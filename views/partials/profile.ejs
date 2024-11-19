@@ -1,0 +1,161 @@
+<% if (account) { %>
+    <div class="container-fluid light-style flex-grow-1 container-p-y profile_page">
+        <div class="card">
+            <div class="row no-gutters row-bordered row-border-light">
+                <div class="col col-lg-4 col-12 pt-0">
+                    <div class="list-group list-group-flush account-settings-links">
+                        <div class="avatar media align-items-center">
+                            <img src='<%= account.profilePicture%>' alt class="d-block ui-w-80">
+                            <div class="full_name">
+                                <%= account.fullName%>
+                            </div>
+                        </div>
+                        <div class="alert alert-success d-flex align-items-center" role="alert">
+                            <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Success:">
+                                <use xlink:href="#check-circle-fill" />
+                            </svg>
+                            <div>
+                                Authorized account: <strong>
+                                    <%= account.role%>
+                                </strong>
+                            </div>
+                        </div>
+                        <a class="list-group-item list-group-item-action active" data-bs-toggle="tab"
+                            href="#account">Account</a>
+                        <a class="list-group-item list-group-item-action" data-bs-toggle="tab"
+                            href="#password">Password</a>
+                        <a class="list-group-item list-group-item-action" data-bs-toggle="tab"
+                            href="#completed-courses">Achievements</a>
+                    </div>
+                </div>
+                <!-- //TODO: sửa lại thành form -->
+                <div class="col col-lg-8 col-12">
+                    <div class="tab-content">
+                        <div class="tab-pane fade active show" id="account">
+
+                            <div class="card-body">
+
+                                <form enctype="multipart/form-data" class="row g-3">
+                                    <label for="customFile" class="form-label">Change avatar</label>
+                                    <div class="col-auto">
+
+                                        <input class="form-control" type="file" class="custom-file-input"
+                                            id="customFile">
+                                    </div>
+                                    <div class="col-auto">
+                                        <button id="upload" class="btn btn-success px-5"
+                                            onclick="uploadFiles(event , '/upload/avatar')">Upload</button>
+                                    </div>
+                                    <div>
+                                        <div class="progress" style="display: none;">
+                                            <div class="progress-bar progress-bar-striped bg-success" role="progressbar"
+                                                aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                    </div>
+
+                                </form>
+
+
+                                <form method="POST">
+                                    <div class="form-group mb-3">
+                                        <label class="form-label">Username <strong>(can not change)</strong></label>
+                                        <input type="text" class="form-control mb-1" value="<%= account.username%>"
+                                            placeholder="username" disabled>
+                                    </div>
+                                    <!-- <div class="form-group mb-3">
+                                        <label class="form-label">Email <strong>(can not change)</strong></label>
+                                        <input type="text" class="form-control mb-1" value="<%# account.email%>"
+                                            placeholder="Email" disabled>
+
+                                    </div> -->
+                                    <div class="form-group mb-3">
+                                        <label class="form-label">Fullname</label>
+                                        <input type="text" class="form-control" value="<%= account.fullName%>"
+                                            placeholder="Fullname" name="fullname">
+                                    </div>
+                                    <div class="form-group mb-3">
+                                        <label class="form-label">Time created <strong>(can not change)</strong></label>
+                                        <input type="text" class="form-control" value="<%= account.createdAt%>"
+                                            placeholder="Time created" disabled>
+                                    </div>
+                                    <div class="form-group mb-3">
+                                        <label class="form-label">Last login <strong>(can not change)</strong></label>
+                                        <input type="text" class="form-control" value="<%= account.lastLogin%>"
+                                            placeholder="Last login" disabled>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary" id="change_fullname"
+                                        onclick="changeFullname(event)">Save changes</button>&nbsp;
+                                </form>
+
+
+                                <hr class="border-light m-0">
+
+                            </div>
+
+                        </div>
+
+                        <div class="tab-pane fade" id="password">
+                            <div class="card-body pb-2">
+                                <form method="POST">
+                                    <div class="form-group mb-3">
+                                        <label class="form-label">Current password</label>
+                                        <input type="password" class="form-control" placeholder="Current password"
+                                            name="currpass">
+                                    </div>
+                                    <div class="form-group mb-3">
+                                        <label class="form-label">New password</label>
+                                        <input type="password" class="form-control" placeholder="New password"
+                                            name="newpass">
+                                    </div>
+                                    <div class="form-group mb-3">
+                                        <label class="form-label">Repeat new password</label>
+                                        <input type="password" class="form-control" placeholder="Repeat new password"
+                                            name="renewpass">
+                                    </div>
+                                    <button type="submit" class="btn btn-primary" id="change_password"
+                                        onclick="changePassword(event)">Save changes</button>&nbsp;
+                                </form>
+
+                            </div>
+                        </div>
+
+                        <!-- COMPLETED COURSES -->
+                        <div class="tab-pane fade" id="completed-courses">
+                            <div class="card-body pb-2">
+
+                                <!--  -->
+
+                            </div>
+                            <div class="modal fade" id="certificateModal" tabindex="-1"
+                                aria-labelledby="certificateModalLabel" aria-hidden="true">
+                                <div class="modal-dialog modal-lg">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="certificateModalLabel">Certificate of Completion
+                                            </h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body" id="certificateContent">
+                                            <!-- Contents -->
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary"
+                                                data-bs-dismiss="modal">Close</button>
+                                            <button type="button" class="btn btn-primary"
+                                                id="downloadCertificate">Download PDF</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <script src="../../javascripts/certificate.js"></script>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <% } %>

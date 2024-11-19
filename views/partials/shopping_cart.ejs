@@ -1,0 +1,58 @@
+<!-- Contact Section -->
+
+
+<div id="cart_page" class="container cart_page">
+    <% if (data.list_cart) { %>
+        <% var list_cart=data.list_cart %>
+        <% var total_price=0 %>
+        <h3 class="course-type"> SHOPPING CART</h3>
+        <p><%=list_cart.length %> course in cart</p>
+        <div class="row">
+            <% if (list_cart.length> 0) { %>
+                <div class="col-lg-8 col-md-7 col-12" data-aos="zoom-in" data-aos-delay="100">
+                <% list_cart.forEach((cart)=> { %>
+                        <div class="course_cart d-flex justify-content-between align-items-center mb-3">
+                            <img id="course_pic" src="<%=cart.courseImage%>" class="img-fluid" alt="err" onclick="getcoursebyId('<%=cart.courseId%>')">
+                            <div class="course-content" onclick="getcoursebyId('<%=cart.courseId%>')">
+                                <%=cart.courseName%> <br>
+                                <%=cart.courseCategory%> <br>
+                                <%=cart.instructorFullName%>
+                            </div>
+                            <div class="price">
+                                <strong>
+                                    <%=cart.coursePrice%>
+                                    <% total_price = total_price + cart.coursePrice %>
+                                    <i class="fa-solid fa-tag"></i>
+                                </strong>
+                            </div>
+                            <div class="options">
+                                <button type="button" class="btn btn-danger" onclick="delcart('<%=cart.courseId%>')"><i class="fa-solid fa-xmark"></i></button>
+                            </div>
+
+                        </div>
+                        
+
+                <% }); %>
+                </div> <!-- End Course Item-->
+                <div class="payment col-lg-4 col-md-5 col-12">
+                    <strong>Total:</strong>
+                    <!-- TODO : tự tính tổng -->
+                    <h3><%=total_price%></h3>
+                    <button type="button" class="btn btn-success" onclick="checkout()">Checkout</button>
+                </div>
+            <% } %>
+
+            <h2 id="course_cart_empty">
+                <% if(list_cart.length==0) { %>
+                    <img src="../../images/empty-shopping-cart-v2.jpg" alt="err">
+                    <p>Your cart is empty. Keep shopping to find a course!</p>
+                    <button type="button" class="btn btn-primary" onclick="callback('/home/course')">Keep Shopping</button>
+                <% }; %>
+
+            </h2>
+    <% }%>
+
+
+    </div>
+
+</div><!-- /Contact Section -->

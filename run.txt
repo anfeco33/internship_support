@@ -1,0 +1,7 @@
+ yarn install
+
+ $env:DEBUG='OCOS:*'; npm start
+ 
+or  
+
+ node ../bin/www

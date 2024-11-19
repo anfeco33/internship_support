@@ -1,0 +1,259 @@
+<div class="create_course">
+    <div class="container mt-5">
+        <!-- Thông tin khóa học -->
+        <div class="row">
+            <h3>Create a new course</h3>
+            <div class="col-12 mb-3">
+                <div class="row">
+                    <label for="inputCourseTitle" class="col-sm-2 col-form-label">Title</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="inputCourseTitle" placeholder="Title" required>
+                    </div>
+                </div>
+            </div>
+    
+            <div class="col-12 mb-3">
+                <div class="row">
+                    <label for="inputCoursePrice" class="col-sm-2 col-form-label">Price</label>
+                    <div class="col-sm-10">
+                        <input type="number" class="form-control" id="inputCoursePrice" placeholder="VNĐ" min="30000" required>
+                    </div>
+                </div>
+            </div>
+    
+            <div class="col-12 mb-3">
+                <div class="row">
+                    <label for="inputCoursePreview" class="col-sm-2 col-form-label">Preview video</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="inputCoursePreview" placeholder="https://www.youtube.com/embed/<code>" required>
+                    </div>
+                </div>
+            </div>
+    
+            <div class="col-12 mb-3">
+                <div class="row">
+                    <label for="inputCategory" class="col-sm-2 col-form-label">Category</label>
+                    <div class="col-sm-10">
+                        <select id="inputCategory" class="form-select">
+                            <option selected>Development</option>
+                            <option>Business</option>
+                            <option>Finance & Accounting</option>
+                            <option>IT & Software</option>
+                            <option>Office Productivity</option>
+                            <option>Personal Development</option>
+                            <option>Design</option>
+                            <option>Marketing</option>
+                            <option>Lifestyle</option>
+                            <option>Photography & Video</option>
+                            <option>Health & Fitness</option>
+                            <option>Music</option>
+                            <option>Teaching & Academics</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+    
+            <div class="col-12 mb-3">
+                <div class="row">
+                    <label for="inputCourseImage" class="col-sm-2 col-form-label">Course Image</label>
+                    <div class="col-sm-10">
+                        <input type="file" class="form-control" id="inputCourseImage" accept="image/*" required>
+                    </div>
+                </div>
+            </div>        
+    
+            <div class="col-12 mb-3">
+                <div class="row">
+                    <label for="inputCourseDescription" class="col-sm-2 col-form-label">Description</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="inputCourseDescription" placeholder="Description" required>
+                    </div>
+                </div>
+            </div>
+    
+            <div class="col-12 mb-3">
+                <div class="row">
+                    <label for="inputCourseAudience" class="col-sm-2 col-form-label">Audience</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="inputCourseAudience" placeholder="Who are the target audience for this course?" required>
+                    </div>
+                </div>
+            </div>
+    
+            <div class="col-12 mb-3">
+                <div class="form-group">
+                    <div class="row">
+                        <label for="inputCourseResult" class="col-sm-2 col-form-label">What you'll learn</label>
+                        <div class="col-sm-10 d-flex justify-content-between">
+                            <input type="text" class="form-control me-3" id="inputCourseResult">
+                            <button type="button" class="btn btn-primary" id="addResult">Add</button>
+                        </div>
+                    </div>
+                </div>
+    
+                <ul class="list-group mt-3" id="inputCourseResultList"></ul>
+            </div>
+    
+            <div class="col-12 mb-3">
+                <div class="form-group">
+                    <div class="row">
+                        <label for="inputCourseReq" class="col-sm-2 col-form-label">Requirements</label>
+                        <div class="col-sm-10 d-flex justify-content-between">
+                            <input type="text" class="form-control me-3" id="inputCourseReq">
+                            <button type="button" class="btn btn-primary" id="addReq">Add</button>
+                        </div>
+                    </div>
+                </div>
+    
+                <ul class="list-group mt-3" id="inputCourseReqList"></ul>
+            </div>
+        </div>
+    
+        <!-- Thêm chương -->
+        <div class="row">
+            <div class="col-12">
+                <button id="addChapterBtn" class="btn btn-primary">New Section</button>
+                <div id="addChapterForm" class="mt-3 d-none">
+                    <div class="mb-3">
+                        <div class="row">
+                            <label for="chapterName" class="col-sm-2 col-form-label">Section Header</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="chapterName">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="row">
+                            <label for="chapterTitle" class="col-sm-2 col-form-label">Section Title</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="chapterTitle">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="float-end">
+                        <button id="confirmChapterBtn" class="btn btn-success me-2">Confirm</button>
+                        <button id="cancelChapterBtn" class="btn btn-danger">Cancel</button>
+                    </div>
+                </div>
+            </div>
+            <div id="chapters" class="mt-3 mb-3"></div>
+        </div>
+    
+        <div class="row">
+            <!-- Button thêm khóa học -->
+            <div class="col-12 mb-3">
+                <button id="addCourseBtn" type="button" class="btn btn-success float-end">Create Course</button>
+            </div>
+        </div>
+    </div>
+    
+    <%# account = global.account %>
+    
+    <!-- Modal thêm video bài giảng -->
+    <div id="videoModalCreate" class="modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">New Lecture</h5>
+                    <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close">
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <div class="row">
+                            <label for="videoTitle" class="col-sm-2 col-form-label">Lecture Title</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="videoTitle">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="row">
+                            <label for="videoLink" class="col-sm-2 col-form-label">Embed URL</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="videoLink">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="row">
+                            <label for="videoDesc" class="col-sm-2 col-form-label">Lecture Description</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="videoDesc">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button id="confirmVideoBtn" type="button" class="btn btn-primary">Confirm</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="alert-container" style="position: fixed; top: 20px; right: 20px; z-index: 9999;">
+        <!-- <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <strong>Successfully!</strong> New course created.
+            <button type="button" class="close btn" data-dismiss="alert" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div> -->
+    </div>
+    
+    
+    <%# include('../partials/course') %>
+    <% if (data.list_my_course) { %>
+        <% var listcourse = data.list_my_course %>
+        <div class="table" id="table_product">
+            <div class="container">
+        
+                <h3 class="course-type"> MY COURSES</h3>
+                <div class="row">
+                    <% if (listcourse.length> 0) { %>
+                        <% listcourse.forEach((course)=> { %>
+                            <div class="col-lg-4 col-md-6 col-12 d-flex align-items-stretch" data-aos="zoom-in" data-aos-delay="100" onclick="getcoursebyId('<%=course._id.toString() %>')">
+                                <div class="course-item">
+                                    <img id="course_pic" src="<%=course.courseImage%>" class="img-fluid" alt="err">
+                                    <div class="course-content">
+                                        <div class="d-flex justify-content-between align-items-center mb-3">
+                                            <p class="category"><%=course.courseCategory%></p>
+                                            <p class="price"><%=course.coursePrice%></p>
+                                        </div>
+                    
+                                        <h3 class="course-name"><%=course.courseName%></h3>
+                                        <p class="description"><%=course.courseDescription%></p>
+                                        <div class="trainer d-flex justify-content-between align-items-center">
+                                            <div class="trainer-profile d-flex align-items-center">
+                                                <img src='<%= course.instructorID.profilePicture%>' alt="profileImg" />
+                                            <h5 class="trainer-name"><%= course.instructorID.fullName%></h5>
+                                            </div>
+                                            <div class="trainer-rank d-flex align-items-center">
+                                            <i class="fa-regular fa-user"></i>&nbsp;50
+                                            &nbsp;&nbsp;
+                                            <i class="fa-regular fa-heart"></i>&nbsp;65
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div> <!-- End Course Item-->
+                        
+                            <% }); %>
+                    <% } %>
+                
+                    <h2 id="list_course_empty">
+                        <% if(listcourse.length==0) { %>
+                            No course exist
+                        <% }; %>
+                    </h2>
+                
+        
+                </div>
+    
+            </div>
+        </div>
+    <% }%>
+    
+    
+    <script src="../../javascripts/create-course.js"></script>
+    
+</div>

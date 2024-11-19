@@ -1,0 +1,62 @@
+
+<button type="button" class="btn btn-secondary" onclick="callback('/admin/customer')">
+    BACK
+</button>
+
+<!-- //TODO: tối ưu và chỉnh lại -->
+
+
+<% var listproduct= data.listproduct %>
+
+
+<!-- //TODO: tối ưu và chỉnh lại -->
+
+<table class="table" id="table_details_order">
+    <thead>
+      <tr>
+        <th scope="col">Name</th>
+        <th scope="col">Quantity</th>
+        <th scope="col">Total Price</th>
+
+
+      </tr>
+    </thead>
+    <tbody id="product_row">
+        <% if (listproduct.length> 0) { %>
+            <% listproduct.forEach((product)=> { %>
+                <tr >
+                    <td>
+                        <div >
+                            <%=product.productName%> 
+                        </div>
+                    </td>
+
+                    <td>
+                        <div>
+                            <%=product.quantity%>
+                        </div>
+                    </td>
+                    <td>
+                        <div>
+                            <%=product.price%>
+                        </div>
+                    </td>
+                </tr>
+                
+            <% }); %>
+
+        <% } %>
+        <% if(listproduct.length==0) { %>
+            <tr>
+                <td colspan="3" style="text-align:center;font-weight: bold;font-size: 20px;">
+                    No product exist
+                </td>
+            </tr>
+        <% }; %>
+    
+
+    </tbody>
+</table>
+
+
+

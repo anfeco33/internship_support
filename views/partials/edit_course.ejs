@@ -1,0 +1,273 @@
+<div class="create_course">
+    <div class="container mt-5">
+        <% var course = data.course_detail %>
+        <% var sections = data.section_detail %>
+        <!-- Thông tin khóa học -->
+        <div class="row">
+            <h3>Edit course</h3>
+            <input type="hidden" id="courseId" value="<%= data.courseId %>">
+            <div class="col-12 mb-3">
+                <div class="row">
+                    <label for="inputCourseTitle" class="col-sm-2 col-form-label">Title</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="inputCourseTitle" placeholder="Title"
+                        value="<%= course.courseName %>" required>
+                    </div>
+                </div>
+            </div>
+    
+            <div class="col-12 mb-3">
+                <div class="row">
+                    <label for="inputCoursePrice" class="col-sm-2 col-form-label">Price</label>
+                    <div class="col-sm-10">
+                        <input type="number" class="form-control" id="inputCoursePrice" placeholder="VNĐ" min="30000"
+                        value="<%= course.coursePrice %>" required>
+                    </div>
+                </div>
+            </div>
+    
+            <div class="col-12 mb-3">
+                <div class="row">
+                    <label for="inputCoursePreview" class="col-sm-2 col-form-label">Preview video</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="inputCoursePreview" placeholder="https://www.youtube.com/embed/<code>"
+                            value="<%= course.coursePreview %>" required>
+                    </div>
+                </div>
+            </div>
+    
+            <div class="col-12 mb-3">
+                <div class="row">
+                    <label for="inputCategory" class="col-sm-2 col-form-label">Category</label>
+                    <div class="col-sm-10">
+                        <select id="inputCategory" class="form-select">
+                            <option <% if (course.courseCategory === 'Development') { %> selected <% } %>>Development</option>
+                            <option <% if (course.courseCategory === 'Business') { %> selected <% } %>>Business</option>
+                            <option <% if (course.courseCategory === 'Finance & Accounting') { %> selected <% } %>>Finance & Accounting</option>
+                            <option <% if (course.courseCategory === 'IT & Software') { %> selected <% } %>>IT & Software</option>
+                            <option <% if (course.courseCategory === 'Office Productivity') { %> selected <% } %>>Office Productivity</option>
+                            <option <% if (course.courseCategory === 'Personal Development') { %> selected <% } %>>Personal Development</option>
+                            <option <% if (course.courseCategory === 'Design') { %> selected <% } %>>Design</option>
+                            <option <% if (course.courseCategory === 'Marketing') { %> selected <% } %>>Marketing</option>
+                            <option <% if (course.courseCategory === 'Lifestyle') { %> selected <% } %>>Lifestyle</option>
+                            <option <% if (course.courseCategory === 'Photography & Video') { %> selected <% } %>>Photography & Video</option>
+                            <option <% if (course.courseCategory === 'Health & Fitness') { %> selected <% } %>>Health & Fitness</option>
+                            <option <% if (course.courseCategory === 'Music') { %> selected <% } %>>Music</option>
+                            <option <% if (course.courseCategory === 'Teaching & Academics') { %> selected <% } %>>Teaching & Academics</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+    
+            <div class="col-12 mb-3">
+                <div class="row">
+                    <label for="inputCourseImage" class="col-sm-2 col-form-label">Course Image</label>
+                    <div class="col-sm-10">
+                        <img id="existImageUrl" src="<%= course.courseImage %>" class="img-fluid" alt="<%= course.courseTitle %>">
+                        <input type="file" class="form-control" id="inputCourseImage" accept="image/*" required>
+                    </div>
+                </div>
+            </div>        
+    
+            <div class="col-12 mb-3">
+                <div class="row">
+                    <label for="inputCourseDescription" class="col-sm-2 col-form-label">Description</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="inputCourseDescription" placeholder="Description"
+                        value="<%= course.courseDescription %>" required>
+                    </div>
+                </div>
+            </div>
+    
+            <div class="col-12 mb-3">
+                <div class="row">
+                    <label for="inputCourseAudience" class="col-sm-2 col-form-label">Audience</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="inputCourseAudience" placeholder="Who are the target audience for this course?"
+                        value="<%= course.courseAudience %>" required>
+                    </div>
+                </div>
+            </div>
+    
+            <div class="col-12 mb-3">
+                <div class="form-group">
+                    <div class="row">
+                        <label for="inputCourseResult" class="col-sm-2 col-form-label">What you'll learn</label>
+                        <div class="col-sm-10 d-flex justify-content-between">
+                            <input type="text" class="form-control me-3" id="inputCourseResult">
+                            <button type="button" class="btn btn-primary" id="addResult">Add</button>
+                        </div>
+                    </div>
+                </div>
+    
+                <ul class="list-group mt-3" id="inputCourseResultList">
+                    <% if (course.courseResult && course.courseResult.length > 0) { %>
+                        <% course.courseResult.forEach(function(result) { %>
+                            <li class="list-group-item" onmouseenter="this.querySelector('.delete-btn').style.display='inline-block';" onmouseleave="this.querySelector('.delete-btn').style.display='none';">
+                                <%= result %>
+                                <button type="button" class="btn btn-danger btn-sm float-end delete-btn" style="display:none;" onclick="this.parentNode.remove();">Remove</button>
+                            </li>
+                        <% }); %>
+                    <% } %>
+                </ul>
+            </div>
+    
+            <div class="col-12 mb-3">
+                <div class="form-group">
+                    <div class="row">
+                        <label for="inputCourseReq" class="col-sm-2 col-form-label">Requirements</label>
+                        <div class="col-sm-10 d-flex justify-content-between">
+                            <input type="text" class="form-control me-3" id="inputCourseReq">
+                            <button type="button" class="btn btn-primary" id="addReq">Add</button>
+                        </div>
+                    </div>
+                </div>
+    
+                <ul class="list-group mt-3" id="inputCourseReqList">
+                    <% if (course.courseRequirement && course.courseRequirement.length > 0) { %>
+                        <% course.courseRequirement.forEach(function(requirement) { %>
+                            <li class="list-group-item" onmouseenter="this.querySelector('.delete-btn').style.display='inline-block';" onmouseleave="this.querySelector('.delete-btn').style.display='none';">
+                                <%= requirement %>
+                                <button type="button" class="btn btn-danger btn-sm float-end delete-btn" style="display:none;" onclick="this.parentNode.remove();">Remove</button>
+                            </li>
+                        <% }); %>
+                    <% } %>
+                </ul>
+            </div>
+        </div>
+    
+        <!-- Thêm chương -->
+        <div class="row">
+            <div class="col-12">
+                <button id="addChapterBtn" class="btn btn-primary">New Section</button>
+                <div id="addChapterForm" class="mt-3 d-none">
+                    <div class="mb-3">
+                        <div class="row">
+                            <label for="chapterName" class="col-sm-2 col-form-label">Section Number</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="chapterName">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="row">
+                            <label for="chapterTitle" class="col-sm-2 col-form-label">Section Title</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="chapterTitle">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="float-end">
+                        <button id="confirmChapterBtn" class="btn btn-success me-2">Confirm</button>
+                        <button id="cancelChapterBtn" class="btn btn-danger">Cancel</button>
+                    </div>
+                </div>
+            </div>
+            <div id="chapters" class="mt-3 mb-3">
+
+                <% if (sections && sections.length > 0) { %>
+                    <% sections.forEach(function(section) { %>
+                        <div class="card mt-3 chapter-card">
+                            <div class="card-body">
+                                <h5 class="chapter-name card-title" contenteditable="true"><%= section.sectionNumber %></h5>
+                                <h6 class="chapter-title card-subtitle mb-2 text-muted" contenteditable="true"><%= section.sectionTitle %></h6>
+                                <div class="w-100 mb-3">
+                                    <button class="btn btn-primary" onclick="showVideoForm('<%= section.sectionNumber %>')">New Lecture</button>
+                                    <button class="btn btn-danger ms-2 float-end" onclick="deleteChapter(this)">Remove</button>
+                                </div>
+                                <div class="mt-3" id="<%= section.sectionSlugID %>">
+                                    <% if (section.lectures && section.lectures.length > 0) { %>
+                                        <% section.lectures.forEach(function(lecture) { %>
+                                            <div class="card mt-2 video-card">
+                                                <div class="row">
+                                                    <div class="col-md-4">
+                                                        <div class="embed-responsive embed-responsive-16by9">
+                                                            <iframe class="embed-responsive-item" src="<%= lecture.lectureLink %>" allowfullscreen></iframe>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-8">
+                                                        <div class="card-body">
+                                                            <h6 class="video-title card-title" contenteditable="true"><%= lecture.lectureTitle %></h6>
+                                                            <p class="video-desc card-text"><%= lecture.lectureDescription %></p>
+                                                            <div class="w-100 mb-3">
+                                                                <button class="btn btn-danger ms-2 float-end" onclick="deleteVideo(this)">Remove</button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        <% }); %>
+                                    <% } %>
+                                </div>
+                            </div>
+                        </div>
+                    <% }); %>
+                <% } %>
+
+            </div>
+        </div>
+    
+        <div class="row">
+            <!-- Button thêm khóa học -->
+            <div class="col-12 mb-3">
+                <button id="editCourseBtn" type="button" class="btn btn-success float-end" onclick="editCourse()">Edit Course</button>
+            </div>
+        </div>
+    </div>
+    
+    <%# account = global.account %>
+    
+    <!-- Modal thêm video bài giảng -->
+    <div id="videoModalCreate" class="modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">New Lecture</h5>
+                    <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close">
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <div class="row">
+                            <label for="videoTitle" class="col-sm-2 col-form-label">Lecture Title</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="videoTitle">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="row">
+                            <label for="videoLink" class="col-sm-2 col-form-label">Embed URL</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="videoLink">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="row">
+                            <label for="videoDesc" class="col-sm-2 col-form-label">Lecture Description</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="videoDesc">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button id="confirmVideoBtn" type="button" class="btn btn-primary">Confirm</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="alert-container" style="position: fixed; top: 20px; right: 20px; z-index: 9999;">
+        <!-- <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <strong>Successfully!</strong> New course created.
+            <button type="button" class="close btn" data-dismiss="alert" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div> -->
+    </div>
+    
+    <script src="../../javascripts/create-course.js"></script>
+    
+</div>

@@ -1,0 +1,242 @@
+<% var course = data.course_detail %>
+<button type="button" id="callback_btn" class="btn btn-secondary" 
+    <% if(account.role == 'admin'){ %>
+
+        onclick="callback('/admin/course')"
+        
+    <% }else{%>
+        onclick="callback('/home/course')"
+    <% } %>
+    >
+    BACK
+</button>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<% if (course) { %>
+<div class="container-fluid light-style flex-grow-1 container-p-y course_detail_page">
+    <div class="course_detail_card">
+        <div class="row no-gutters row-bordered row-border-light">
+            <div class="col col-lg-7 col-12 pt-0 video_trailer">
+                <iframe width="100%" id="trailer_link" height="100%" src="<%=course.coursePreview%>"
+                    title="YouTube video player" frameborder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+            </div>
+            <!-- //TODO: sửa lại thành form -->
+            <div class="col col-lg-5 col-12  course_info">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5>Instructor</h5>
+                    <p><%= course.instructorID.fullName%></p>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5>Course Fee</h5>
+                    <p><%= course.coursePrice%> VND</p> 
+                </div>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <% if (account.role !== 'admin' && account.role !== 'instructor') { %>
+                        <% if (!data.hasBought) { %>
+                            <% if (!data.hasAddToCart) { %>
+                                <button type="button" class="btn btn-primary" onclick="addtocart('<%=course._id.toString() %>')">Add to cart</button>
+                            <% } %>
+                            <button type="button" class="btn btn-success" onclick="buyNow('<%= course._id %>')">Buy Now</button>
+                        <% } %>
+                        <% if (data.hasBought) { %>
+                            <button type="button" class="btn btn-info" onclick="getlecturebyId('<%=course._id.toString() %>')">Start Course</button>
+                        <% } %>
+                    <% } else { %>
+                        <% if (account.role === 'instructor') { %>
+                            <button type="button" class="btn btn-info" onclick="getlecturebyId('<%=course._id.toString() %>')">Start Course</button>
+                        <% } %>
+                        <button type="button" class="btn btn-danger" onclick="deletecourse('<%= account.role%>','<%= course.courseName%>','<%= course._id.toString()%>')">DELETE COURSE</button>
+                        <button type="button" class="btn btn-primary" onclick="editcoursebyId('<%= course._id.toString()%>')">EDIT COURSE</button>
+                    <% } %>
+                </div>
+
+            </div>
+            <div class="col col-12 tab_section">
+            <!-- Tabs Section -->
+            <section id="tabs" class="tabs section">
+
+                <div class="container" data-aos="fade-up" data-aos-delay="100">
+
+                    <div class="row">
+                        <div class="col-lg-3">
+                            <ul class="nav nav-tabs flex-column">
+                                <li class="nav-item">
+                                    <a class="nav-link active show" data-bs-toggle="tab" href="#tab-1">
+                                        Name
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" data-bs-toggle="tab" href="#tab-2">
+                                        Description
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" data-bs-toggle="tab" href="#tab-3">
+                                        Target object
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" data-bs-toggle="tab" href="#tab-4">
+                                        Content
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" data-bs-toggle="tab" href="#tab-5">
+                                        Requirements
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="col-lg-9 mt-4 mt-lg-0">
+                            <div class="tab-content">
+                                <div class="tab-pane active show" id="tab-1">
+                                    <div class="row">
+                                        <div class="col-lg-8 details order-2 order-lg-1">
+                                            <h3>
+                                                <%= course.courseName%>
+                                            </h3>
+                                            <p class="fst-italic">
+                                                Category : <strong><%= course.courseCategory%></strong> <br>
+                                                Instructor : <strong><%= course.instructorID.fullName%></strong>
+                                            </p>
+                                        </div>
+                                        <div class="col-lg-4 text-center order-1 order-lg-2">
+                                            <img src="../../images/tabs/tab-1.png" alt="" class="img-fluid">
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="tab-pane" id="tab-2">
+                                    <div class="row">
+                                        <div class="col-lg-8 details order-2 order-lg-1">
+                                            <h3>
+                                                About course 
+                                            </h3>
+                                            <p class="fst-italic">
+                                                <%= course.courseDescription%>
+                                            </p>
+                                        </div>
+                                        <div class="col-lg-4 text-center order-1 order-lg-2">
+                                            <img src="../../images/tabs/tab-2.png" alt="" class="img-fluid">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="tab-pane" id="tab-3">
+                                    <div class="row">
+                                        <div class="col-lg-8 details order-2 order-lg-1">
+                                            <h3>
+                                                Who need the course ?
+                                            </h3>
+                                            <p class="fst-italic">
+                                                <%= course.courseAudience%>
+                                            </p>
+                                        </div>
+                                        <div class="col-lg-4 text-center order-1 order-lg-2">
+                                            <img src="../../images/tabs/tab-3.png" alt="" class="img-fluid">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="tab-pane" id="tab-4">
+                                    <div class="row">
+                                        <div class="col-lg-8 details order-2 order-lg-1">
+                                            <h3>
+                                                What you'll learn
+                                            </h3>
+                                            <p class="fst-italic">
+                                                <% course.courseResult.forEach((result) => { %>
+                                                    <p><i class="fa-solid fa-check"></i> <%= result %></p>
+                                                <% }); %>
+                                            </p>
+                                        </div>
+                                        <div class="col-lg-4 text-center order-1 order-lg-2">
+                                            <img src="../../images/tabs/tab-4.png" alt="" class="img-fluid">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="tab-pane" id="tab-5">
+                                    <div class="row">
+                                        <div class="col-lg-8 details order-2 order-lg-1">
+                                            <h3>
+                                                What do you need to prepare?
+                                            </h3>
+                                            <p class="fst-italic">
+                                                <% course.courseRequirement.forEach((require) => { %>
+                                                    <p><i class="fa-solid fa-seedling"></i> <%= require %></p>
+                                                <% }); %>
+                                            </p>
+                                        </div>
+                                        <div class="col-lg-4 text-center order-1 order-lg-2">
+                                            <img src="../../images/tabs/tab-5.png" alt="" class="img-fluid">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </section><!-- /Tabs Section -->
+            <!-- google forms -->
+<% if (data.hasExercises && data.hasBought) { %> 
+    <div class="google-forms">
+        <h4 style="color:chartreuse;">Your exercises:</h4>
+        <% data.hasExercises.forEach((exercise, index) => { %>
+            <div class="exercise-container">
+                <a href="<%= exercise.googleFormLink %>" style="color: black;">Link to Exercise <%= index +1 %></a>
+            </div>
+        <% }); %>
+    </div>
+<% } %> 
+ <!-- comment down there -->
+ <input type="hidden" name="courseId" value="<%= course._id %>" id="courseId">
+ <% if (data.hasBought) { %>
+     <div class="course-rating">
+         <h4 style="color:chartreuse;">We glad to hear your feedback! &hearts;</h4>
+         <form id="rating-form">
+             <div class="star-rating">
+                 <input type="hidden" id="star1_hidden" value="1" class="hidden">
+                 <img src="../../images/star.png" onmouseover="change(this.id);" id="star1" class="star">
+                 <input type="hidden" id="star2_hidden" value="2" class="hidden">
+                 <img src="../../images/star.png" onmouseover="change(this.id);" id="star2" class="star">
+                 <input type="hidden" id="star3_hidden" value="3" class="hidden">
+                 <img src="../../images/star.png" onmouseover="change(this.id);" id="star3" class="star">
+                 <input type="hidden" id="star4_hidden" value="4" class="hidden">
+                 <img src="../../images/star.png" onmouseover="change(this.id);" id="star4" class="star">
+                 <input type="hidden" id="star5_hidden" value="5" class="hidden">
+                 <img src="../../images/star.png" onmouseover="change(this.id);" id="star5" class="star">
+             </div>
+             <input type="hidden" name="starrating" id="starrating" value="">
+             <div class="form-group">
+                 <textarea id="comment" name="comment" class="form-control" rows="3" style="margin-top: 20px;" required></textarea>
+             </div>
+             <div style="text-align: end;">
+                 <button type="submit" id="sendComment" class="btn btn-primary" style="margin-top: 20px;">Send</button>
+             </div>
+         </form>
+     </div>
+ <% } %>   
+ <% if (data.hasReviewsOfACourse || account.role == 'admin'){ %>
+     <div class="comment-section">
+         <% if (data.hasReviewed) { %>
+             <button type="submit" id="rmComment" class="btn btn-success" onclick="rmComment('<%=data.hasReviewed._id%>')" style="margin-bottom: 20px;">Remove my comment</button>
+         <% }; %>
+         <h4 style="color:lightcoral;">Comments</h4>
+         <div id="comment-list">
+             <% data.hasReviewsOfACourse.forEach((comment) => { %>
+                 <div class="comment" >          
+                     <div class="rating" >
+                         <h5><%= comment.userId.fullName %></h5>      
+                         <% for (let i = 0; i < comment.rating; i++) { %>
+                             <i class="fa-solid fa-star"></i>
+                         <% } %>
+                         <p><%= comment.comment %></p>
+                     </div>                            
+                     
+                 </div>
+             <% }); %>
+         </div>
+     </div>
+ <% } %>   
+<% }%>

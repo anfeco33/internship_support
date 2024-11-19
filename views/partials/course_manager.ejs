@@ -1,0 +1,73 @@
+
+<h2 class="title_admin_page">LIST COURSE</h2>
+
+<% if (data.listcourse) { %>
+    <% var listcourse=data.listcourse %>
+    <table id="course_manager" class="table">
+        <thead>
+            <tr>
+                <th scope="col">Image</th>
+    
+                <th scope="col">Name</th>
+    
+                <th scope="col">Price</th>
+                
+                <th scope="col">Category</th>
+    
+                <th scope="col">Time Create</th>
+             
+            </tr>
+        </thead>
+        <tbody>
+            <% if (listcourse.length> 0) { %>
+                <% listcourse.forEach((course)=> { %>
+                    <tr class="course_manager_row" onclick="getcoursebyId_admin('<%=course._id.toString() %>')">
+                        <td>
+                            <div class="course_pic">
+                                <img src="<%=course.courseImage%>" alt="err">
+                            </div>
+                        </td>
+                        <td>
+                            <div>
+                                <%=course.courseName%>
+                            </div>
+                        </td>
+                        <td>
+                            <div>
+                                <%=course.coursePrice%>
+                            </div>
+                        </td>
+                        <td>
+                            <div>
+                                <%=course.courseCategory%>
+                            </div>
+                        </td>
+                        <td>
+                            <div>
+                                <%=course.createdAt%>
+                            </div>
+                        </td>
+    
+    
+    
+                    </tr>
+    
+                <% }); %>
+    
+
+            <% } %>
+            <% if(listcourse.length==0) { %>
+                <tr>
+                    <td colspan="5"
+                        style="text-align:center;font-weight: bold;font-size: 20px;">
+                        No course exist
+                    </td>
+                </tr>
+            <% }; %>
+    
+    
+        </tbody>
+    </table>
+<% }%>
+
+

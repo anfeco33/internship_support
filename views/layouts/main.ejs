@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<!-- Website - www.codingnepalweb.com -->
+<html lang="en" dir="ltr">
+
+<head>
+    <meta charset="UTF-8" />
+
+
+    <%- include('../partials/css-library') %>
+
+    <link rel="stylesheet" href="../../css/style.css" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <title>EduSphere</title>
+    <link rel="icon" type="image/svg+xml" href="../../images/logo.svg">
+</head>
+
+<body class="main_body">
+    <header></header>
+    <div class="background-container"></div>
+    <main>
+        <% global.access = access %>
+        <% global.account = account %>
+
+        <div class="container-fluid">
+
+            <%- include('../partials/sidebar') %>
+
+            <%# if(account.status != 'intial'){ %>
+                <%#- include('../partials/ordercard') %>
+            <%# } %>
+
+            <section class="home-section">
+                <div class="fill_content">
+            
+                    <% if (body) { %>
+                        <%- body %>
+                    <% } %>
+                    
+                        
+                </div>
+                
+                <% if(account.role != 'admin'){ %>
+
+                    <%- include('../partials/footer') %>
+                    
+                <% } %>
+                <!-- Scroll Top -->
+                <a href="#"  class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+
+
+            </section>
+
+        </div>
+    </main>
+    <footer>
+    </footer>
+
+    <%- include('../partials/modal') %>
+
+    <%- include('../partials/js-library') %>
+
+    <%- include('../partials/flash-message') %>
+
+    <script src="../../javascripts/main.js"></script>
+    
+    <script src="../../javascripts/slide.js"></script>
+
+</body>
+
+</html>

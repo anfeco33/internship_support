@@ -1,0 +1,60 @@
+<!-- sidebar menu lấy từ các role trong dtb ứng với account -->
+<% sidedata = global.access %>
+<% account = global.account %>
+<div class="sidebar">
+    <div class="logo-details">
+        
+        <img src="../../images/logo.png" alt="err">
+        <!-- <i class="bx bxl-c-plus-plus icon"></i> -->
+        <div class="logo_name">EduSphere</div>
+        <i class="bx bx-menu" id="btn_sidebar"></i>
+    </div>
+
+    <ul class="nav-list">
+        <!-- <li>
+            <i class="bx bx-search"></i>
+            <input type="text" placeholder="Search..." />
+            <span class="tooltip">Search</span>
+        </li> -->
+        <% if (sidedata) { %>
+            <% sidedata.forEach((control) => { %>
+                <li class="<%=(control.access).replace(/\s/g, '')%>">
+                    <a href="#">
+                        <%- control.icon%>
+                        <span class="links_name"><%= control.access%></span>
+                    </a>
+                    <span class="tooltip"><%= control.access%></span>
+                </li>
+            <% }); %>
+        <% } %>
+
+
+        <li class="mode">
+            <div class="moon-sun">
+                <i class="bx bx-moon icon"></i>
+                <!-- <i class="bx bx-sun icon"></i> -->
+            </div>
+            <div class="mode_name">Dark mode</div>
+            <span class="tooltip">Dark mode</span>
+            <div class="toggle_switch">
+                <span class="switch"></span>
+            </div>
+        </li>
+        <% if (account) { %>
+            <li class="profile" >
+                <div class="profile-details">
+                    <!-- <img src='../<%# account.profilePicture%>' alt="profileImg" /> -->
+                    <img src='<%= account.profilePicture%>' alt="profileImg" />
+                    <div class="name_job">
+                        <div class="name"><%= account.fullName%></div>
+                        <div class="job"><%= account.role%></div>
+                    </div>
+                </div>
+                
+                <!-- <i class="bx bx-cog" id="log_out"> </i> -->
+                <i class="bx bx-log-out" id="log_out" data-bs-toggle="modal"
+                data-bs-target="#logoutModal"></i>
+            </li>
+        <% } %>
+    </ul>
+</div>

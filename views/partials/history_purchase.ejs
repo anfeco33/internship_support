@@ -1,0 +1,73 @@
+<% var customer=data.customer_taget %>
+
+<% var list_purchase=data.history_purchase %>
+
+<button type="button" class="btn btn-secondary" onclick="callback('/admin/customer')">
+    BACK
+</button>
+
+
+
+
+<!-- //TODO: tối ưu và chỉnh lại -->
+
+<table class="table" id="table_history_purchase">
+    <thead>
+        <tr>
+            <th colspan="5" style="text-align:center">HISTORY PURCHASE OF <%=customer.fullName%>
+            </th>
+        </tr>
+        <tr>
+            
+
+            <th scope="col">Day Create</th>
+            <th scope="col">Total Price</th>
+            <th scope="col">Amount</th>
+            <th scope="col">Change</th>
+            <th scope="col">Action</th>
+        </tr>
+    </thead>
+    <tbody id="purchase_row">
+        <% if (list_purchase.length> 0) { %>
+            <% list_purchase.forEach((order)=> { %>
+                <tr>
+                    <td>
+                        <div>
+                            <%=order.createdAt%>
+                        </div>
+                    </td>
+                    <td>
+                        <div>
+                            <%=order.totalPrice%>
+                        </div>
+                    </td>
+                    <td>
+                        <div>
+                            <%=order.amountPaid%>
+                        </div>
+                    </td>
+                    <td>
+                        <div>
+                            <%=order.change%>
+                        </div>
+                    </td>
+
+                    <td>
+                        <button type="button" class="btn btn-info"onclick="gotodetailsorder('<%=order._id.toString()%>')">DETAIL PRODUCT</button>
+                    </td>
+
+
+                </tr>
+
+            <% }); %>
+
+            <% } %>
+                <% if(list_purchase.length==0) { %>
+                    <tr>
+                        <td colspan="5" style="text-align:center;font-weight: bold;font-size: 20px;">
+                            No order exist
+                        </td>
+                    </tr>
+            <% }; %>
+    </tbody>
+</table>

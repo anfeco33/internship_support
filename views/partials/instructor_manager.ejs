@@ -1,0 +1,38 @@
+<h2 class="title_admin_page">LIST INSTRUCTORS</h2>
+<% var listinstructor=data.listinstructor %>
+
+<ul class="list-group list-group-flush" id="list_instructor">
+    <% if (listinstructor.length> 0) { %>
+        <% listinstructor.forEach((instructor)=> { %>
+            <li class="list-group-item d-flex justify-content-between align-items-center"
+                onclick="getprofilebyId('<%=instructor._id.toString() %>')">
+                <div class="account_avatar">
+                    <img src="<%=instructor.profilePicture%>" alt="err">
+                </div>
+                <div class="account_name">
+                    <%=instructor.fullName%> <strong>( <%=instructor.role%> )</strong>
+                </div>
+
+                <div class="history_login">
+                    <span class="badge bg-primary rounded-pill">
+                        <%=instructor.lastLogin%>
+                    </span>
+                </div>
+
+
+                <!-- <div class="control">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                    <i class="fa-solid fa-trash"></i>
+                </div> -->
+            </li>
+            <% }); %>
+    <% } %>
+
+    <h2 id="list_instructor_empty">
+        <% if(listinstructor.length==0) { %>
+            No instructor exist
+        <% }; %>
+    </h2>
+
+
+</ul>

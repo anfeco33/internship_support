@@ -1,0 +1,66 @@
+
+<h2 class="title_admin_page">LIST TRANSACTIONS</h2>
+<% if (data.list_transaction) { %>
+    <% var list_transaction=data.list_transaction %>
+    <table id="course_manager" class="table">
+        <thead>
+            <tr>
+                <th scope="col">Student name</th>
+    
+                <th scope="col">Purchased course</th>
+    
+                <th scope="col">Total Price</th>
+                
+                <th scope="col">Time</th>
+    
+                <th scope="col">Payment</th>
+             
+            </tr>
+        </thead>
+        <tbody>
+            <% if (list_transaction.length> 0) { %>
+                <% list_transaction.forEach((transaction)=> { %>
+                    <tr>
+                        <td>
+              
+                           
+                            <%=transaction.fullName%>
+                           
+                            
+                        </td>
+                        <td>
+                            <% transaction.courses.forEach((course) => { %>
+                                <p><%=course.courseName%> <strong>( <%=course.coursePrice%>  VND)</strong></p> <br>
+
+                            <% }); %>
+                            
+                        </td>
+                        <td>
+                            <%=transaction.amountPaid%>
+                        </td>
+                        <td>
+                            <%=transaction.transactionDate%>
+                        </td>
+                        <td>
+                            <button type="button" class="btn btn-info" onclick="show_info_payment('<%=transaction.cardOwner%>' , '<%=transaction.paymentMethod%>')">Detail</button>
+                        </td>
+                    </tr>
+    
+                <% }); %>
+    
+            <% } %>
+            <% if(list_transaction.length==0) { %>
+                <tr>
+                    <td colspan="5"
+                        style="text-align:center;font-weight: bold;font-size: 20px;">
+                        No transaction exist
+                    </td>
+                </tr>
+            <% }; %>
+    
+    
+        </tbody>
+    </table>
+<% }%>
+
+

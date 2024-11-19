@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<!-- Website - www.codingnepalweb.com -->
+<html lang="en" dir="ltr">
+
+<head>
+    <meta charset="UTF-8" />
+
+
+    <%- include('../partials/css-library') %>
+
+    <link rel="stylesheet" href="../../css/style.css" />
+    <!-- Đối với favicon.svg -->
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>EduSphere</title>
+    <link rel="icon" type="image/svg+xml" href="../../images/logo.svg">
+</head>
+
+<body class="admin">
+    <% global.access=access %>
+    <% global.account=account %>
+        <header></header>
+        <div class="background-container"></div>
+        <main>
+            <div class="container-fluid">
+
+                <%- include('../partials/sidebar') %>
+
+                    <section class="home-section">
+                        <div class="fill_content">
+
+                            <% if (body) { %>
+                                <%- body %>
+                            <% } %>
+
+                        </div>
+
+                    </section>
+
+
+            </div>
+        </main>
+        <footer>
+        </footer>
+        <%- include('../partials/modal') %>
+
+        <%- include('../partials/js-library') %>
+
+        <%- include('../partials/flash-message') %>
+
+        <script src="../../javascripts/main.js"></script>
+
+
+</body>
+
+</html>

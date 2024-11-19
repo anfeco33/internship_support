@@ -1,0 +1,41 @@
+{
+  "name": "project",
+  "version": "1.0.1",
+  "private": true,
+  "main": "app.js",
+  "scripts": {
+    "start": "nodemon ./bin/www"
+  },
+  "dependencies": {
+    "archiver": "^6.0.1",
+    "bcrypt": "^5.1.1",
+    "cookie-parser": "~1.4.4",
+    "debug": "~2.6.9",
+    "dotenv": "^16.3.1",
+    "ejs": "^3.1.9",
+    "express": "^4.18.2",
+    "express-ejs-layouts": "^2.5.1",
+    "express-session": "^1.17.3",
+    "express-validator": "^7.0.1",
+    "fs": "^0.0.1-security",
+    "http-errors": "~1.6.3",
+    "jsonwebtoken": "^9.0.2",
+    "mailgen": "^2.0.28",
+    "mime-types": "^2.1.35",
+    "moment": "^2.29.4",
+    "mongoose": "^8.0.1",
+    "morgan": "~1.9.1",
+    "multer": "^1.4.5-lts.1",
+    "nodemailer": "^6.9.7",
+    "nodemon": "^3.0.1",
+    "passport": "^0.7.0",
+    "passport-google-oauth20": "^2.0.0",
+    "path": "^0.12.7",
+    "stripe": "^15.1.0",
+    "unzipper": "^0.10.14"
+  },
+  "description": "POS website for phone store ",
+  "repository": "https://gitlab.duthu.net/S52100196/nodejs_02_finalproject_group33.git",
+  "author": "Guu",
+  "license": "TDTU organization"
+}

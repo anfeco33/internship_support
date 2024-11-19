@@ -1,0 +1,140 @@
+<% var menu_bar = data.menu_bar %>
+<% var first_lecture = data.first_lecture %>
+
+<div class="d-flex justify-content-between align-items-center mb-3 nav_lecture">
+    <button type="button" id="callback_btn" class="btn btn-secondary me-auto p-2 bd-highlight" onclick="callback('/home/course')">
+        BACK
+    </button>
+    <% if (account.role !== 'admin' && account.role !== 'instructor') { %>
+        <span id="courseProgress">0/0</span>
+
+        <div data-bs-toggle="offcanvas" data-bs-target="#note_bar" aria-controls="offcanvasScrolling" class="note_content">
+            <i  class="fa-solid fa-file curr_note"></i>
+            My notes
+
+            <div class="offcanvas offcanvas-end" data-bs-scroll="true" data-bs-backdrop="false" tabindex="-1"
+                id="note_bar" aria-labelledby="note_barLabel">
+                <div class="offcanvas-header">
+                    <h5 class="offcanvas-title" id="note_barLabel">My notes</h5>
+                    <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"
+                        aria-label="Close"></button>
+                </div>
+                <div class="offcanvas-body notes-list">
+                    <ul>
+                        <% if (data.notes && data.notes.length > 0) { %>
+                            <% data.notes.forEach(function(note) { %>
+                                <li onclick="jumpToLecture('<%= note.lectureID %>', '<%= note.noteTimeStamp %>', '<%= note.lectureTitle %>', '<%= note.lectureLink %>', '<%= note.lectureDescription %>')">
+                                    <p><%= note.noteTimeStamp %> - <%= note.sectionTitle %> - <%= note.lectureTitle %>: <%= note.noteDescription %></p>
+                                </li>
+                            <% }); %>
+                        <% } else { %>
+                            <li>There are no notes yet.</li>
+                        <% } %>
+                    </ul>
+
+                </div>
+            </div>
+        </div>
+    <% } %>
+
+
+</div>
+
+<div class="container-fluid light-style flex-grow-1 container-p-y lecture_page">
+    <div class="lecture_card">
+        <% if (first_lecture) { %>
+            <div class="lecture_video">
+                <iframe width="100%" id="lecture_link" height="100%"
+                    src="<%=first_lecture.lectureLink %>&enablejsapi=1" title="YouTube video player"
+                    frameborder="0"
+                    allowscriptaccess="always"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    referrerpolicy="strict-origin-when-cross-origin" allowfullscreen
+                    ></iframe>
+            </div>
+            <!-- //TODO: sửa lại thành form -->
+            <div class="d-flex justify-content-between align-items-center mb-3 lecture_modified">
+                
+                <div class="des_content" style="max-width: 700px;">
+                    <h4 class="lecture_title"><%= first_lecture.lectureTitle %></h4>
+                    <p class="lecture_description"><%= first_lecture.lectureDescription %></p>
+                </div>
+                <form id="noteForm" onsubmit="takeNoteSubmit(event)">
+                    <input type="hidden" id="lectureId" value="<%= first_lecture.lectureID %>">
+                    <% if (account.role !== 'admin' && account.role !== 'instructor') { %>
+                        <button type="submit" class="take_note">
+                            <i class="fa-solid fa-file-pen new_note"></i>
+                            <span id="noteTime">Take note 00:00</span>
+                        </button>
+                    <% } %>
+                </form>
+            </div>
+            <form id="comment-form">
+                <div class="form-group">
+                    <textarea id="comment" name="comment" class="form-control" rows="3" style="margin-top: 20px;" placeholder="If you have any questions, please ask here" required ></textarea>
+                </div>
+                <div style="text-align: end;">
+                    <button type="submit" id="sendComment" class="btn btn-primary" style="margin-top: 20px;">Send</button>
+                </div>
+            </form>
+            <h4>Comments</h4>
+            <% if (data.hasCommentsOfALecture){ %>
+                <div id="comment-list">
+                    <% data.hasCommentsOfALecture.forEach((comment) => { %>
+                        <div class="comment">          
+                            <h5><%= comment.userId.fullName %></h5>      
+                            <p><%= comment.comment %></p>                        
+                        </div>
+                    <% }); %>
+                </div>
+            <% } else { %>
+                <p style="text-align: center; color:lightcoral;"><b> There are no comments, you could make one!</b></p>
+            <% } %>
+        <% } %>
+
+        <div class="panel_content">
+            <!-- Tabs Section -->
+
+            <i data-bs-toggle="offcanvas" data-bs-target="#section_bar" aria-controls="offcanvasScrolling"
+                class="fa-solid fa-list menu_icon"></i>
+            <div class="offcanvas offcanvas-end" data-bs-scroll="true" data-bs-backdrop="false" tabindex="-1"
+                id="section_bar" aria-labelledby="section_barLabel">
+                <div class="offcanvas-header">
+                    <h5 class="offcanvas-title" id="section_barLabel">Course Content</h5>
+                    <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"
+                        aria-label="Close"></button>
+                </div>
+                <div class="offcanvas-body">
+                    <% if (menu_bar) { %>
+                        <% menu_bar.forEach(function(section) { %>
+                            <h5>
+                                <strong><%= section.sectionNumber %>: <%= section.sectionTitle %></strong>
+                                <i class="toggle_show_lecture fa-solid fa-angle-down"></i>
+                            </h5>
+                    
+                            <ul id="all_lecture">
+                                <% section.lectures.forEach(function(lecture) { %>
+                                    <li data-lecture-id="<%= lecture.lectureID %>" onclick="change_lecture('<%= lecture.lectureID %>', '<%= lecture.lectureTitle %>', '<%= lecture.lectureLink %>', '<%= lecture.lectureDescription %>')">
+                                        <p><i class="fa-regular fa-circle-play"></i> <%= lecture.lectureTitle %></p>
+                                    </li>
+                                <% }); %>
+                            </ul>
+                        <% }); %>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="../../javascripts/take-note.js"></script>
+<style>
+.comment{
+    background-color: #fff; 
+    padding-left: 8px; 
+    border-radius: 20px; 
+    border: 2px solid lightcoral;
+    width: 800px;
+    margin-bottom: 20px;
+}
+</style>

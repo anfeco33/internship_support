@@ -1,0 +1,38 @@
+<h2 class="title_admin_page">LIST STUDENTS</h2>
+<% var liststudent=data.liststudent %>
+
+<ul class="list-group list-group-flush" id="list_student">
+    <% if (liststudent.length> 0) { %>
+        <% liststudent.forEach((student)=> { %>
+            <li class="list-group-item d-flex justify-content-between align-items-center"
+                onclick="getprofilebyId('<%=student._id.toString() %>')">
+                <div class="account_avatar">
+                    <img src="<%=student.profilePicture%>" alt="err">
+                </div>
+                <div class="account_name">
+                    <%=student.fullName%> <strong>( <%=student.role%> )</strong>
+                </div>
+
+                <div class="history_login">
+                    <span class="badge bg-primary rounded-pill">
+                        <%=student.lastLogin%>
+                    </span>
+                </div>
+
+
+                <!-- <div class="control">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                    <i class="fa-solid fa-trash"></i>
+                </div> -->
+            </li>
+        <% }); %>
+    <% } %>
+
+    <h2 id="list_student_empty">
+        <% if(liststudent.length==0) { %>
+            No student exist
+        <% }; %>
+    </h2>
+
+
+</ul>

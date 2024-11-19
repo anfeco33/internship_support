@@ -1,0 +1,7 @@
+Chỉnh ở phần main cho web client
+làm đơn giản chú trọng phần tính năng trước
+
+EduSphere
+
+TODO: SEARCH + CHỉnh giao diện 
+

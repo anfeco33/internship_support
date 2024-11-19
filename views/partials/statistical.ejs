@@ -1,0 +1,150 @@
+<h2 class="title_admin_page">STATISTICAL</h2>
+<div class="statistic_page" >
+
+    <form  id="statisticsForm" action="/admin/statistical" method="post" style="display: flex; justify-content: space-between; align-items: center;">
+
+    <div style="display: flex; display: flex; justify-content: space-between; align-items: center;">
+        <label for="timeFixed">Select time: </label> 
+            <select class="statisticLeft" id="timeFixed" name="timeFixed">
+                <option value="" disabled selected>Choose option</option>
+                <option value="today">Today</option>
+                <option value="yesterday">Yesterday</option>
+                <option value="7days">In 7 days</option>
+                <option value="thisMonth">This month</option>
+            </select>
+    </div>
+
+    <div class="statisticRight">
+        <label for="fromDay">From:</label>
+        <input type="date" id="fromDay" name="fromDay">
+        <label for="toDay">To:</label>
+        <input type="date" id="toDay" name="toDay">
+    </div>
+
+    <div class="button mt-3">
+        <button type="submit" id="btnReport" class="btn btn-success">Report</button>
+        <button type="reset" id="btnReset" class="btn btn-light">Reset</button>
+    </div>
+    </form>
+
+
+    <% var orders = data.transactions %>
+    <% var start = data.start %>
+    <% var end = data.end %>
+
+
+    <div id="showReport">
+        <% if (orders && orders.length > 0) { %>
+        <h3>This is report from <%= start %> to <%= end %></h3>
+        <!-- Thêm các phần tử để hiển thị thông tin tổng hợp -->
+        
+        
+        <table class="table" id="table_statistical">
+            <thead>
+                <tr>
+                  <th scope="col">Total Transactions</th>
+                  <th scope="col">Total Courses</th>
+                  <th scope="col">Summary</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                <tr style="font-weight:600; font-size:larger">
+                  <td scope="col" id="totalOrders">0</td>
+                  <td scope="col" id="totalProducts">0</td>
+                  <td scope="col" id="Summary">0</td>
+                </tr>
+              </tbody>
+        </table>
+        <table class="table" id="table_statistical">
+            <thead>
+              <tr>
+                <th scope="col">Student Name</th>
+                <th scope="col">Purcharsed Course</th>
+                <th scope="col">Transaction Date & Time</th>
+                <th scope="col">Total Price</th>
+              </tr>
+            </thead>
+            <tbody id="product_row">
+                <% orders.forEach((order) => { %>
+                    <tr>
+                        <td>
+                            <div>
+                                <%= order.userId.fullName %> 
+                            </div>
+                        </td>
+                        <td>
+                            <% order.courseIds.forEach((course) => { %>
+                                <div>
+                                    <%= course.courseName %> ( <%= course.coursePrice %> VND )
+                                </div>
+                            <% }); %>
+                        </td>
+                        <td>
+                            <div>
+                                <%= order.transactionDate %>
+                            </div>
+                        </td>
+                        <td>
+                            <div>
+                                <%=order.amountPaid%>
+                            </div>
+                        </td>
+                    </tr>
+                <% }); %>
+      <% } else { %>
+        <p>No transaction available</p>
+      <% } %>
+        </tbody>
+        </table>  
+    </div>
+    
+
+
+
+</div>
+<script src="../../javascripts/statistic.js"></script>
+    
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Lấy danh sách các hàng từ bảng sản phẩm
+        const tableRows = document.querySelectorAll('#product_row tr');
+
+        let totalOrders = 0;
+        let totalProducts = 0;
+        let totalSummary = 0;
+
+        // Duyệt qua từng hàng trong bảng sản phẩm
+        tableRows.forEach(row => {
+            const cells = row.querySelectorAll('td');
+
+            // Tăng tổng số đơn hàng lên mỗi khi duyệt qua một hàng
+            totalOrders++;
+
+            // Lấy số lượng sản phẩm từ cột thứ hai (index 1) và cộng vào tổng số sản phẩm
+            const productCell = cells[1];
+            const products = productCell.querySelectorAll('div');
+            totalProducts += products.length;
+
+            // Lấy giá trị tổng giá tiền từ cột thứ ba (index 2) và cộng vào tổng giá trị tổng cộng
+            const totalPriceCell = cells[3];
+            const totalPrice = parseFloat(totalPriceCell.textContent);
+            totalSummary += totalPrice;
+        });
+        
+        if(document.getElementById('totalOrders'))
+        {
+            document.getElementById('totalOrders').textContent = totalOrders;
+        }
+        // Hiển thị các tổng đã tính được vào các ô tương ứng trong bảng tổng hợp
+        if(document.getElementById('totalProducts')){
+            document.getElementById('totalProducts').textContent = totalProducts;
+
+        }
+        if(document.getElementById('Summary'))
+        {
+            document.getElementById('Summary').textContent = totalSummary.toFixed(2); // Hiển thị giá trị tổng cộng với hai số sau dấu thập phân
+
+        }
+    });
+</script>
