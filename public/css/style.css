@@ -39,12 +39,12 @@
 
 :root {
     /* color */
-    --sidebar-light-color: #F3FDE8;
+    --sidebar-light-color:  rgba(232, 232, 221, 0.248);
     --icon-light-color: #FFBFBF;
 
-    --sidebar-dark-color: #5C5470;
+    --sidebar-dark-color:  rgba(232, 232, 221, 0.248);;
     --navlink-sidebar-dark: #1d1b31;
-    --navlink-sidebar-light: #E95793;
+    --navlink-sidebar-light: #FF9800;
 
     --icon-dark-color: #352F44;
     --icon-light-color: #F9B572;
@@ -70,12 +70,6 @@ body .background-container {
     /* filter: blur(2px); */
     transition: 0.5s ease;
 }
-
-
-
-
-
-
 /*TODO:  SIDEBARS  */
 
 
@@ -166,7 +160,7 @@ body .background-container {
 .sidebar .logo-details img {
     opacity: 0;
     transition: all 0.5s ease;
-    height: 40px;
+    height: 50px;
     border-radius: 20px;
     margin-right: 10px;
 }
