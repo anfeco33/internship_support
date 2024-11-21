@@ -23,8 +23,6 @@ const sidebar = document.querySelector(".sidebar"),
 
   menuIcon = document.querySelector('.menu_icon'),
 
-
-
   // const curr_page = document.querySelector('.home-section');
 
   // open_course_card = document.querySelector(".course"),
@@ -283,10 +281,6 @@ function menuBtnChange() {
     closeBtn.classList.replace("bx-menu-alt-right", "bx-menu");//replacing the iocns class
   }
 }
-
-
-
-
 
 //Admin page redirect
 const student_manager = document.querySelector(".Student"),
@@ -1014,5 +1008,16 @@ if(scrollTopButton){
     }
   });
   
-  
 }
+
+document.addEventListener("DOMContentLoaded", () => {
+  const header = document.querySelector(".navbar");
+
+  window.addEventListener("scroll", () => {
+      if (window.scrollY > 50) {
+          header.classList.add("scrolled"); // Thêm lớp khi cuộn xuống
+      } else {
+          header.classList.remove("scrolled"); // Gỡ lớp khi trở về đầu trang
+      }
+  });
+});

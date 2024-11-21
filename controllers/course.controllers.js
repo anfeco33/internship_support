@@ -28,14 +28,17 @@ class CourseController {
   async get_list_course() {
     try {
       const courses = await Course.find().populate('instructorID', 'profilePicture fullName');
-      for (const course of courses) {
+      // Lọc bỏ các khóa học không có instructorID hợp lệ
+      const validCourses = courses.filter(course => course.instructorID);
+
+      for (const course of validCourses) {
         const instructor = course.instructorID; // Người hướng dẫn tương ứng với khóa học
         const profilePicture = instructor.profilePicture; // Ảnh đại diện của người hướng dẫn
         const fullName = instructor.fullName; // Tên đầy đủ của người hướng dẫn
 
         // console.log(profilePicture, fullName);
       }
-      return courses;
+      return validCourses;
     } catch (error) {
       console.log(error);
       // return res.status(500).json({ error: 'Đã xảy ra lỗi khi lấy danh sách khóa học.' });
