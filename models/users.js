@@ -8,7 +8,7 @@ const userSchema = new Schema({
     email: { type: String, required: true , unique: true},
     googleId: {type: String, required: false},
     fullName: { type: String, required: true },
-    role: { type: String, enum: ['admin', 'student','instructor'], required: true },
+    role: { type: String, enum: ['admin', 'student','company'], required: true },
     access: [
         {
           access: { type: String, required: true },

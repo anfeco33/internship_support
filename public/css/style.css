@@ -39,7 +39,7 @@
 
 :root {
     /* color */
-    --sidebar-light-color:  rgba(232, 232, 221, 0.248);
+    --sidebar-light-color:  rgba(252, 243, 243, 0.579);
 
     --sidebar-dark-color:  rgba(232, 232, 221, 0.248);
     --navlink-sidebar-dark: #1d1b31;
@@ -64,7 +64,7 @@ body .background-container {
     left: 0;
     width: 100%;
     height: 100%;
-    background: url(/images/lightmodebg.jpg) no-repeat center center fixed;
+    background: url(/images/lightmodebg.png) no-repeat center center fixed;
     background-size: cover;
     /* filter: blur(2px); */
     transition: 0.5s ease;
@@ -76,7 +76,7 @@ body .background-container {
 
 /* //TODO sửa lại ul li tùy page */
 #list_student ul,
-#list_instructor ul {
+#list_company ul {
 
     width: 100%;
     height: calc(100vh - 270px);
@@ -90,7 +90,7 @@ body .background-container {
 }
 
 #list_student li,
-#list_instructor li {
+#list_company li {
 
     width: 100%;
     height: 100%;
@@ -107,7 +107,7 @@ body .background-container {
 
 
 #list_student li:hover,
-#list_instructor li:hover {
+#list_company li:hover {
 
     background-color: bisque;
     box-shadow: 0px 8px 16px 0 rgba(0, 0, 0, 0.5);
@@ -115,7 +115,7 @@ body .background-container {
 }
 
 #list_student li:hover i,
-#list_instructor li:hover i {
+#list_company li:hover i {
 
     color: var(--icon-dark-color);
 
@@ -955,7 +955,7 @@ body .background-container {
 }
 
 ul#list_student,
-ul#list_instructor {
+ul#list_company {
     transition: all 0.5s ease;
     /* border: 2px solid yellow;  */
     height: 100%;
@@ -967,7 +967,7 @@ ul#list_instructor {
 
 
 #list_student .account_avatar img,
-#list_instructor .account_avatar img {
+#list_company .account_avatar img {
     /* border: 2px solid red; */
     width: 100%;
     height: 100%;
@@ -1851,7 +1851,7 @@ body.dark .background-container {
     left: 0;
     width: 100%;
     height: 100%;
-    background: url(/images/darkmodebg.jpg) no-repeat center center fixed;
+    background: url(/images/darkmodebg.png) no-repeat center center fixed;
     background-size: cover;
     /* filter: blur(2px); */
     transition: 0.5s ease;
@@ -2124,18 +2124,18 @@ body.dark .background-container {
 body.dark {
 
     #list_student ul,
-    #list_instructor ul {
+    #list_company ul {
         background-color: var(--sidebar-dark-color);
         color: var(--text-light-color);
     }
     #list_student li,
-    #list_instructor li {
+    #list_company li {
         background-color: var(--navlink-sidebar-dark);
         color: var(--text-light-color);
     }
 
     #list_student li:hover,
-    #list_instructor li:hover {
+    #list_company li:hover {
 
         background-color: bisque;
         box-shadow: 0px 8px 16px 0 rgba(0, 0, 0, 0.5);
@@ -2144,14 +2144,14 @@ body.dark {
     }
 
     #list_student li i,
-    #list_instructor li i {
+    #list_company li i {
 
         color: var(--icon-light-color);
 
     }
 
     #list_student i,
-    #list_instructor i {
+    #list_company i {
 
         color: var(--icon-light-color);
 
@@ -2289,15 +2289,10 @@ body.dark {
     .product_page,
     .statistic_page {
         color: var(--text-light-color);
-
     }
 
     .profile_page .card {
-
-
         background-color: transparent;
-
-
     }
 
 
@@ -2305,12 +2300,8 @@ body.dark {
         background-color: transparent;
     }
 
-
-
-
-
     #list_student .account_avatar img,
-    #list_instructor .account_avatar img {
+    #list_company .account_avatar img {
         background-color: var(--sidebar-light-color);
     }
 

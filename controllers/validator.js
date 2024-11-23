@@ -14,7 +14,7 @@ let validateSignup = () => {
       check('email', 'email does not Empty' ).not().isEmpty(),
       check('email', 'Email must be valid' ).isEmail(),
       check('password','password does not Empty').not().isEmpty(),
-      check('account_type', 'Invalid Account type').not().isIn(['student', 'instructor']),
+      check('account_type', 'Invalid Account type').not().isIn(['student', 'company']),
   ];
 }
 

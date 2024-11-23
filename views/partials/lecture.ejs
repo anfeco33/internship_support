@@ -5,7 +5,7 @@
     <button type="button" id="callback_btn" class="btn btn-secondary me-auto p-2 bd-highlight" onclick="callback('/home/course')">
         BACK
     </button>
-    <% if (account.role !== 'admin' && account.role !== 'instructor') { %>
+    <% if (account.role !== 'admin' && account.role !== 'company') { %>
         <span id="courseProgress">0/0</span>
 
         <div data-bs-toggle="offcanvas" data-bs-target="#note_bar" aria-controls="offcanvasScrolling" class="note_content">
@@ -61,7 +61,7 @@
                 </div>
                 <form id="noteForm" onsubmit="takeNoteSubmit(event)">
                     <input type="hidden" id="lectureId" value="<%= first_lecture.lectureID %>">
-                    <% if (account.role !== 'admin' && account.role !== 'instructor') { %>
+                    <% if (account.role !== 'admin' && account.role !== 'company') { %>
                         <button type="submit" class="take_note">
                             <i class="fa-solid fa-file-pen new_note"></i>
                             <span id="noteTime">Take note 00:00</span>

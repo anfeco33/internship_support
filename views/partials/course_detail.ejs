@@ -24,15 +24,15 @@
             <!-- //TODO: sửa lại thành form -->
             <div class="col col-lg-5 col-12  course_info">
                 <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h5>Instructor</h5>
-                    <p><%= course.instructorID.fullName%></p>
+                    <h5>Company</h5>
+                    <p><%= course.companyID.fullName%></p>
                 </div>
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h5>Course Fee</h5>
                     <p><%= course.coursePrice%> VND</p> 
                 </div>
                 <div class="d-flex justify-content-between align-items-center mb-3">
-                    <% if (account.role !== 'admin' && account.role !== 'instructor') { %>
+                    <% if (account.role !== 'admin' && account.role !== 'company') { %>
                         <% if (!data.hasBought) { %>
                             <% if (!data.hasAddToCart) { %>
                                 <button type="button" class="btn btn-primary" onclick="addtocart('<%=course._id.toString() %>')">Add to cart</button>
@@ -43,7 +43,7 @@
                             <button type="button" class="btn btn-info" onclick="getlecturebyId('<%=course._id.toString() %>')">Start Course</button>
                         <% } %>
                     <% } else { %>
-                        <% if (account.role === 'instructor') { %>
+                        <% if (account.role === 'company') { %>
                             <button type="button" class="btn btn-info" onclick="getlecturebyId('<%=course._id.toString() %>')">Start Course</button>
                         <% } %>
                         <button type="button" class="btn btn-danger" onclick="deletecourse('<%= account.role%>','<%= course.courseName%>','<%= course._id.toString()%>')">DELETE COURSE</button>
@@ -98,7 +98,7 @@
                                             </h3>
                                             <p class="fst-italic">
                                                 Category : <strong><%= course.courseCategory%></strong> <br>
-                                                Instructor : <strong><%= course.instructorID.fullName%></strong>
+                                                Company : <strong><%= course.companyID.fullName%></strong>
                                             </p>
                                         </div>
                                         <div class="col-lg-4 text-center order-1 order-lg-2">

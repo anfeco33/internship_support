@@ -284,7 +284,7 @@ function menuBtnChange() {
 
 //Admin page redirect
 const student_manager = document.querySelector(".Student"),
-  instructor_manager = document.querySelector(".Instructor"),
+  company_manager = document.querySelector(".Company"),
   course_manager = document.querySelector(".CourseManager"),
   transaction = document.querySelector(".Transaction"),
   statistical = document.querySelector(".Statistical");
@@ -297,10 +297,10 @@ if (body) {
       window.location.href = "/admin/student"
     });
   }
-  if (instructor_manager) {
-    instructor_manager.addEventListener('click', function () {
-      console.log('instructor manager page');
-      window.location.href = "/admin/instructor"
+  if (company_manager) {
+    company_manager.addEventListener('click', function () {
+      console.log('company manager page');
+      window.location.href = "/admin/company"
     });
   }
   if (course_manager) {
@@ -330,7 +330,7 @@ if (body) {
 
 
 // TODO important
-//Student and Instructor page redirect
+//Student and company page redirect
 const course_page = document.querySelector(".Course"),
   subscribed_page = document.querySelector(".Subscribed"),
   exercise_page = document.querySelector(".Exercise");
@@ -701,7 +701,7 @@ function deletecourse(role, course_name, id) {
   if(role == "admin"){
     end_point = "/admin/course/";
   }
-  if(role =="instructor"){
+  if(role =="company"){
     end_point = "/home/course/";
   }
 

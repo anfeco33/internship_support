@@ -5,7 +5,7 @@ const Schema = mongoose.Schema;
 
 const courseSchema = new Schema({
     //khóa liên kết
-    instructorID: { type: Schema.Types.ObjectId, ref: 'User' },
+    companyID: { type: Schema.Types.ObjectId, ref: 'User' },
     courseName: { type: String, required: true },
     coursePrice: { type: Number, required: true, default: 0 },
     courseCategory: { type: String, required: true },

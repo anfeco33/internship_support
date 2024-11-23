@@ -1,5 +1,5 @@
 const User = require('../models/users');
-const Instructor = require('../models/instructors')
+const Company = require('../models/companies')
 const Student = require('../models/students')
 const Admin = require('../models/admins')
 const bcrypt = require('bcrypt');
@@ -17,7 +17,7 @@ const { stat } = require('fs');
 
 const admin_feature_list = [
   { access: "Student", icon: "<i class='bx bx-grid-alt'></i>" },
-  { access: "Instructor", icon: "<i class='fa-solid fa-bars-progress'></i>" },
+  { access: "Company", icon: "<i class='fa-solid fa-bars-progress'></i>" },
   { access: "Course Manager", icon: "<i class='fa-solid fa-list'></i>" },
   { access: "Transaction", icon: "<i class='fa-solid fa-cart-plus'></i>" },
   { access: "Statistical", icon: "<i class='fa-solid fa-signal'></i>" }
@@ -29,7 +29,7 @@ const student_feature_list = [
 ]
 
 
-const instructor_feature_list = [
+const company_feature_list = [
   { access: "Course", icon: "<i class='fa-solid fa-graduation-cap'></i>" },
   { access: "Exercise", icon: "<i class='fa-solid fa-pen-to-square'></i>" }
 ]
@@ -37,7 +37,7 @@ const instructor_feature_list = [
 class UserController {
   // account có quyền hạn cao nhất các account sau đó được phân chia quyền hạn dựa trên admin
   createDefaultAccount() {
-    console.log("DEFAULT ADMIN : ")
+    console.log("ADMIN ACCOUNT: ")
     return new Promise(async (resolve, reject) => {
       try {
         const admin = await User.findOne({ username: 'admin' });
@@ -54,7 +54,7 @@ class UserController {
             fullName: 'Admin',
             role: 'admin',
             access: admin_feature_list,
-            profilePicture: '../../images/dejault_avatar.png',
+            profilePicture: '../../images/default_avatar.png',
             lastLogin: currentTime,
           });
           await defaultAdmin.save();
@@ -185,15 +185,16 @@ class UserController {
       } else {
         const { username , email, password , accountType } = req.body;
         const currentTime = moment().format("HH:mm | DD/MM/YYYY");
+        let profilePicture = "";
 
         if(accountType == "student"){
           var access = student_feature_list;
+          profilePicture = '../../images/student_default_avatar.png';
         }
-        if(accountType == "instructor"){
-          var access = instructor_feature_list;
+        if(accountType == "company"){
+          var access = company_feature_list;
+          profilePicture = '../../images/company_default_avatar.png';
         }
-
-  
 
         console.log(username , email, password , accountType);
         const find = await User.findOne({ email: email });
@@ -208,7 +209,7 @@ class UserController {
             fullName: email.split("@")[0],
             role: accountType,
             access: access,
-            profilePicture: '../../images/dejault_avatar.png',
+            profilePicture: profilePicture,
             lastLogin: currentTime,
           });
 
@@ -259,10 +260,10 @@ class UserController {
     }
   }
 
-  async getlistinstructor() {
+  async getlistcompany() {
     try {
 
-      const find = await User.find({ $or: [{ role: 'instructor' }] });
+      const find = await User.find({ $or: [{ role: 'company' }] });
       // console.log(find);
 
       return find
@@ -423,12 +424,12 @@ class UserController {
           req.session.flash = {
             type: 'success',
             intro: 'Change fullname',
-            message: 'Fullname has been changed successfully',
+            message: 'Your full name has been changed successfully',
           };
           res.json({
             changed: true,
             status: 'success',
-            message: 'Fullname has been changed successfully'
+            message: 'Your full name changed successfully'
           });
         } else {
           req.session.flash = {

@@ -40,8 +40,8 @@ router.get('/', (req, res) => {
     if(curr_account.role ==='student'){
       callback_url = '/admin/student'
     }
-    if(curr_account.role ==='instructor'){
-      callback_url = '/admin/instructor'
+    if(curr_account.role ==='company'){
+      callback_url = '/admin/company'
     }
     req.page_data = {
       account_details:  curr_account,

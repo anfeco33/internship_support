@@ -7,7 +7,7 @@ const Comment = require('../models/lecturecomments');
 const Exercise = require('../models/exercises');
 const Note = require('../models/note');
 const User = require('../models/users');
-const Instructor = require('../models/instructors')
+const Company = require('../models/companies')
 const Student = require('../models/students')
 const Admin = require('../models/admins')
 const Progress = require('../models/progress');
@@ -27,14 +27,14 @@ const fs = require('fs');
 class CourseController {
   async get_list_course() {
     try {
-      const courses = await Course.find().populate('instructorID', 'profilePicture fullName');
-      // Lọc bỏ các khóa học không có instructorID hợp lệ
-      const validCourses = courses.filter(course => course.instructorID);
+      const courses = await Course.find().populate('companyID', 'profilePicture fullName');
+      // Lọc bỏ các khóa học không có companyID hợp lệ
+      const validCourses = courses.filter(course => course.companyID);
 
       for (const course of validCourses) {
-        const instructor = course.instructorID; // Người hướng dẫn tương ứng với khóa học
-        const profilePicture = instructor.profilePicture; // Ảnh đại diện của người hướng dẫn
-        const fullName = instructor.fullName; // Tên đầy đủ của người hướng dẫn
+        const company = course.companyID; // Người hướng dẫn tương ứng với khóa học
+        const profilePicture = company.profilePicture; // Ảnh đại diện của người hướng dẫn
+        const fullName = company.fullName; // Tên đầy đủ của người hướng dẫn
 
         // console.log(profilePicture, fullName);
       }
@@ -47,15 +47,15 @@ class CourseController {
 
   async get_my_course(req, res, next) {
     try {
-      const instructorID = req.session.account; // Lấy instructorID từ session hoặc nguồn dữ liệu khác
+      const companyID = req.session.account; // Lấy companyID từ session hoặc nguồn dữ liệu khác
 
-      console.log(instructorID); // Xử lý kết quả tìm kiếm
-      const courses = await Course.find({ instructorID }).populate('instructorID', 'profilePicture fullName');
+      console.log(companyID); // Xử lý kết quả tìm kiếm
+      const courses = await Course.find({ companyID }).populate('companyID', 'profilePicture fullName');
 
       for (const course of courses) {
-        const instructor = course.instructorID; // Người hướng dẫn tương ứng với khóa học
-        const profilePicture = instructor.profilePicture; // Ảnh đại diện của người hướng dẫn
-        const fullName = instructor.fullName; // Tên đầy đủ của người hướng dẫn
+        const company = course.companyID; // Người hướng dẫn tương ứng với khóa học
+        const profilePicture = company.profilePicture; // Ảnh đại diện của người hướng dẫn
+        const fullName = company.fullName; // Tên đầy đủ của người hướng dẫn
 
         // console.log(profilePicture, fullName);
       }
@@ -72,34 +72,8 @@ class CourseController {
     
       const student = await User.findById(studentID); // Lấy thông tin người dùng từ bảng User
       console.log(student)
-      const courses = await Course.find({ _id: { $in: student.subscribed } }).populate('instructorID', 'profilePicture fullName'); // Lấy thông tin các khóa học đã đăng ký từ bảng Course và liên kết với thông tin người dùng từ bảng User
+      const courses = await Course.find({ _id: { $in: student.subscribed } }).populate('companyID', 'profilePicture fullName'); // Lấy thông tin các khóa học đã đăng ký từ bảng Course và liên kết với thông tin người dùng từ bảng User
       console.log(courses)
-      // const subscribedCourses = courses.map(course => {
-      //   const { courseName, coursePrice, courseCategory, coursePreview, courseImage, courseDescription, courseAudience, courseResult, courseRequirement } = course;
-    
-      //   return {
-      //     instructorID: course.instructorID,
-      //     courseName,
-      //     coursePrice,
-      //     courseCategory,
-      //     coursePreview,
-      //     courseImage,
-      //     courseDescription,
-      //     courseAudience,
-      //     courseResult,
-      //     courseRequirement,
-      //     fullName: course.instructorID.fullName,
-      //     profilePicture: course.instructorID.profilePicture
-      //   };
-      // });
-    
-      // const result = {
-      //   student: {
-      //     fullName: student.fullName,
-      //     profilePicture: student.profilePicture
-      //   },
-      //   courses: subscribedCourses
-      // };
     
       return courses;
     } catch (error) {
@@ -152,13 +126,13 @@ class CourseController {
 
       let listCourse;
       if (term === "all") {
-        listCourse = await Course.find().populate('instructorID', 'profilePicture fullName')
+        listCourse = await Course.find().populate('companyID', 'profilePicture fullName')
       } else {
         listCourse = await Course.find({
           $or: [
             { courseName: regex },
           ]
-        }).populate('instructorID', 'profilePicture fullName');
+        }).populate('companyID', 'profilePicture fullName');
       }
 
       if (listCourse.length > 0) {
@@ -178,7 +152,7 @@ class CourseController {
   async getCourse(courseID) {
     console.log("curr Course : " + courseID);
     try {
-      const find = await Course.findById(courseID).populate('instructorID', 'fullName');
+      const find = await Course.findById(courseID).populate('companyID', 'fullName');
       // console.log(find)
       if (find) {
         return find;
@@ -335,7 +309,7 @@ class CourseController {
 
       // Lặp qua từng item trong cart và lấy thông tin course tương ứng
       for (const cartItem of cartItems) {
-        const course = await Course.findById(cartItem._id).populate('instructorID', 'fullName');
+        const course = await Course.findById(cartItem._id).populate('companyID', 'fullName');
         if (course) {
           const formattedCourse = {
             courseId: course._id.toString(),
@@ -343,7 +317,7 @@ class CourseController {
             coursePrice: course.coursePrice,
             courseCategory: course.courseCategory,
             courseImage: course.courseImage,
-            instructorFullName: course.instructorID.fullName,
+            companyFullName: course.companyID.fullName,
             courseImage: course.courseImage
           };
           cartCourses.push(formattedCourse);
@@ -521,9 +495,9 @@ class CourseController {
       } else {
         console.log(req.body);
         const { courseName, coursePrice, courseCategory, coursePreview, courseDescription, courseAudience, courseResult, courseRequirement, sections } = req.body;
-        var instructorID = req.session.account;
+        var companyID = req.session.account;
         const newCourse = new Course({
-          instructorID,
+          companyID,
           courseName,
           coursePrice,
           courseCategory,
@@ -852,9 +826,9 @@ class CourseController {
 
   async getCoursesWithExercises(req, res, next) {
     try {
-      const instructorId = req.session.account; 
+      const companyId = req.session.account; 
       const courses = await Course.find({
-        instructorID: instructorId,
+        companyID: companyId,
         exercises: { $exists: true, $ne: [] }  // Ensure there are exercises associated with the course
       })
       .populate({
@@ -873,14 +847,14 @@ class CourseController {
   async manageExercise(req, res, next) {
     try {
       const { courseId, exerciseIndex, googleFormLink, selectCourse } = req.body;
-      const instructorID = req.session.account;
-      console.log("rm exercise: ", courseId, instructorID, exerciseIndex)
+      const companyID = req.session.account;
+      console.log("rm exercise: ", courseId, companyID, exerciseIndex)
   
       // thêm mới or cập nhật bài tập
       if (googleFormLink) {
         // Kiểm tra nếu exerciseIndex được cung cấp, thì thực hiện cập nhật
         if (exerciseIndex !== undefined) {
-          const existingEx = await Exercise.find({ InstructorId: instructorID, courseId: courseId });
+          const existingEx = await Exercise.find({ companyId: companyID, courseId: courseId });
           if (!existingEx) {
             req.session.flash = {
               type: 'warning',
@@ -907,7 +881,7 @@ class CourseController {
           }
           const newExercise = new Exercise({
             courseId: selectCourse,
-            InstructorId: instructorID,
+            companyId: companyID,
             googleFormLink: googleFormLink
           });
   
@@ -929,7 +903,7 @@ class CourseController {
       else if (exerciseIndex !== undefined) {
         // Xóa bài tập tại vị trí index
         try {
-          const existingEx = await Exercise.find({ InstructorId: instructorID, courseId: courseId });
+          const existingEx = await Exercise.find({ companyId: companyID, courseId: courseId });
           if (!existingEx) {
             req.session.flash = {
               type: 'warning',
@@ -1066,12 +1040,12 @@ class CourseController {
   async getAboutUS() {
     const students = await User.find({ role: 'student' });
     const courses = await Course.find({});
-    const instructors = await User.find({ role: 'instructor' });
+    const companies = await User.find({ role: 'company' });
   
     return {
       students: students,
       courses: courses,
-      instructors: instructors,
+      companies: companies,
     };
   }
 

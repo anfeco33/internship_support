@@ -35,14 +35,14 @@ router.get('/', function (req, res) {
     // console.log(req.page_data.liststaff)
     await userControllers.getpage(req , res, next);
   })
-  .get('/instructor', async function (req, res, next) {
+  .get('/company', async function (req, res, next) {
     delete req.session.product
-    const partial = 'partials/instructor_manager';
+    const partial = 'partials/company_manager';
     const layout = 'layouts/main';
     req.partial_path = partial
     req.layout_path = layout
     req.page_data = {
-      listinstructor: await userControllers.getlistinstructor(),
+      listcompany: await userControllers.getlistcompany(),
       // feature: req.session.admin_feature,
     }
     // console.log(req.page_data.listproduct)

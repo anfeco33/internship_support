@@ -35,7 +35,7 @@ router.get('/', function (req, res) {
     const layout = 'layouts/main';
 
     // delete req.session.customer;
-    if (req.session.role == "instructor") {
+    if (req.session.role == "company") {
       res.redirect('/home/course_create');
     } else {
       req.partial_path = partial
@@ -133,7 +133,7 @@ router.get('/', function (req, res) {
   
     req.page_data = {
       list_my_course: coursesWithExercises,
-      list_all_course_of_anInstructor: await courseController.get_my_course(req, res, next)
+      list_all_course_of_aCompany: await courseController.get_my_course(req, res, next)
     }
     await userController.getpage(req, res, next);
   })
@@ -152,7 +152,7 @@ router.get('/', function (req, res) {
   
     req.page_data = {
       list_my_course: coursesWithExercises,
-      list_all_course_of_anInstructor: await courseController.get_my_course(req, res, next)
+      list_all_course_of_aCompany: await courseController.get_my_course(req, res, next)
     }
     await userController.getpage(req, res, next);
   })
@@ -321,7 +321,7 @@ router.get('/', function (req, res) {
     req.page_data = {
       num_student : aboutUsData.students.length,
       num_course : aboutUsData.courses.length,
-      num_instructor : aboutUsData.instructors.length,
+      num_company : aboutUsData.companies.length,
     }
     await userController.getpage(req, res, next);
   })
