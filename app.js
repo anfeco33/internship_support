@@ -10,7 +10,6 @@ const app = express();
 
 
 // middleware setup
-// var staffRouter = require('./routes/staffRoute');
 
 // var adminRouter = require('./routes/adminRoute');
 

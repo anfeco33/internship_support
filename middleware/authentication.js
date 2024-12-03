@@ -8,7 +8,7 @@ var moment = require('moment');
 const envPath = path.join(__dirname, '.env.example');
 require('dotenv').config({ path: envPath });
 const student_feature_list = [
-  { access: "Course", icon: "<i class='fa-solid fa-graduation-cap'></i>" },
+  { access: "Student_Homepage", icon: "<i class='fa-solid fa-house'></i>" },
   { access: "Subscribed", icon: "<i class='fa-solid fa-square-check'></i>" }
 ]
 
@@ -24,8 +24,6 @@ function authentication(req, res, next) {
   }
 }
 
-
-
 function isAdmin(req, res, next) {
   if(req.session.isAdmin){
     next();
@@ -34,8 +32,6 @@ function isAdmin(req, res, next) {
     return res.status(403).json({ error: 'Permission Denied' });
   }
 }
-
-
 
 passport.serializeUser((user, done) => {
   done(null, user.id);
@@ -57,7 +53,7 @@ passport.use(new GoogleStrategy({
 async (req, accessToken, refreshToken, profile, done) => {
   const newUser = {
       googleId: profile.id,
-      username: profile.id,
+      // username: profile.id,
       fullName: profile.displayName,
       lastLogin: moment().format("HH:mm | DD/MM/YYYY"),
       profilePicture: profile.photos[0].value,

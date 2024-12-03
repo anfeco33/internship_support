@@ -1,5 +1,5 @@
 
-const Course = require('../models/courses');
+// const Business = require('../models/business');
 const Section = require('../models/section');
 const Lecture = require('../models/lecture');
 const Review = require('../models/reviews');
@@ -24,135 +24,136 @@ const { validate } = require('./validator');
 const { validationResult } = require('express-validator');
 const fs = require('fs');
 
-class CourseController {
-  async get_list_course() {
+class BusinessController {
+  async get_list_business() {
     try {
-      const courses = await Course.find().populate('companyID', 'profilePicture fullName');
-      // Lọc bỏ các khóa học không có companyID hợp lệ
-      const validCourses = courses.filter(course => course.companyID);
+      // dòng lúc đầu để list course
+      // const course = await Course.find().populate('companyID', 'profilePicture fullName');
 
-      for (const course of validCourses) {
-        const company = course.companyID; // Người hướng dẫn tương ứng với khóa học
-        const profilePicture = company.profilePicture; // Ảnh đại diện của người hướng dẫn
-        const fullName = company.fullName; // Tên đầy đủ của người hướng dẫn
+      // const business = await Company.find().populate('companyID', 'profilePicture fullName');
+      // // Lọc bỏ các khóa học không có companyID hợp lệ
+      // const validBusiness = business.filter(business => business.companyID);
+
+
+      //   const profilePicture = company.profilePicture; // Ảnh đại diện logo của doanh nghiệp
+      //   const fullName = company.fullName; // Tên đầy đủ của doanh nghiệp
+
+      const businesses = await Company.find()
+
 
         // console.log(profilePicture, fullName);
-      }
-      return validCourses;
+      return businesses;
     } catch (error) {
       console.log(error);
-      // return res.status(500).json({ error: 'Đã xảy ra lỗi khi lấy danh sách khóa học.' });
     }
   }
 
-  async get_my_course(req, res, next) {
+  async get_my_business(req, res, next) {
     try {
       const companyID = req.session.account; // Lấy companyID từ session hoặc nguồn dữ liệu khác
 
       console.log(companyID); // Xử lý kết quả tìm kiếm
-      const courses = await Course.find({ companyID }).populate('companyID', 'profilePicture fullName');
+      const businesses = await Business.find({ companyID }).populate('companyID', 'profilePicture fullName');
 
-      for (const course of courses) {
-        const company = course.companyID; // Người hướng dẫn tương ứng với khóa học
-        const profilePicture = company.profilePicture; // Ảnh đại diện của người hướng dẫn
+      for (const business of businesses) {
+        const company = business.companyID; // Người hướng dẫn tương ứng với khóa học
+        const profilePicture = business.profilePicture; // Ảnh đại diện của người hướng dẫn
         const fullName = company.fullName; // Tên đầy đủ của người hướng dẫn
 
         // console.log(profilePicture, fullName);
       }
 
-      return courses;
+      return businesses;
     } catch (error) {
       next(error);
     }
   }
 
-  async  get_subcribe_course(req, res, next) {
-    try {
-      const studentID = req.session.account; // Lấy studentID từ session hoặc nguồn dữ liệu khác
+  // async  get_subcribe_course(req, res, next) {
+  //   try {
+  //     const studentID = req.session.account; // Lấy studentID từ session hoặc nguồn dữ liệu khác
     
-      const student = await User.findById(studentID); // Lấy thông tin người dùng từ bảng User
-      console.log(student)
-      const courses = await Course.find({ _id: { $in: student.subscribed } }).populate('companyID', 'profilePicture fullName'); // Lấy thông tin các khóa học đã đăng ký từ bảng Course và liên kết với thông tin người dùng từ bảng User
-      console.log(courses)
+  //     const student = await User.findById(studentID); // Lấy thông tin người dùng từ bảng User
+  //     console.log(student)
+  //     const courses = await Course.find({ _id: { $in: student.subscribed } }).populate('companyID', 'profilePicture fullName'); // Lấy thông tin các khóa học đã đăng ký từ bảng Course và liên kết với thông tin người dùng từ bảng User
+  //     console.log(courses)
     
-      return courses;
-    } catch (error) {
-      next(error);
-    }
-  }
+  //     return courses;
+  //   } catch (error) {
+  //     next(error);
+  //   }
+  // }
   
 
-  async delete_course(req, res, next) {
-    console.log("Delete course : ")
-    try {
-      const product = await Course.findById(req.params.courseId);
-      if (product) {
-        if(!product.inOrders){
-          await product.deleteOne();
-          const imagePath = path.join(__dirname, '../uploads/courses', path.basename(product.courseImage));
-          console.log(imagePath);
-          fs.unlink(imagePath, (err) => {
-            if (err) {
-              console.error('Có lỗi xảy ra khi xóa file:', err);
-              return;
-            }
-            console.log('File đã được xóa thành công.');
-          });
-          req.session.flash = {
-            type: "success",
-            intro: 'Delete product',
-            message: "Delete course successfully",
-          };
-          res.json({ delete: true, status: "success", message: 'Course has been deleted', redirect: "/admin/course" });
-        }
-        else{
-          res.json({ delete : false, status: "warning", message: 'Product is in order'});
-        }
+  // async delete_course(req, res, next) {
+  //   console.log("Delete course : ")
+  //   try {
+  //     const product = await Course.findById(req.params.courseId);
+  //     if (product) {
+  //       if(!product.inOrders){
+  //         await product.deleteOne();
+  //         const imagePath = path.join(__dirname, '../uploads/courses', path.basename(product.courseImage));
+  //         console.log(imagePath);
+  //         fs.unlink(imagePath, (err) => {
+  //           if (err) {
+  //             console.error('Có lỗi xảy ra khi xóa file:', err);
+  //             return;
+  //           }
+  //           console.log('File đã được xóa thành công.');
+  //         });
+  //         req.session.flash = {
+  //           type: "success",
+  //           intro: 'Delete product',
+  //           message: "Delete course successfully",
+  //         };
+  //         res.json({ delete: true, status: "success", message: 'Course has been deleted', redirect: "/admin/course" });
+  //       }
+  //       else{
+  //         res.json({ delete : false, status: "warning", message: 'Product is in order'});
+  //       }
 
-      } else {
-        res.status(404)({ delete: false, status: "success", message: 'Product Not Foud' });
-      }
-    } catch (err) {
-      next(err);
-    }
-  }
+  //     } else {
+  //       res.status(404)({ delete: false, status: "success", message: 'Product Not Foud' });
+  //     }
+  //   } catch (err) {
+  //     next(err);
+  //   }
+  // }
 
-
-  async getcoursebyTermRegex(req, res, next) {
+  // search business
+  async getbusinessbyTermRegex(req, res, next) {
     try {
       const term = req.params.term;
       const regex = new RegExp(term, 'i');
       console.log(regex);
 
-      let listCourse;
+      let listBusiness;
       if (term === "all") {
-        listCourse = await Course.find().populate('companyID', 'profilePicture fullName')
+        listBusiness = await Company.find().populate('companyID', 'profilePicture fullName')
       } else {
-        listCourse = await Course.find({
+        listBusiness = await Business.find({
           $or: [
-            { courseName: regex },
+            { businessName: regex },
           ]
         }).populate('companyID', 'profilePicture fullName');
       }
 
-      if (listCourse.length > 0) {
-        res.json({ match: true, status: "success", message: 'Success', data: listCourse });
+      if (listBusiness.length > 0) {
+        res.json({ match: true, status: "success", message: 'Success', data: listBusiness });
       } else {
-        res.json({ match: false, status: "warning", message: 'Fail', data: listCourse});
+        res.json({ match: false, status: "warning", message: 'Fail', data: listBusiness});
       }
 
     } catch (error) {
-      console.error('Error getting product:', error);
+      console.error('Error getting business:', error);
       throw error;
     }
   }
 
-  
-
-  async getCourse(courseID) {
-    console.log("curr Course : " + courseID);
+  async getBusiness(businessID) {
+    console.log("curr business : " + businessID);
     try {
-      const find = await Course.findById(courseID).populate('companyID', 'fullName');
+      const find = await Course.findById(businessID).populate('companyID', 'fullName');
       // console.log(find)
       if (find) {
         return find;
@@ -1082,4 +1083,4 @@ class CourseController {
       }
   }
 }
-module.exports = new CourseController();
+module.exports = new BusinessController();

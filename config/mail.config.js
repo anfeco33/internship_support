@@ -2,8 +2,6 @@ const path = require('path')
 const envPath = path.join(__dirname, '../.env.example');
 require('dotenv').config({ path: envPath });
 
-// console.log(process.env.MAIL_MAILER);
-
 module.exports = {
     MAILER: process.env.MAIL_MAILER,
     HOST: process.env.MAIL_HOST,

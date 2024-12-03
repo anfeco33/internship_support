@@ -148,7 +148,23 @@ body .background-container {
     align-items: center;
     padding: 10px 20px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-    background-color: rgba(0, 0, 0, 0.579);
+    background-color: rgb(248, 248, 248);
+    color: #fff;
+    top: 0;
+    right: 20px;
+    width: calc(100% - 108px);
+    z-index: 1000;
+    transition: background-color 0.3s ease;
+}
+
+body.dark .navbar {
+    position: fixed;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    background-color: rgba(0, 0, 0, 0.663);
     color: #fff;
     top: 0;
     right: 20px;
@@ -621,6 +637,7 @@ body .background-container {
 
 /* TODO search bar */
 .seach_bar {
+    position: relative;
     display: flex;
     justify-content: center; /* Mặc định căn giữa */
     align-items: center;
@@ -630,6 +647,21 @@ body .background-container {
     width: auto;
 }
 
+#seach_icon {
+    background: transparent;
+    border: none;
+    border-right: 2px solid #000;
+    border-top: 2px solid #000;
+    border-bottom: 2px solid #000;
+    left: 100px;
+}
+
+body.dark #seach_icon {
+    background: white;
+    border: none;
+    left: 100px;
+}
+
 #searchInput {
     width: 300px;
     flex-grow: 1;
@@ -637,7 +669,31 @@ body .background-container {
     box-sizing: border-box;
     transition: width 0.5s ease;
     border-radius: 5px 0 0 5px;
+    background-color: transparent;
+
+    border: none;
+    border-top: 2px solid #000;
+    border-bottom: 2px solid #000;
+    border-left: 2px solid #000;
+}
+
+body.dark #searchInput {
+    width: 300px;
+    flex-grow: 1;
+    height: 100%;
+    box-sizing: border-box;
+    transition: width 0.5s ease;
+    border-radius: 5px 0 0 5px;
     background-color: white;
+
+    border: none;
+    border-top: 2px solid #000;
+    border-bottom: 2px solid #000;
+    border-left: 2px solid #000;
+}
+
+#searchInput:hover {
+    border-bottom: 2px solid var(--icon-light-color);
 }
 
 /* Khi logo biến mất, căn sát trái */
@@ -649,6 +705,7 @@ body .background-container {
     opacity: 1;
     transition: all 0.5s ease;
 }
+
 
 /* Khi sidebar mở, tăng chiều dài thanh tìm kiếm */
 .sidebar.open ~ .home-section #searchInput {

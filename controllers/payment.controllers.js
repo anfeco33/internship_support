@@ -1,6 +1,6 @@
 const stripe = require("stripe")(process.env.STRIPE_SECRET);
 const User = require('../models/users');
-const Course = require('../models/courses');
+// const Course = require('../models/courses');
 const Transaction = require('../models/transactions');
 
 exports.processPayment = async (req, res, next) => {

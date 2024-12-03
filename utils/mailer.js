@@ -78,24 +78,8 @@ exports.sendMail = async (to, subject , url) => {
     });
 }
 
-exports.sendMailResetPassword = async (option) => {
-    // const transporter = nodeMailer.createTransport({
-    //     host: process.env.EMAIL_HOST,
-    //     port: process.env.EMAIL_PORT,
-    //     auth: {
-    //         user: process.env.EMAIL_USER,
-    //         pass: process.env.EMAIL_PASS
-    //     }
-    // })
-
+exports.sendMailForOTP = async (option) => {
     var smtpConfig = {
-        // host: process.env.EMAIL_HOST,
-        // port: 587,
-        // secure: false, // use SSL
-        // auth: {
-        //     user: process.env.EMAIL_USER,
-        //     pass: process.env.EMAIL_PASS
-        // }
         service: 'Gmail',
             auth: {
                 user: process.env.MAIL_USERNAME,
@@ -105,10 +89,10 @@ exports.sendMailResetPassword = async (option) => {
     var transporter = nodeMailer.createTransport(smtpConfig);
 
     const emailOptions = {
-        from: 'EduSphere support<support@courxe.com>',
+        from: 'InternChoice support<support@internchoice.com>',
         to: option.email,
         subject: option.subject,
-        text: option.message
+        text: option.message, // Gửi OTP ở đây
     }
 
     await transporter.sendMail(emailOptions)

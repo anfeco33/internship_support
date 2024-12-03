@@ -14,22 +14,28 @@ const { validate } = require('../controllers/validator');
 
 const { validationResult } = require('express-validator');
 const { stat } = require('fs');
+const { type } = require('os');
 
+// feature list này là các tab trong sidebar cần tạo để truy cập
 const admin_feature_list = [
   { access: "Student", icon: "<i class='bx bx-grid-alt'></i>" },
   { access: "Company", icon: "<i class='fa-solid fa-bars-progress'></i>" },
-  { access: "Course Manager", icon: "<i class='fa-solid fa-list'></i>" },
   { access: "Transaction", icon: "<i class='fa-solid fa-cart-plus'></i>" },
   { access: "Statistical", icon: "<i class='fa-solid fa-signal'></i>" }
 ]
 
 const student_feature_list = [
-  { access: "Course", icon: "<i class='fa-solid fa-graduation-cap'></i>" },
+  //{ access: "Course", icon: "<i class='fa-solid fa-graduation-cap'></i>" },
+
+  { access: "Student_Homepage", icon: "<i class='fa-solid fa-house'></i>" },
   { access: "Subscribed", icon: "<i class='fa-solid fa-square-check'></i>" }
 ]
 
 
 const company_feature_list = [
+  // LƯU Ý: khi thay đổi trong này, cần tạo lại acc mới vì acc cũ chỉ lưu các access cũ
+  // sửa luôn trong main.js
+
   { access: "Course", icon: "<i class='fa-solid fa-graduation-cap'></i>" },
   { access: "Exercise", icon: "<i class='fa-solid fa-pen-to-square'></i>" }
 ]
@@ -70,20 +76,12 @@ class UserController {
     });
   }
 
-
-
-
-
   async login(req, res, next) {
+   // async sendOTP_func(req, res, next) {
     // TODO: thêm xử lý đăng nhập khi đăng ký bên ngoài 
     // trường hợp không phải admin tạo
     console.log("LOGIN : ")
     try {
-      // req.session.admin_feature = admin_feature_list;
-      // req.session.staff_feature = student_feature_list;
-
-      // Kiểm tra thông tin đăng nhập và xác thực
-      // console.log("HERE");
       // console.log(req.body);
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
@@ -101,7 +99,7 @@ class UserController {
 
       }
       else {
-        const { username, password } = req.body;
+        const { username } = req.body;
         const find = await User.findOne({ username: username });
         if (!find) {
           var state = { status: 'warning', message: 'Account not found' }
@@ -576,6 +574,152 @@ class UserController {
     } catch (error) {
 
       next(error);
+    }
+  }
+
+  async sendOTP_func(req, res, next) {
+    console.log("email input SEND OTP : ", req.body.email)
+ 
+    // console.log(req.body);
+    if (!validate.validateEmail(req.body.email)) {
+      return res.status(400).json({
+        status: 'warning',
+        message: 'Invalid email. Please enter a valid email address.'
+      });
+    }
+
+    const user = await User.findOne({ email: req.body.email })
+    if (!user) {
+        return res.status(400).json({
+          status: 'warning',
+          message: 'User not found with this email!',
+      });
+    }
+
+    // verify for admin
+    if (user.role === 'admin') {
+      return res.status(200).json({
+        status: 'requirePassword',
+        message: 'Admin account detected. Please enter your password.'
+      });
+    } //end admin
+
+     // Generate OTP for student or company
+    const otp = user.createOTP();
+    await user.save({ validateBeforeSave: false})
+
+    const message = `Your OTP code is: ${otp}\n\nThis code is valid for 10 minutes.`;
+      
+    try {
+      await mailer.sendMailForOTP({
+        email: user.email,
+        subject: 'InternChoice: Your Login OTP (valid for 10 min)',
+        message: message
+      })
+
+      req.session.flash = {
+        type: 'success',
+        message: 'OTP has been sent to your email! Please check your email to login!'
+      }
+
+      return res.status(200).json({
+        status: 'success',
+        message: 'OTP has been sent to your email! Please check your email to login.'
+    });
+    } catch (err) {
+        user.otp = undefined;
+        user.otpExpires = undefined;
+        await user.save({ validateBeforeSave: false });
+
+        console.error('Error during sending OTP:', err);
+
+        return res.status(500).json({
+            status: 'error',
+            message: 'There was an error while sending the email. Try again later!'
+        });
+    }
+  }
+
+  async verify_OTP(req, res, next) {
+    console.log("VERIFying : ")
+    const { email, otp, password } = req.body;
+
+    try {
+        const user = await User.findOne({ email });
+
+        if (!user) {
+            return res.status(400).json({
+                status: 'error',
+                message: 'User not found with this email!'
+            });
+        }
+
+        // Xử lý xác thực OTP
+        if (otp) {
+            if (!user.otp || user.otpExpires < Date.now()) {
+                return res.status(400).json({
+                    status: 'error',
+                    message: 'OTP has expired. Please request a new one!'
+                });
+            }
+
+            if (user.otp !== otp) {
+                return res.status(400).json({
+                    status: 'error',
+                    message: 'Invalid OTP. Please try again!'
+                });
+            }
+
+            // OTP hợp lệ
+            user.otp = null; // Xóa OTP sau khi sử dụng
+            user.otpExpires = null;
+            await user.save();
+
+            req.session.account = user._id.toString();
+            req.session.role = user.role;
+            req.session.loggedIn = true;
+
+            return res.status(200).json({
+                status: 'success',
+                message: 'Login successful!',
+                redirect: '/home'
+            });
+        }
+
+        // Xử lý xác thực mật khẩu
+        if (password) {
+            const isPasswordValid = await bcrypt.compare(password, user.password);
+            if (!isPasswordValid) {
+                return res.status(400).json({
+                    status: 'warning',
+                    message: 'Invalid password. Please try again!'
+                });
+            }
+
+            req.session.account = user._id.toString();
+            req.session.role = user.role;
+            req.session.loggedIn = true;
+            req.session.isAdmin = true;
+            req.session.access = user.access
+            
+            return res.status(200).json({
+                status: 'success',
+                message: 'Admin login successful!',
+                redirect: '/admin/company'
+            });
+        }
+
+        // Nếu cả OTP và mật khẩu đều không có
+        return res.status(400).json({
+            status: 'error',
+            message: 'Invalid request. Please provide OTP or password.'
+        });
+    } catch (error) {
+        console.error('Error verifying OTP or password:', error);
+        return res.status(500).json({
+            status: 'error',
+            message: 'Server error. Please try again later.'
+        });
     }
   }
 

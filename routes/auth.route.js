@@ -18,20 +18,17 @@ router.get('/' , (req, res) => {
 
 //TODO: Chia authRoute và check đăng nhập trong dtb
 router.get('/login', function (req, res) {
-    // Lấy flash message từ session
     var flashMessage = req.session.flash;
     if(flashMessage)
     {
-        console.log(flashMessage);
+        console.log("flash-otp:  ", flashMessage);
     }
-    // console.log(flashMessage);
     // Xóa flash message khỏi session
     delete req.session.flash;
 
     res.render('pages/login', { layout: false, flashMessage });
-
 })
-  .post('/login' , validate.validateLogin() ,userController.login)
+//   .post('/login' , validate.validateLogin() ,userController.login)
   .post('/signup' , validate.validateSignup() ,userController.signup)
   .post('/logout', authentication,  userController.logout)
   .get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }))
@@ -40,31 +37,43 @@ router.get('/login', function (req, res) {
     // res.cookie("remember", token, { maxAge: 30 * 24 * 60 * 60 * 1000 });
     res.redirect('/home');
 });
-  // quên mk
-router.get('/forgot-password', function (req, res) {
+
+router.get('/login/verify-otp', async (req, res) => {
     const flashMessage = req.session.flash;
     if(flashMessage)
     {
         console.log(flashMessage);
     }
     delete req.session.flash;
-
-    res.render('pages/forgot-password', { layout: false, flashMessage }); 
+    res.render('pages/login', { layout: false, flashMessage });
 });
 
-router.get('/reset-password/:token', async (req, res) => {
-    const flashMessage = req.session.flash;
-    if(flashMessage)
-    {
-        console.log(flashMessage);
-    }
-    delete req.session.flash;
-    res.render('pages/reset-password', { token: req.params.token, layout: false, flashMessage });
-});
+router.post('/login', userController.sendOTP_func)
+router.post('/login/verify-otp', userController.verify_OTP)
 
-router.post('/forgot-password', userController.forgotPassword)
-router.post('/reset-password/:token', userController.resetPassword)
+// router.get('/forgot-password', function (req, res) {
+//     const flashMessage = req.session.flash;
+//     if(flashMessage)
+//     {
+//         console.log(flashMessage);
+//     }
+//     delete req.session.flash;
 
+//     res.render('pages/forgot-password', { layout: false, flashMessage }); 
+// });
+
+// router.get('/reset-password/:token', async (req, res) => {
+//     const flashMessage = req.session.flash;
+//     if(flashMessage)
+//     {
+//         console.log(flashMessage);
+//     }
+//     delete req.session.flash;
+//     res.render('pages/reset-password', { token: req.params.token, layout: false, flashMessage });
+// });
+
+// router.post('/forgot-password', userController.forgotPassword)
+// router.post('/reset-password/:token', userController.resetPassword)
 
 module.exports = router;
 

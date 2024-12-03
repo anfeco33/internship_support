@@ -7,20 +7,32 @@
     <script src="https://kit.fontawesome.com/64d58efce2.js" crossorigin="anonymous"></script>
     <%- include('../partials/css-library') %>
     <link rel="stylesheet" href="../../css/login.css" />
-    <title>EduSphere - Login</title>
-    <link rel="icon" type="image/svg+xml" href="../../images/logo.svg">
+    <title>Welcome to InternChoice</title>
+    <link rel="icon" type="image/svg+xml" href="../../images/logo0.png" />
 </head>
 
 <body>
     <div class="container login_page">
         <div class="forms-container">
             <div class="signin-signup">
-                <form class="sign-in-form" method="POST">
+
+
+                <!-- <form class="sign-in-form" method="POST">
                     <h2 class="title">Sign in</h2>
-                    <div class="input-field">
-                        <i class="fas fa-user"></i>
-                        <input type="text" placeholder="Username" name="username" id="username" />
+                    <p class="social-text">Student and company can sign in with social platforms</p>
+                    <div class="social-media">
+
+                        <a href="/auth/google" class="social-icon">
+                            <i class="fab fa-google"></i>
+                        </a>
+
                     </div>
+
+                    <div class="input-field">
+                        <i class="fas fa-envelope"></i>
+                        <input type="text" placeholder="Email" name="otp_email" id="otp_email" />
+                    </div>
+
                     <div class="input-field">
                         <i class="fas fa-lock"></i>
                         <input type="password" placeholder="Password" name="password" id="password" />
@@ -30,15 +42,32 @@
                         <a href="/forgot-password" id="forgot-password" class="forgot-password" style="color: black;">Click here!</a>
                     </div>
                     <input type="submit" value="Login" class="btn solid"/>
-                    <p class="social-text">Or Student can sign in with social platforms</p>
-                    <div class="social-media">
+                </form> -->
 
+                <form class="sign-in-form" id="login-form" method="POST">
+                    <h2 class="title">Sign in or Sign up</h2>
+                    <p class="social-text">Sign up for free or log in to use the features on our website!</p>
+                    <div class="social-media">
                         <a href="/auth/google" class="social-icon">
                             <i class="fab fa-google"></i>
+
                         </a>
-
+                        Signin
+                    
                     </div>
-
+                    <div class="input-field">
+                        <i class="fas fa-envelope"></i>
+                        <input type="text" placeholder="Email" name="otp_email" id="otp_email" /> 
+                    </div>
+                    <div class="input-field" id="otp-field" style="display: none;">
+                        <i class="fas fa-key" style="padding-left: 20px; padding-right: 20px;"></i>
+                        <input type="text" placeholder="Enter OTP" name="otp_code" id="otp_code" />
+                    </div>
+                    <div class="input-field" id="admin-password-field" style="display: none;">
+                        <i class="fas fa-lock" style="padding-left: 20px; padding-right: 20px;"></i>
+                        <input type="password" placeholder="Password" name="password" id="admin_password" />
+                    </div>
+                    <button type="submit" class="btn solid" id="send-otp-btn">Continue</button>
                 </form>
 
                 <form class="sign-up-form" method="POST">

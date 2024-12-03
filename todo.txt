@@ -1,5 +1,11 @@
 Chỉnh ở phần main cho web client
 làm đơn giản chú trọng phần tính năng trước
 
-TODO: SEARCH + Chỉnh giao diện 
-
+TODO: Chỉnh giao diện 
+model:
+User
+Company
+Review
+Job
+Comment
+Blog

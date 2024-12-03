@@ -8,7 +8,6 @@ const adminRoute = require("./admin.route"),
 const connect = require("../config/connection");
 var { authentication, isAdmin } = require('../middleware/authentication');
 const mailer = require('../utils/mailer')
-const userControllers = require('../controllers/user.controllers');
 
 //TODO: để giữ dark mode dùng ajax lưu state và gắn class .dark cho body
 
@@ -23,10 +22,11 @@ const router = (app) => {
   //TODO: sửa lại để check khi user click verify (gợi ý : check từng middleware) 
   app.use("/admin", authentication, isAdmin, adminRoute);
   app.use('/home', authentication, userRoute);
+  app.use('/home', userRoute);
   // app.get('/verify', userControllers.verifyAccount);
   app.use('/' , authentication , profileRoute);
   app.use('/' , authentication , fileRoute);
-  app.use('/', authentication, paymentRoute);
+  // app.use('/', authentication, paymentRoute);
 
 };
 

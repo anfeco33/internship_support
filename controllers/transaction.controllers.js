@@ -1,7 +1,9 @@
 const Transaction = require('../models/transactions');
-const Course = require('../models/courses');
+const Course = require('../models/companies');
 const User = require('../models/users');
 const { validationResult } = require('express-validator');
+
+// sửa course thành companies
 
 class TransactionController {
   async get_list_transaction() {

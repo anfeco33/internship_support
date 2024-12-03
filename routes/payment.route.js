@@ -3,7 +3,7 @@ const router = express.Router();
 const paymentController = require('../controllers/payment.controllers');
 const userController = require('../controllers/user.controllers');
 var { authentication } = require('../middleware/authentication');
-const courseController = require('../controllers/course.controllers');
+const courseController = require('../controllers/business.controllers');
 const User = require('../models/users');
 
 var path = require('path');

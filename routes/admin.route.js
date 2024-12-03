@@ -4,7 +4,7 @@ const User = require('../models/users');
 const Review = require('../models/reviews');
 const userControllers = require('../controllers/user.controllers');
 const statisticControllers = require('../controllers/statistic.controllers');
-const courseController = require('../controllers/course.controllers');
+const businessController = require('../controllers/business.controllers');
 const transactionController = require('../controllers/transaction.controllers');
 
 
@@ -22,7 +22,6 @@ router.get('/', function (req, res) {
   res.redirect('/admin/student');
 })
   //TODO: sửa lại get staff hiển thị toàn bộ user trong database
-  //FOR STAFF CONTROLLER
   .get('/student', async function (req, res, next) {
     const partial = 'partials/student_manager';
     const layout = 'layouts/main';
@@ -45,7 +44,6 @@ router.get('/', function (req, res) {
       listcompany: await userControllers.getlistcompany(),
       // feature: req.session.admin_feature,
     }
-    // console.log(req.page_data.listproduct)
     await userControllers.getpage(req , res, next);
   })
   .get('/course', async function (req, res, next) {
@@ -54,7 +52,7 @@ router.get('/', function (req, res) {
     req.partial_path = partial
     req.layout_path = layout
     req.page_data = {
-      listcourse: await courseController.get_list_course(),
+      listcourse: await businessController.get_list_course(),
     }
     await userControllers.getpage(req , res, next);
   })
@@ -74,7 +72,7 @@ router.get('/', function (req, res) {
     req.layout_path = layout
 
     req.page_data = {
-      course_detail: await courseController.getCourse(req.params.courseId),
+      course_detail: await businessController.getCourse(req.params.courseId),
       hasBought: hasBought,
       hasAddToCart: hasAddToCart,
       hasReviewed: hasReviewed,
@@ -83,7 +81,7 @@ router.get('/', function (req, res) {
     // console.log(req.page_data.account_details)
     await userControllers.getpage(req, res, next);
   })
-  .delete('/course/:courseId', courseController.delete_course)
+  //.delete('/course/:courseId', businessController.delete_course)
   .get('/transaction', async function (req, res, next) {
     const partial = 'partials/transaction';
     const layout = 'layouts/main';

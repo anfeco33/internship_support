@@ -25,7 +25,6 @@ const sidebar = document.querySelector(".sidebar"),
 
   // const curr_page = document.querySelector('.home-section');
 
-  // open_course_card = document.querySelector(".course"),
 
   // order = document.querySelector(".order_card"),
 
@@ -172,9 +171,6 @@ profile.addEventListener('click', function () {
 });
 
 
-
-
-
 // Lắng nghe sự kiện click của nút "Có"
 log_out.addEventListener('click', function () {
   // Gửi yêu cầu đăng xuất đến máy chủ
@@ -276,19 +272,17 @@ if (offcanvasElement) {
 
 function menuBtnChange() {
   if (sidebar.classList.contains("open")) {
-    closeBtn.classList.replace("bx-menu", "bx-menu-alt-right");//replacing the iocns class
+    closeBtn.classList.replace("bx-menu", "bx-menu-alt-right");//replacing the icon class
   } else {
-    closeBtn.classList.replace("bx-menu-alt-right", "bx-menu");//replacing the iocns class
+    closeBtn.classList.replace("bx-menu-alt-right", "bx-menu");//replacing the icon class
   }
 }
 
 //Admin page redirect
 const student_manager = document.querySelector(".Student"),
   company_manager = document.querySelector(".Company"),
-  course_manager = document.querySelector(".CourseManager"),
   transaction = document.querySelector(".Transaction"),
   statistical = document.querySelector(".Statistical");
-
 
 if (body) {
   if (student_manager) {
@@ -301,12 +295,6 @@ if (body) {
     company_manager.addEventListener('click', function () {
       console.log('company manager page');
       window.location.href = "/admin/company"
-    });
-  }
-  if (course_manager) {
-    course_manager.addEventListener('click', function () {
-      console.log('course manager page');
-      window.location.href = "/admin/course"
     });
   }
   if (transaction) {
@@ -331,17 +319,15 @@ if (body) {
 
 // TODO important
 //Student and company page redirect
-const course_page = document.querySelector(".Course"),
+const student_homepage = document.querySelector(".Student_Homepage"),
   subscribed_page = document.querySelector(".Subscribed"),
   exercise_page = document.querySelector(".Exercise");
 
 
 if (body) {
-  if (course_page) {
-    course_page.addEventListener('click', function () {
-      console.log('course page');
-      window.location.href = "/home/course"
-
+  if (student_homepage) {
+    student_homepage.addEventListener('click', function () {
+      window.location.href = "/home/business"
     });
   }
 
@@ -702,7 +688,7 @@ function deletecourse(role, course_name, id) {
     end_point = "/admin/course/";
   }
   if(role =="company"){
-    end_point = "/home/course/";
+    end_point = "/home/business/";
   }
 
 }

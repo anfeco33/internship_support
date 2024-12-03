@@ -35,7 +35,7 @@ input {
   top: 50%;
   transform: translate(-50%, -50%);
   left: 75%;
-  width: 50%;
+  width: 100%;
   transition: 1s 0.7s ease-in-out;
   display: grid;
   grid-template-columns: 1fr;
@@ -90,6 +90,11 @@ form.sign-in-form {
   /* Khoảng cách giữa radio button và nhãn */
 }
 
+#email-error {
+  font-size: 14px;
+  margin-top: 5px;
+  display: none; /* Ẩn lỗi mặc định */
+}
 
 .input-field i {
   text-align: center;
@@ -122,6 +127,7 @@ form.sign-in-form {
 .social-media {
   display: flex;
   justify-content: center;
+  background-color: #04befe;
 }
 
 .social-icon {
@@ -290,7 +296,7 @@ form.sign-in-form {
   }
 
   .signin-signup {
-    width: 100%;
+    /* width: 50%; */
     top: 95%;
     transform: translate(-50%, -100%);
     transition: 1s 0.8s ease-in-out;
