@@ -66,11 +66,9 @@ class UserController {
           await defaultAdmin.save();
           resolve(); // Tài khoản mặc định đã được tạo thành công
         } else {
-          // console.log('Tài khoản admin đã tồn tại.');
           resolve(); // Tài khoản admin đã tồn tại
         }
       } catch (error) {
-        // console.error('Lỗi khi tạo tài khoản admin mặc định:', error);
         reject(error); // Xảy ra lỗi khi tạo tài khoản
       }
     });
@@ -78,7 +76,6 @@ class UserController {
 
   async login(req, res, next) {
    // async sendOTP_func(req, res, next) {
-    // TODO: thêm xử lý đăng nhập khi đăng ký bên ngoài 
     // trường hợp không phải admin tạo
     console.log("LOGIN : ")
     try {
@@ -270,18 +267,29 @@ class UserController {
     }
   }
 
-
-
   async getpage(req, res, next) {
     console.log("get page : " + req.partial_path)
+    console.log("Session in getpage:", req.session);
     try {
       const partial = req.partial_path
       const layout = req.layout_path
+      console.log("req.usernek: ", req.user)
+      console.log("req.session.accountnek: ", req.session.account)
+      if (!req.session.loggedIn) {
+        req.session.flash = {
+            type: 'warning',
+            message: 'Sorry! You need to be logged in to access this page.'
+        };
+        return res.redirect("/login");
+    }
 
-      // console.log(partial, layout);
-      // console.log(req.session.account)
-      // const verifyaccess = await this.verifyAccess(req.session.account);
-      const account = await this.getAccount(req.session.account)
+    // const accountID = req.user._id;
+    const accountID = req.session.account;
+    console.log("Authenticated user ID:", accountID);
+
+    const account = await this.getAccount(accountID);
+
+     // const account = await this.getAccount(req.session.account)
       if (account.lock) {
         var state = { status: 'warning', message: 'Account has been locked' };
         req.session.flash = {
@@ -292,7 +300,9 @@ class UserController {
         res.redirect("/login")
       }
       else{
-        const sidebar = req.session.access;
+        // const sidebar = req.session.access;
+        const sidebar = account.access;
+        console.log("sidebary: ", sidebar)
 
         //TODO: chỗ này tùy chỉnh tùy theo page
         const data_render = req.page_data ? req.page_data : "";
@@ -314,7 +324,7 @@ class UserController {
   }
 
   async getAccount(accountID) {
-    console.log("curr account : " + accountID)
+    console.log("curr account 6: " + accountID)
     try {
       const find = await User.findById(accountID);
       // console.log(find)
@@ -418,7 +428,7 @@ class UserController {
         const find = await User.findById(req.session.account);
         if (find) {
           find.fullName = fullname;
-          await find.save(); // Lưu thay đổi
+          await find.save(); 
           req.session.flash = {
             type: 'success',
             intro: 'Change fullname',
@@ -546,292 +556,547 @@ class UserController {
     }
   }
 
-  async logout(req, res) {
-    console.log("LOGOUT : ")
-    try {
-      if (req.session.loggedIn) {
-        req.session.loggedIn = false;
-        var state = { status: 'success', message: 'Logout successful' };
+  logout = async (req, res, next) => {
+      try {
+          // await req.logout();
+          req.logout((err) => {
+            if (err) {
+                console.error("Error during logout:", err);
+                return res.status(500).json({
+                    flashMessage: {
+                        type: 'error',
+                        message: 'An error occurred, please log in again'
+                    }
+                });
+            }
+
+          // Destroy the session
+          req.session.destroy((err) => {
+              if (err) {
+                  console.error("Error destroying session during logout:", err);
+                  return res.status(500).json({
+                      flashMessage: {
+                          type: 'error',
+                          message: 'An error occurred, please log in again' 
+                      }
+                  });
+              }
+
+              // Clear the session cookie
+              res.clearCookie('connect.sid', { path: '/' });
+              return res.json({
+                  flashMessage: {
+                      type: 'success',
+                      message: 'Logout successful'
+                  }
+              });
+          });
+      });
+      } catch (err) {
+          console.error("Error during logout:", err);
+          return res.status(500).json({
+              flashMessage: {
+                  type: 'error',
+                  message: 'An error occurred, please log in again'
+              }
+          });
       }
-      else {
-        var state = { status: 'warning', message: 'Có lỗi xảy ra hãy đăng nhập lại' };
-      }
-
-      req.session.flash = {
-        type: state.status,
-        intro: 'logout feature',
-        message: state.message,
-      };
-      var goto = "/login"
-      var flashMessage = req.session.flash;
-      // console.log(flashMessage);
-      // Trả về phản hồi thành công
-      return res.status(200).json({ flashMessage: flashMessage, redirect: goto });
-      //   var state = { status: 'warning', message: err_msg };
-
-
-
-    } catch (error) {
-
-      next(error);
-    }
   }
 
-  async sendOTP_func(req, res, next) {
-    console.log("email input SEND OTP : ", req.body.email)
- 
-    // console.log(req.body);
-    if (!validate.validateEmail(req.body.email)) {
-      return res.status(400).json({
-        status: 'warning',
-        message: 'Invalid email. Please enter a valid email address.'
-      });
-    }
+  // async logout(req, res) {
+  //   console.log("LOGOUT : ")
+  //   try {
+  //     if (req.session.loggedIn) {
+  //       req.session.loggedIn = false;
+  //       var state = { status: 'success', message: 'Logout successful' };
+  //     }
+  //     else {
+  //       var state = { status: 'warning', message: 'Có lỗi xảy ra hãy đăng nhập lại' };
+  //     }
 
-    const user = await User.findOne({ email: req.body.email })
-    if (!user) {
-        return res.status(400).json({
-          status: 'warning',
-          message: 'User not found with this email!',
-      });
-    }
+  //     req.session.flash = {
+  //       type: state.status,
+  //       intro: 'logout feature',
+  //       message: state.message,
+  //     };
+  //     var goto = "/login"
+  //     var flashMessage = req.session.flash;
+  //     return res.status(200).json({ flashMessage: flashMessage, redirect: goto });
+  //   } catch (error) {
+  //     next(error);
+  //   }
+  // }
 
-    // verify for admin
-    if (user.role === 'admin') {
-      return res.status(200).json({
-        status: 'requirePassword',
-        message: 'Admin account detected. Please enter your password.'
-      });
-    } //end admin
+  // todo: create new acc if not created => show entering fullname
+  // and distinguish between student and company account
+  
+  // async sendOTP_func(req, res, next) {
+  //   console.log("email input SEND OTP : ", req.body.email);
+  //       // console.log(req.body);
+  //   if (!validate.validateEmail(req.body.email)) {
+  //     return res.status(400).json({
+  //       status: 'warning',
+  //       message: 'Invalid email. Please enter a valid email address.'
+  //     });
+  //   }
 
-     // Generate OTP for student or company
-    const otp = user.createOTP();
-    await user.save({ validateBeforeSave: false})
+  //   const user = await User.findOne({ email: req.body.email })
+  //   if (!user) {
+  //       return res.status(400).json({
+  //         status: 'warning',
+  //         message: 'User not found with this email!',
+  //     });
+  //   }
 
-    const message = `Your OTP code is: ${otp}\n\nThis code is valid for 10 minutes.`;
+  //   // verify for admin
+  //   if (user.role === 'admin') {
+  //     return res.status(200).json({
+  //       status: 'requirePassword',
+  //       message: 'Admin account detected. Please enter your password.'
+  //     });
+  //   } //end admin
+
+  //    // Generate OTP for student or company
+  //   const otp = user.createOTP();
+  //   await user.save({ validateBeforeSave: false})
+
+  //   const message = `Your OTP code is: ${otp}\n\nThis code is valid for 10 minutes.`;
       
-    try {
-      await mailer.sendMailForOTP({
-        email: user.email,
-        subject: 'InternChoice: Your Login OTP (valid for 10 min)',
-        message: message
-      })
+  //   try {
+  //     await mailer.sendMailForOTP({
+  //       email: user.email,
+  //       subject: 'InternChoice: Your Login OTP (valid for 10 min)',
+  //       message: message
+  //     })
 
-      req.session.flash = {
-        type: 'success',
-        message: 'OTP has been sent to your email! Please check your email to login!'
+  //     req.session.flash = {
+  //       type: 'success',
+  //       message: 'OTP has been sent to your email! Please check your email to login!'
+  //     }
+
+  //     return res.status(200).json({
+  //       status: 'success',
+  //       message: 'OTP has been sent to your email! Please check your email to login.'
+  //   });
+  //   } catch (err) {
+  //       user.otp = undefined;
+  //       user.otpExpires = undefined;
+  //       await user.save({ validateBeforeSave: false });
+
+  //       console.error('Error during sending OTP:', err);
+
+  //       return res.status(500).json({
+  //           status: 'error',
+  //           message: 'There was an error while sending the email. Try again later!'
+  //       });
+  //   }
+  // }
+
+  async sendOTP_func(req, res, next) {
+      console.log("Email input SEND OTP:", req.body.email);
+
+      if (!validate.validateEmail(req.body.email)) {
+          return res.status(400).json({
+              status: 'warning',
+              message: 'Invalid email. Please enter a valid email address.'
+          });
       }
 
-      return res.status(200).json({
-        status: 'success',
-        message: 'OTP has been sent to your email! Please check your email to login.'
-    });
-    } catch (err) {
-        user.otp = undefined;
-        user.otpExpires = undefined;
-        await user.save({ validateBeforeSave: false });
+      let user = await User.findOne({ email: req.body.email });
 
-        console.error('Error during sending OTP:', err);
+      if (!user) {
+          // New user registration
+          const email = req.body.email;
+          const domain = email.split('@')[1];
+          const isStudent = domain.endsWith('.edu.vn');
+          const role = isStudent ? 'student' : 'company';
+          const access = isStudent ? student_feature_list : company_feature_list;
+          let profilePicture = "";
+          const currentTime = moment().format("HH:mm | DD/MM/YYYY");
 
-        return res.status(500).json({
-            status: 'error',
-            message: 'There was an error while sending the email. Try again later!'
-        });
-    }
+          if(access == student_feature_list){
+            profilePicture = '../../images/student_default_avatar.png';
+          }
+          if(access == company_feature_list){
+            profilePicture = '../../images/company_default_avatar.png';
+          }
+
+          // Create new user
+          user = new User({
+              email: email,
+              role: role,
+              access: access,
+              fullName: '', // Will be set during OTP verification
+              profilePicture: profilePicture,
+              createdAt: currentTime,
+              lastLogin: currentTime,
+              lock: false,
+          });
+
+          // Generate OTP
+          const otp = user.createOTP();
+          await user.save({ validateBeforeSave: false });
+
+          const message = `Your OTP code is: ${otp}\n\nThis code is valid for 10 minutes.`;
+
+          try {
+              await mailer.sendMailForOTP({
+                  email: user.email,
+                  subject: 'Your Registration OTP (valid for 10 min)',
+                  message: message
+              });
+
+              return res.status(200).json({
+                  status: 'newUser',
+                  message: 'OTP has been sent to your email! Please check your email to register.'
+              });
+          } catch (err) {
+              user.otp = undefined;
+              user.otpExpires = undefined;
+              await user.save({ validateBeforeSave: false });
+
+              console.error('Error during sending OTP:', err);
+
+              return res.status(500).json({
+                  status: 'error',
+                  message: 'There was an error while sending the email. Try again later!'
+              });
+          }
+      }
+
+      // Verify for admin
+      if (user.role === 'admin') {
+          return res.status(200).json({
+              status: 'requirePassword',
+              message: 'Admin account detected. Please enter your password.'
+          });
+      }
+
+      // Generate OTP for existing user
+      const otp = user.createOTP();
+      await user.save({ validateBeforeSave: false });
+
+      const message = `Your OTP code is: ${otp}\n\nThis code is valid for 10 minutes.`;
+
+      try {
+          await mailer.sendMailForOTP({
+              email: user.email,
+              subject: 'Your Login OTP (valid for 10 min)',
+              message: message
+          });
+
+          return res.status(200).json({
+              status: 'success',
+              message: 'OTP has been sent to your email! Please check your email to login.'
+          });
+      } catch (err) {
+          user.otp = undefined;
+          user.otpExpires = undefined;
+          await user.save({ validateBeforeSave: false });
+
+          console.error('Error during sending OTP:', err);
+
+          return res.status(500).json({
+              status: 'error',
+              message: 'There was an error while sending the email. Try again later!'
+          });
+      }
   }
 
   async verify_OTP(req, res, next) {
-    console.log("VERIFying : ")
-    const { email, otp, password } = req.body;
+      console.log("VerifYING...");
+      const { email, otp, password, fullName } = req.body;
 
-    try {
-        const user = await User.findOne({ email });
+      try {
+          let user = await User.findOne({ email });
 
-        if (!user) {
-            return res.status(400).json({
-                status: 'error',
-                message: 'User not found with this email!'
-            });
-        }
+          if (!user) {
+              return res.status(400).json({
+                  status: 'error',
+                  message: 'User not found with this email!'
+              });
+          }
 
-        // Xử lý xác thực OTP
-        if (otp) {
-            if (!user.otp || user.otpExpires < Date.now()) {
-                return res.status(400).json({
+          // Handle OTP verification
+          if (otp) {
+              if (!user.otp || user.otpExpires < Date.now()) {
+                  return res.status(400).json({
+                      status: 'error',
+                      message: 'OTP has expired. Please request a new one!'
+                  });
+              }
+
+              if (user.otp !== otp) {
+                  return res.status(400).json({
+                      status: 'error',
+                      message: 'Invalid OTP. Please try again!'
+                  });
+              }
+
+              // Valid OTP
+              user.otp = null;
+              user.otpExpires = null;
+
+              // For new user registration
+              if (!user.fullName && fullName) {
+                  user.fullName = fullName;
+                  // Access type is already set during user creation
+                  await user.save();
+              } else {
+                  // Existing user
+                  await user.save();
+              }
+
+              req.session.account = user._id.toString();
+              req.session.loggedIn = true;
+
+              req.session.save((err) => {
+                if (err) {
+                  console.error("Error saving session:", err);
+                  return res.status(500).json({
                     status: 'error',
-                    message: 'OTP has expired. Please request a new one!'
+                    message: 'Server error. Please try again later.'
+                  });
+                }
+        
+                return res.status(200).json({
+                  status: 'success',
+                  message: 'Login successful!',
+                  redirect: '/home'
                 });
-            }
+              });
+              return;
+          }
 
-            if (user.otp !== otp) {
-                return res.status(400).json({
-                    status: 'error',
-                    message: 'Invalid OTP. Please try again!'
-                });
-            }
+          // Handle password authentication for admin
+          if (password) {
+              const isPasswordValid = await bcrypt.compare(password, user.password);
+              if (!isPasswordValid) {
+                  return res.status(400).json({
+                      status: 'warning',
+                      message: 'Invalid password. Please try again!'
+                  });
+              }
 
-            // OTP hợp lệ
-            user.otp = null; // Xóa OTP sau khi sử dụng
-            user.otpExpires = null;
-            await user.save();
+              req.session.account = user._id.toString();
+              req.session.role = user.role;
+              req.session.loggedIn = true;
+              req.session.isAdmin = true;
+              req.session.access = user.access;
 
-            req.session.account = user._id.toString();
-            req.session.role = user.role;
-            req.session.loggedIn = true;
+              return res.status(200).json({
+                  status: 'success',
+                  message: 'Admin login successful!',
+                  redirect: '/admin/company'
+              });
+          }
 
-            return res.status(200).json({
-                status: 'success',
-                message: 'Login successful!',
-                redirect: '/home'
-            });
-        }
-
-        // Xử lý xác thực mật khẩu
-        if (password) {
-            const isPasswordValid = await bcrypt.compare(password, user.password);
-            if (!isPasswordValid) {
-                return res.status(400).json({
-                    status: 'warning',
-                    message: 'Invalid password. Please try again!'
-                });
-            }
-
-            req.session.account = user._id.toString();
-            req.session.role = user.role;
-            req.session.loggedIn = true;
-            req.session.isAdmin = true;
-            req.session.access = user.access
-            
-            return res.status(200).json({
-                status: 'success',
-                message: 'Admin login successful!',
-                redirect: '/admin/company'
-            });
-        }
-
-        // Nếu cả OTP và mật khẩu đều không có
-        return res.status(400).json({
-            status: 'error',
-            message: 'Invalid request. Please provide OTP or password.'
-        });
-    } catch (error) {
-        console.error('Error verifying OTP or password:', error);
-        return res.status(500).json({
-            status: 'error',
-            message: 'Server error. Please try again later.'
-        });
-    }
+          // If neither OTP nor password is provided
+          return res.status(400).json({
+              status: 'error',
+              message: 'Invalid request. Please provide OTP or password.'
+          });
+      } catch (error) {
+          console.error('Error verifying OTP or password:', error);
+          return res.status(500).json({
+              status: 'error',
+              message: 'Server error. Please try again later.'
+          });
+      }
   }
 
-  forgotPassword = async(req, res, next) => {
-    if (!validate.validateEmail(req.body.email)) {
-      req.session.flash = {
-        type: 'warning',
-        intro: 'Invalid email format',
-        message: 'Please enter a valid email address.',
-      };
-      return res.redirect("/forgot-password");
-    }
+  // async verify_OTP(req, res, next) {
+  //   console.log("VERIFying : ")
+  //   const { email, otp, password } = req.body;
 
-    const user = await User.findOne({ email: req.body.email })
-    if (!user || user.role === 'admin') {
-      var state = { status: 'warning', message: 'User not found with this email!' };
-      req.session.flash = {
-        type: state.status,
-        intro: 'forgotpass feature',
-        message: state.message,
-      }
-      return res.redirect("/forgot-password")
-      // return res.status(404).json({
-      //   status: 'warning',
-      //   message: 'User not found with this email'
-      // });
-    }
-    const resetToken = user.createResetPasswordToken()
+  //   try {
+  //       const user = await User.findOne({ email });
 
-    await user.save({ validateBeforeSave: false})
+  //       if (!user) {
+  //           return res.status(400).json({
+  //               status: 'error',
+  //               message: 'User not found with this email!'
+  //           });
+  //       }
 
-    const resetUrl = `${req.protocol}://${req.get('host')}/reset-password/${resetToken}`
-    const message = `Forgot your password ? Paste this link to your browser\n\n`+
-                    `${resetUrl}\n\n` +
-                    `If you didn't forget your password, please ignore this email!\n`
+  //       // Xử lý xác thực OTP
+  //       if (otp) {
+  //           if (!user.otp || user.otpExpires < Date.now()) {
+  //               return res.status(400).json({
+  //                   status: 'error',
+  //                   message: 'OTP has expired. Please request a new one!'
+  //               });
+  //           }
+
+  //           if (user.otp !== otp) {
+  //               return res.status(400).json({
+  //                   status: 'error',
+  //                   message: 'Invalid OTP. Please try again!'
+  //               });
+  //           }
+
+  //           // OTP hợp lệ
+  //           user.otp = null; // Xóa OTP sau khi sử dụng
+  //           user.otpExpires = null;
+  //           await user.save();
+
+  //           req.session.account = user._id.toString();
+  //           req.session.role = user.role;
+  //           req.session.loggedIn = true;
+
+  //           return res.status(200).json({
+  //               status: 'success',
+  //               message: 'Login successful!',
+  //               redirect: '/home'
+  //           });
+  //       }
+
+  //       // Xử lý xác thực mật khẩu
+  //       if (password) {
+  //           const isPasswordValid = await bcrypt.compare(password, user.password);
+  //           if (!isPasswordValid) {
+  //               return res.status(400).json({
+  //                   status: 'warning',
+  //                   message: 'Invalid password. Please try again!'
+  //               });
+  //           }
+
+  //           req.session.account = user._id.toString();
+  //           req.session.role = user.role;
+  //           req.session.loggedIn = true;
+  //           req.session.isAdmin = true;
+  //           req.session.access = user.access
+
+  //           return res.status(200).json({
+  //               status: 'success',
+  //               message: 'Admin login successful!',
+  //               redirect: '/admin/company'
+  //           });
+  //       }
+
+  //       // Nếu cả OTP và mật khẩu đều không có
+  //       return res.status(400).json({
+  //           status: 'error',
+  //           message: 'Invalid request. Please provide OTP or password.'
+  //       });
+  //   } catch (error) {
+  //       console.error('Error verifying OTP or password:', error);
+  //       return res.status(500).json({
+  //           status: 'error',
+  //           message: 'Server error. Please try again later.'
+  //       });
+  //   }
+  // }
+
+  // forgotPassword = async(req, res, next) => {
+  //   if (!validate.validateEmail(req.body.email)) {
+  //     req.session.flash = {
+  //       type: 'warning',
+  //       intro: 'Invalid email format',
+  //       message: 'Please enter a valid email address.',
+  //     };
+  //     return res.redirect("/forgot-password");
+  //   }
+
+  //   const user = await User.findOne({ email: req.body.email })
+  //   if (!user || user.role === 'admin') {
+  //     var state = { status: 'warning', message: 'User not found with this email!' };
+  //     req.session.flash = {
+  //       type: state.status,
+  //       intro: 'forgotpass feature',
+  //       message: state.message,
+  //     }
+  //     return res.redirect("/forgot-password")
+  //     // return res.status(404).json({
+  //     //   status: 'warning',
+  //     //   message: 'User not found with this email'
+  //     // });
+  //   }
+  //   const resetToken = user.createResetPasswordToken()
+
+  //   await user.save({ validateBeforeSave: false})
+
+  //   const resetUrl = `${req.protocol}://${req.get('host')}/reset-password/${resetToken}`
+  //   const message = `Forgot your password ? Paste this link to your browser\n\n`+
+  //                   `${resetUrl}\n\n` +
+  //                   `If you didn't forget your password, please ignore this email!\n`
     
-    try {
-      await mailer.sendMailResetPassword({
-        email: user.email,
-        subject: 'Your password reset token (valid for 10 min)',
-        message: message
-      })
+  //   try {
+  //     await mailer.sendMailResetPassword({
+  //       email: user.email,
+  //       subject: 'Your password reset token (valid for 10 min)',
+  //       message: message
+  //     })
 
-      req.session.flash = {
-        type: 'success',
-        message: 'Token has been sent to your email! Please check your email to reset password.'
-      }
-      return res.redirect("/forgot-password");
-    } catch (err) {
-      user.password_reset_token = undefined
-      user.password_reset_expires = undefined
-      user.save({ validateBeforeSave: false })
+  //     req.session.flash = {
+  //       type: 'success',
+  //       message: 'Token has been sent to your email! Please check your email to reset password.'
+  //     }
+  //     return res.redirect("/forgot-password");
+  //   } catch (err) {
+  //     user.password_reset_token = undefined
+  //     user.password_reset_expires = undefined
+  //     user.save({ validateBeforeSave: false })
 
-      console.error('Error during password reset process:', err);
-        // res.status(500).json({
-        //     status: 'error',
-        //     message: 'There was an error sending the email. Try again later!'
-        // });
-      var state = {
-        status: 'error',
-        message: 'There was an error while sending the email. Try again later!'
-      }
-      req.session.flash = {
-        type: state.status,
-        message: state.message
-      }
-      return res.redirect('redirect: "/forgot-password"');
-    }
-  }
+  //     console.error('Error during password reset process:', err);
+  //       // res.status(500).json({
+  //       //     status: 'error',
+  //       //     message: 'There was an error sending the email. Try again later!'
+  //       // });
+  //     var state = {
+  //       status: 'error',
+  //       message: 'There was an error while sending the email. Try again later!'
+  //     }
+  //     req.session.flash = {
+  //       type: state.status,
+  //       message: state.message
+  //     }
+  //     return res.redirect('redirect: "/forgot-password"');
+  //   }
+  // }
 
-  async resetPassword(req, res, next) {
-    const hashedToken = crypto.createHash('sha256').update(req.params.token).digest('hex');
-    console.log(hashedToken)
+  // async resetPassword(req, res, next) {
+  //   const hashedToken = crypto.createHash('sha256').update(req.params.token).digest('hex');
+  //   console.log(hashedToken)
 
-    const user = await User.findOne({
-      password_reset_token: hashedToken,
-      password_reset_expires: { $gt: Date.now() }
-    });
+  //   const user = await User.findOne({
+  //     password_reset_token: hashedToken,
+  //     password_reset_expires: { $gt: Date.now() }
+  //   });
   
-    if (!user) {
-      req.session.flash = {
-        type: 'warning',
-        message: 'Token is invalid or has expired. You can get a new one here!'
-      };
-      return res.redirect('/forgot-password');
-    }
-    // set new password
-    if (req.body.password !== req.body.confirmPassword) {
-      req.session.flash = {
-        type: 'warning',
-        message: 'Passwords do not match. Please try again!'
-      };
-      return res.redirect(`/reset-password/${req.params.token}`);
-    }
+  //   if (!user) {
+  //     req.session.flash = {
+  //       type: 'warning',
+  //       message: 'Token is invalid or has expired. You can get a new one here!'
+  //     };
+  //     return res.redirect('/forgot-password');
+  //   }
+  //   // set new password
+  //   if (req.body.password !== req.body.confirmPassword) {
+  //     req.session.flash = {
+  //       type: 'warning',
+  //       message: 'Passwords do not match. Please try again!'
+  //     };
+  //     return res.redirect(`/reset-password/${req.params.token}`);
+  //   }
 
-    user.password = await bcrypt.hash(req.body.password, parseInt(process.env.BCRYPT_SALT_ROUND));
-    user.password_reset_token = undefined
-    user.password_reset_expires = undefined
-    user.passwordChangedAt = Date.now()
-    await user.save()
+  //   user.password = await bcrypt.hash(req.body.password, parseInt(process.env.BCRYPT_SALT_ROUND));
+  //   user.password_reset_token = undefined
+  //   user.password_reset_expires = undefined
+  //   user.passwordChangedAt = Date.now()
+  //   await user.save()
 
-    // log the user in, send JWT
-    const loginToken = jwt.sign({ accountId: user._id.toString() }, process.env.JWT_SECRET, { expiresIn: '30d' });
-    res.cookie("remember", loginToken, { maxAge: 30 * 24 * 60 * 60 * 1000 })
+  //   // log the user in, send JWT
+  //   const loginToken = jwt.sign({ accountId: user._id.toString() }, process.env.JWT_SECRET, { expiresIn: '30d' });
+  //   res.cookie("remember", loginToken, { maxAge: 30 * 24 * 60 * 60 * 1000 })
 
-    req.session.flash = {
-      type: 'success',
-      message: 'Your password has been reset successfully. Please login with your new password.'
-    };
+  //   req.session.flash = {
+  //     type: 'success',
+  //     message: 'Your password has been reset successfully. Please login with your new password.'
+  //   };
   
-    return res.redirect('/login');
-  }
+  //   return res.redirect('/login');
+  // }
 }
 
 module.exports = new UserController();

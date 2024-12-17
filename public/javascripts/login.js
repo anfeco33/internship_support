@@ -1,24 +1,27 @@
 const sign_in_btn = document.querySelector("#sign-in-btn");
-const sign_up_btn = document.querySelector("#sign-up-btn");
+// const sign_up_btn = document.querySelector("#sign-up-btn");
 const container = document.querySelector(".login_page");
 
-sign_up_btn.addEventListener("click", () => {
-  container.classList.add("sign-up-mode");
-});
+// sign_up_btn.addEventListener("click", () => {
+//   container.classList.add("sign-up-mode");
+// });
 
-sign_in_btn.addEventListener("click", () => {
-  container.classList.remove("sign-up-mode");
-});
+// sign_in_btn.addEventListener("click", () => {
+//   container.classList.remove("sign-up-mode");
+// });
+const backIcon = document.getElementById('back-icon');
+const backButton = document.getElementById('back-button');
 
 
 const login_form = document.querySelector('.sign-in-form');
 
-const signup_form = document.querySelector('.sign-up-form');
+// const signup_form = document.querySelector('.sign-up-form');
 
 if (login_form) {
   const sendOtpButton = document.getElementById('send-otp-btn');
   const otpField = document.getElementById('otp-field');
   const passwordField = document.getElementById('admin-password-field');
+  const fullNameField = document.getElementById('fullName-field');
 
   login_form.addEventListener("submit", async (event) => {
       event.preventDefault();
@@ -26,6 +29,7 @@ if (login_form) {
       const emailInput = document.getElementById('otp_email').value.trim();
       const otpInput = document.getElementById('otp_code')?.value.trim();
       const passwordInput = document.getElementById('admin_password')?.value.trim();
+      const fullNameInput = document.getElementById('fullName')?.value.trim();
 
       if (sendOtpButton.textContent === 'Continue') {
           fetch('/login', {
@@ -38,22 +42,41 @@ if (login_form) {
               if (data.status === 'success') {
                   otpField.style.display = 'block';
                   sendOtpButton.textContent = 'Login';
+                  backIcon.style.display = 'block';
               } else if (data.status === 'requirePassword') {
                   passwordField.style.display = 'block';
                   sendOtpButton.textContent = 'Login';
+                  backIcon.style.display = 'block';
+              } else if (data.status === 'newUser') {
+                  fullNameField.style.display = 'block';
+                  otpField.style.display = 'block';
+                  sendOtpButton.textContent = 'Register';
+                  backIcon.style.display = 'block';
               } else {
                   showflashmessage(data.status, data.message);
               }
           })
           .catch(error => console.error('Error:', error));
-      } else if (sendOtpButton.textContent === 'Login') {
-            const requestBody = passwordInput
-                ? { email: emailInput, password: passwordInput }
-                : { email: emailInput, otp: otpInput };
-        
+      } else if (sendOtpButton.textContent === 'Login'|| sendOtpButton.textContent === 'Register') {
+            // const requestBody = passwordInput
+            //     ? { email: emailInput, password: passwordInput }
+            //     : { email: emailInput, otp: otpInput };
+            let requestBody = {};
+            if (passwordField.style.display === 'block') {
+                // Admin login
+                requestBody = { email: emailInput, password: passwordInput };
+            } else if (fullNameField.style.display === 'block') {
+                // New user registration
+                requestBody = { email: emailInput, otp: otpInput, fullName: fullNameInput };
+            } else {
+                // Regular user login with OTP
+                requestBody = { email: emailInput, otp: otpInput };
+            }
+
             fetch('/login/verify-otp', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
                 body: JSON.stringify(requestBody)
             })
             .then(response => response.json())
@@ -69,6 +92,12 @@ if (login_form) {
                 showflashmessage('error', 'Something went wrong. Please try again.');
             });
         }
+  });
+  backButton.addEventListener("click", () => {
+    otpField.style.display = 'none';
+    passwordField.style.display = 'none';
+    sendOtpButton.textContent = 'Continue';
+    backIcon.style.display = 'none';
   });
 } else {
   console.error('Login form not found');
@@ -112,52 +141,52 @@ if (login_form) {
 // }
 
 
-if (signup_form) {
-  signup_form.addEventListener("submit", (event) => {
-    event.preventDefault();
-    console.log("here");
+// if (signup_form) {
+//   signup_form.addEventListener("submit", (event) => {
+//     event.preventDefault();
+//     console.log("here");
 
-    const usname = document.getElementById('sign_username').value;
-    const email = document.getElementById('sign_email').value;
-    const pass = document.getElementById('sign_password').value;
-    const confirm_pass = document.getElementById('sign_confirmpassword').value;
-    if(confirm_pass != pass){
-      showflashmessage("warning", "Password and Confirm password do not match");
-    }else{
-      const accountTypeElement = document.querySelector('input[name="account_type"]:checked');
-      const accountType = accountTypeElement ? accountTypeElement.value : '';
-      const data = {
-        username: usname,
-        email: email,
-        password: pass,
-        accountType: accountType
-      };
-      console.log(data);
+//     const usname = document.getElementById('sign_username').value;
+//     const email = document.getElementById('sign_email').value;
+//     const pass = document.getElementById('sign_password').value;
+//     const confirm_pass = document.getElementById('sign_confirmpassword').value;
+//     if(confirm_pass != pass){
+//       showflashmessage("warning", "Password and Confirm password do not match");
+//     }else{
+//       const accountTypeElement = document.querySelector('input[name="account_type"]:checked');
+//       const accountType = accountTypeElement ? accountTypeElement.value : '';
+//       const data = {
+//         username: usname,
+//         email: email,
+//         password: pass,
+//         accountType: accountType
+//       };
+//       console.log(data);
   
-      fetch("/signup", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(data)
-      })
-        .then(response => response.json())
-        .then(data => {
-          console.log(data);
-          if (data.status === "success") {
-            window.location.href = data.redirect;
-          } 
-          showflashmessage(data.status, data.message);
-        })
-        .catch(function (error) {
-          console.error("Error:", error);
-        });
-    }
+//       fetch("/signup", {
+//         method: "POST",
+//         headers: {
+//           "Content-Type": "application/json"
+//         },
+//         body: JSON.stringify(data)
+//       })
+//         .then(response => response.json())
+//         .then(data => {
+//           console.log(data);
+//           if (data.status === "success") {
+//             window.location.href = data.redirect;
+//           } 
+//           showflashmessage(data.status, data.message);
+//         })
+//         .catch(function (error) {
+//           console.error("Error:", error);
+//         });
+//     }
     
-  });
-} else {
-  console.error("err");
-}
+//   });
+// } else {
+//   console.error("err");
+// }
 
 
 function showflashmessage(type, message) {

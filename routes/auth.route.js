@@ -29,14 +29,30 @@ router.get('/login', function (req, res) {
     res.render('pages/login', { layout: false, flashMessage });
 })
 //   .post('/login' , validate.validateLogin() ,userController.login)
-  .post('/signup' , validate.validateSignup() ,userController.signup)
+//   .post('/signup' , validate.validateSignup() ,userController.signup)
   .post('/logout', authentication,  userController.logout)
   .get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }))
-  .get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/login' }), (req, res) => {
-    // const token = jwt.sign({ accountId: req.user._id.toString() }, process.env.JWT_SECRET, { expiresIn: '30d' });
-    // res.cookie("remember", token, { maxAge: 30 * 24 * 60 * 60 * 1000 });
-    res.redirect('/home');
-});
+  .get('/auth/google/callback',
+    passport.authenticate('google', { failureRedirect: '/login' }),
+    (req, res) => {
+      console.log("Session after Google Login Callback:", req.session);
+  
+      req.session.account = req.user._id.toString();
+      req.session.loggedIn = true;
+    //   req.session.isAdmin = false;
+    //   req.session.role = req.user.role;
+    //   req.session.access = req.user.access;
+        
+        req.session.save((err) => {
+            if (err) {
+            console.error("Error saving session:", err);
+            return res.redirect('/login'); // Xử lý lỗi lưu session
+            }
+            // Redirect sau khi session được lưu
+            const redirectUrl = req.user.role === 'admin' ? '/admin/company' : '/home';
+            res.redirect(redirectUrl);
+        });
+  });
 
 router.get('/login/verify-otp', async (req, res) => {
     const flashMessage = req.session.flash;
@@ -50,30 +66,6 @@ router.get('/login/verify-otp', async (req, res) => {
 
 router.post('/login', userController.sendOTP_func)
 router.post('/login/verify-otp', userController.verify_OTP)
-
-// router.get('/forgot-password', function (req, res) {
-//     const flashMessage = req.session.flash;
-//     if(flashMessage)
-//     {
-//         console.log(flashMessage);
-//     }
-//     delete req.session.flash;
-
-//     res.render('pages/forgot-password', { layout: false, flashMessage }); 
-// });
-
-// router.get('/reset-password/:token', async (req, res) => {
-//     const flashMessage = req.session.flash;
-//     if(flashMessage)
-//     {
-//         console.log(flashMessage);
-//     }
-//     delete req.session.flash;
-//     res.render('pages/reset-password', { token: req.params.token, layout: false, flashMessage });
-// });
-
-// router.post('/forgot-password', userController.forgotPassword)
-// router.post('/reset-password/:token', userController.resetPassword)
 
 module.exports = router;
 

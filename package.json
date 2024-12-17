@@ -1,5 +1,5 @@
 {
-  "name": "project",
+  "name": "internship_support",
   "version": "1.0.1",
   "private": true,
   "main": "app.js",
@@ -9,6 +9,7 @@
   "dependencies": {
     "archiver": "^6.0.1",
     "bcrypt": "^5.1.1",
+    "connect-mongo": "^5.1.0",
     "cookie-parser": "~1.4.4",
     "debug": "~2.6.9",
     "dotenv": "^16.3.1",
@@ -35,7 +36,7 @@
     "unzipper": "^0.10.14"
   },
   "description": "POS website for phone store ",
-  "repository": "https://gitlab.duthu.net/S52100196/nodejs_02_finalproject_group33.git",
-  "author": "Guu",
+  "repository": "",
+  "author": "",
   "license": "TDTU organization"
 }

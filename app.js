@@ -4,6 +4,7 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 const session = require('express-session');
+const MongoStore = require('connect-mongo');
 const passport = require('passport');
 const expressLayouts = require('express-ejs-layouts');
 const app = express();
@@ -32,9 +33,6 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('layout', 'layouts/main'); // layout.ejs là tên main layout
 app.set('view engine', 'ejs');
 
-
-
-
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -42,13 +40,29 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.static(path.join(__dirname, 'uploads')));
 
+// app.use(session({
+//   secret:  process.env.SESSION_SECRET,
+//   //chỉ lưu nếu có sự thay đổi giá trị
+//   resave: false,
+//   //session chỉ được lưu lại khi nó đã được khởi tạo
+//   saveUninitialized: false,
+// }))
+
 app.use(session({
-  secret:  process.env.SESSION_SECRET,
-  //chỉ lưu nếu có sự thay đổi giá trị
+  secret: process.env.SESSION_SECRET,
   resave: false,
-  //session chỉ được lưu lại khi nó đã được khởi tạo
   saveUninitialized: false,
-}))
+  store: MongoStore.create({
+      mongoUrl: process.env.MONGODB_URI, 
+      collectionName: 'sessions'
+  }),
+  cookie: {
+      httpOnly: true,
+      secure: false, // Đặt true nếu dùng HTTPS
+      maxAge: 24 * 60 * 60 * 1000 // 1 ngày
+  }
+}));
+
 app.use(passport.initialize());
 app.use(passport.session());
 
