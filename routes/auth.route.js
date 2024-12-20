@@ -39,9 +39,10 @@ router.get('/login', function (req, res) {
   
       req.session.account = req.user._id.toString();
       req.session.loggedIn = true;
-    //   req.session.isAdmin = false;
-    //   req.session.role = req.user.role;
-    //   req.session.access = req.user.access;
+      
+      req.session.isAdmin = false;
+      req.session.role = req.user.role;
+      req.session.access = req.user.access;
         
         req.session.save((err) => {
             if (err) {

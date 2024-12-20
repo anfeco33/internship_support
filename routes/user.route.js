@@ -34,20 +34,25 @@ router.get('/', function (req, res) {
     const partial = 'partials/business';
     const layout = 'layouts/main';
 
-    // delete req.session.customer;
-    if (req.session.role == "company") {
-      // res.redirect('/home/course_create');
-      res.redirect('/home/business');
-    } else {
-      req.partial_path = partial
+    // if (req.session.role == "company") {
+    //   // res.redirect('/home/course_create');
+    //   res.redirect('/home/business');
+    // } else {
+    //   req.partial_path = partial
+    //   req.layout_path = layout
+
+    //   req.page_data = {
+    //     listcourse: await businessController.get_list_business(),
+    //   }
+    //   await userController.getpage(req, res, next);
+    // }
+    req.partial_path = partial
       req.layout_path = layout
 
       req.page_data = {
         listcourse: await businessController.get_list_business(),
       }
       await userController.getpage(req, res, next);
-    }
-
   })
   // .get('/course_create', async function (req, res, next) {
   //   const partial = 'partials/course_create';

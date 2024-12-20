@@ -40,14 +40,17 @@
     </nav>
 </header>
 
-<!-- //TODO: tối ưu và chỉnh lại -->
-<%- include('../partials/course_slide') %>
+<%- include('../partials/slide_board') %>
 
 <% if (data.listcourse) { %>
     <% var listcourse=data.listcourse %>
     <div class="table" id="table_product">
         <div class="container">
             <br>
+            <!-- top các công ty hỗ trợ thực tập tốt nhất-->
+            <h3 class="course-type">TOP COMPANIES THAT SUPPORT INTERNSHIPS</h3>
+                <!-- show top companies -->
+
             <h3 class="course-type"> BELOW ARE BUSINESSES THAT ARE LOOKING TO RECRUIT INTERNS</h3>
             <div class="row" id="course_row">
                 <% if (listcourse.length> 0) { %>

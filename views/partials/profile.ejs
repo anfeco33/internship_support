@@ -22,8 +22,11 @@
                         </div>
                         <a class="list-group-item list-group-item-action active" data-bs-toggle="tab"
                             href="#account">Account</a>
-                        <a class="list-group-item list-group-item-action" data-bs-toggle="tab"
+                        <% if (account.role === 'admin') { %>
+                            <a class="list-group-item list-group-item-action" data-bs-toggle="tab"
                             href="#password">Password</a>
+                        <% } %>
+                        
                         <a class="list-group-item list-group-item-action" data-bs-toggle="tab"
                             href="#completed-courses">Achievements</a>
                     </div>

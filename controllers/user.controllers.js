@@ -849,6 +849,8 @@ class UserController {
 
               req.session.account = user._id.toString();
               req.session.loggedIn = true;
+              req.session.role = user.role;
+              req.session.access = user.access;
 
               req.session.save((err) => {
                 if (err) {
