@@ -803,7 +803,7 @@ body.dark #searchInput {
 
 
 /* TODO bell notification */
-.home-section .fill_content .bell_icon {
+.home-section .fill_content .bell_icon, .update_profile_icon {
 
     /* margin-left: 30px; */
     text-align: center;
@@ -812,28 +812,23 @@ body.dark #searchInput {
 }
 
 .bell_icon {
+    margin-right: 5px;
+}
+
+.bell_icon, .update_profile_icon {
     color: var(--icon-light-color);
-    transition: color 0.3s ease; /* Hiệu ứng mượt khi đổi màu */
+    transition: color 0.3s ease;
 }
-
-.bell_icon:hover {
-    color: var(--text-light-color); 
+.bell_icon:hover, .update_profile_icon:hover {
+    color: #f5dabe
 }
-
-
 
 .home-section .fill_content .text {
-
     width: 100px;
     height: 150px;
     margin: 4px;
-    /* margin: 0;
-    padding: 0; */
-
     background-color: lightcoral;
-    /* border: 2px solid rgb(246, 255, 0); */
 }
-
 
 .sidebar.open {
     width: 250px;
@@ -1226,24 +1221,13 @@ section#product_page {
     text-align: center;
 }
 
-/* TODO USER ( student , trainer) */
-/* #TODO COURSE PAGE*/
-
-
-#table_product .course-type {
-    /* border: 2px solid red; */
+#table_product {
     margin-top: 25px;
     padding: 8px;
     padding-left: 0px;
     font-style: normal;
     font-weight: bold;
-    /* background-color: #CCD3CA;
-    border-radius: 0px 0px 7px 7px; */
-
 }
-
-
-
 
 .course-item .course-content {
 
@@ -2572,10 +2556,8 @@ body.dark {
         background-color: bisque;
 
     }
-    .home-section .fill_content .bell_icon {
+    .home-section .fill_content {
         color: var(--icon-light-color);
-    
-    
     }
     .home-section .fill_content #searchInput,
     .home-section .fill_content #seach_icon{
@@ -2609,40 +2591,30 @@ body.dark {
     margin-bottom: 20px;
 }
 
-/* Completed lecture display */
-.completed {
-    color: green;
-    font-weight: bold;
+/* trang update business */
+/* nếu chế độ tối thì chữ sáng */
+body.dark .update_business {
+    color: var(--text-light-color);
 }
 
-/* CERTIFICATE CSS */
-.certificate-container {
-    border: 20px solid tan;
-    width: 750px;
-    height: 563px;
-    display: table-cell;
-    vertical-align: middle;
-    color: black;
-    text-align: center;
+/* nếu chế độ sáng thì chữ tối */
+body.light .update_business {
+    color: var(--text-dark-color);
 }
-.certificate .logo {
-    color: tan;
+
+.center-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh; /* Full viewport height */
+    width: 100%; /* Full viewport width */
 }
-.certificate .marquee {
-    color: tan;
-    font-size: 48px;
-    margin: 20px;
+
+/* dòng pls update firsttime */
+.alert {
+    text-align: center; 
 }
-.certificate .assignment {
-    margin: 20px;
-}
-.certificate .person {
-    border-bottom: 2px solid black;
-    font-size: 32px;
-    font-style: italic;
-    margin: 20px auto;
-    width: 400px;
-}
-.certificate .reason {
-    margin: 20px;
+
+.text-danger {
+    color: red;
 }

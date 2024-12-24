@@ -4,6 +4,7 @@ const Section = require('../models/section');
 const Lecture = require('../models/lecture');
 const Review = require('../models/reviews');
 const Comment = require('../models/lecturecomments');
+const Business = require('../models/companies');
 const Exercise = require('../models/exercises');
 const Note = require('../models/note');
 const User = require('../models/users');
@@ -368,7 +369,7 @@ class BusinessController {
             retailPrice: parseInt(retailprice),
             inventory: inventory,
             category: category,
-            productPicture: "../images/default_product.png",
+            productPicture: "/images/default_product.png",
             barcode: "123"
           });
 
@@ -474,7 +475,6 @@ class BusinessController {
     }
 
   }
-
 
   // Thêm khóa học
   async addNewCourse(req, res, next) {
@@ -1082,5 +1082,152 @@ class BusinessController {
           res.json({ status: "warning", message: err.message })
       }
   }
+
+  async updateProfile(req, res, next) {
+    try {
+        const {
+            name,
+            industry,
+            size,
+            address,
+            website,
+            location,
+            profile,
+            contactEmail,
+            phoneNumber,
+            promotionVideo,
+        } = JSON.parse(req.body.businessProfile);
+
+        const representativeId = req.session.account;
+
+        const [lat, lng] = location ? location.split(',').map(Number) : [10.762622, 106.660172];
+        const geoLocation = {
+            type: 'Point',
+            coordinates: [lng, lat], // GeoJSON requires [lng, lat]
+        };
+
+        const uploadedImages = req.files.images && req.files.images.length > 0
+        ? req.files.images.map(file => `/images/company_image_details/${file.filename}`)
+        : ['/images/default_companyImage_details.jpg']; // Ảnh mặc định nếu không upload
+  
+        const uploadedDocuments = req.files.documents && req.files.documents.length > 0
+          ? req.files.documents.map(file => `/documents/${file.filename}`)
+          : []; 
+
+        const profileDescription = profile || '';
+
+        // Cập nhật thông tin công ty
+        const company = await Company.findOneAndUpdate(
+            { representativeId },
+            {
+                name,
+                industry,
+                size,
+                address,
+                website,
+                location,
+                profile: profileDescription,
+                contactEmail,
+                phoneNumber,
+                promotionVideos: promotionVideo ? [promotionVideo] : [],
+                images: uploadedImages,
+                isProfileUpdated: true,
+                location: geoLocation,
+                documents: uploadedDocuments,
+            },
+            { new: true, upsert: true }
+        );
+
+        res.json({ success: true, company });
+    } catch (error) {
+        console.error('Error updating business profile:', error);
+        next(error);
+    }
+  }
+
+  async editCompanyProfile(req, res, next) {
+    console.log("Edit company profile : ");
+
+    try {
+        const { companyId } = req.params;
+        const currentCompany = await Company.findById(companyId);
+        if (!currentCompany) {
+          return res.status(404).json({ success: false, message: 'Company not found' });
+        }
+
+        const {
+            name,
+            industry,
+            size,
+            address,
+            website,
+            location,
+            profile,
+            contactEmail,
+            phoneNumber,
+            promotionVideo,
+        } = JSON.parse(req.body.businessProfile);
+
+        const [lat, lng] = location ? location.split(',').map(Number) : [10.762622, 106.660172];
+        const geoLocation = { type: 'Point', coordinates: [lng, lat] };
+
+        const uploadedImages = req.files.images && req.files.images.length > 0
+        ? req.files.images.map(file => `/images/company_image_details/${file.filename}`)
+        : currentCompany.images || ['/images/default_companyImage_details.jpg'];
+          
+        const uploadedDocuments = req.files.documents && req.files.documents.length > 0
+        ? req.files.documents.map(file => `/documents/${file.filename}`)
+        : currentCompany.documents || [];
+
+        const updatedCompany = await Company.findByIdAndUpdate(
+            companyId,
+            {
+                name,
+                industry,
+                size,
+                address,
+                website,
+                location: geoLocation,
+                profile: profile || '',
+                contactEmail,
+                phoneNumber,
+                promotionVideos: promotionVideo ? [promotionVideo] : [],
+                images: uploadedImages,
+                documents: uploadedDocuments,
+                isProfileUpdated: true,
+            },
+            { new: true }
+        );
+
+        if (!updatedCompany) {
+            return res.status(404).json({ success: false, message: 'Company not found for updating' });
+        }
+
+        res.json({ success: true, company: updatedCompany });
+    } catch (error) {
+        console.error('Error updating company profile:', error);
+        next(error);
+    }
+  }
+
+  async getBusinessProfile(businessId) {
+    console.log("curr Busi : " + businessId);
+    console.log('getting edit business:', businessId);
+
+    try {
+      const find = await Company.findById(businessId);
+      // console.log(find)
+      if (find) {
+        return find;
+      } else {
+        console.log("ALO No company found");
+        return "";
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+
 }
 module.exports = new BusinessController();

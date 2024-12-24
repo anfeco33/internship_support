@@ -1,5 +1,6 @@
 var createError = require('http-errors');
 var express = require('express');
+const bodyParser = require('body-parser');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
@@ -9,21 +10,12 @@ const passport = require('passport');
 const expressLayouts = require('express-ejs-layouts');
 const app = express();
 
-
 // middleware setup
-
-// var adminRouter = require('./routes/adminRoute');
 
 const userController = require('./controllers/user.controllers');
 
-
-// Đường dẫn tới file .env trong thư mục config
-// const envPath = path.join(__dirname, 'config', '.env');
 const envPath = path.join(__dirname, '.env.example');
-
 require('dotenv').config({ path: envPath });
-
-console.log(process.env.APP_NAME);
 
 // Sử dụng middleware express-ejs-layouts
 app.use(expressLayouts);
@@ -39,6 +31,10 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.static(path.join(__dirname, 'uploads')));
+
+// Body parser middleware
+app.use(bodyParser.json({ limit: '50mb' }));
+app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 
 // app.use(session({
 //   secret:  process.env.SESSION_SECRET,

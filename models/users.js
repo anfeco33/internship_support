@@ -21,7 +21,9 @@ const userSchema = new Schema({
     // note: { type: [String]},
     
     // mới
-    savedCompanies: [{ type: Schema.Types.ObjectId, ref: 'Company' }], // doanh nghiệp yêu thích (dành cho sinh viên)
+    // profileUpdated: { type: Boolean, default: false }, 
+    // verified: { type: Boolean, default: false }, 
+    // savedCompanies: [{ type: Schema.Types.ObjectId, ref: 'Company' }], // doanh nghiệp yêu thích (dành cho sinh viên)
     applicationStatus: { type: String, enum: ['pending', 'approved', 'rejected'], default: 'pending' }, // Trạng thái ứng tuyển
     otp: { type: String }, 
     otpExpires: { type: Date },

@@ -313,20 +313,15 @@ if (body) {
 
 }
 
-
-
-
-
-// TODO important
 //Student and company page redirect
-const student_homepage = document.querySelector(".Student_Homepage"),
+const student_homepage = document.querySelector(".Home"),
   subscribed_page = document.querySelector(".Subscribed"),
   exercise_page = document.querySelector(".Exercise");
-
 
 if (body) {
   if (student_homepage) {
     student_homepage.addEventListener('click', function () {
+      console.log('HOME page');
       window.location.href = "/home/business"
     });
   }
@@ -341,7 +336,6 @@ if (body) {
 
   if (exercise_page) {
     exercise_page.addEventListener('click', function () {
-      console.log('Exercise page');
       window.location.href = "/home/exercise"
     });
   }
@@ -575,15 +569,14 @@ function gotocart() {
   window.location.href = "/home/cart";
 }
 
-
 function getcoursebyId(id) {
   console.log(id)
   window.location.href = "/home/course/" + id;
 }
 
-function editcoursebyId(id) {
-  console.log(id)
-  window.location.href = "/home/courseedit/" + id;
+function editByBussinessId(id) {
+  console.log("/home/business-edit/edit/" + id)
+  window.location.href = "/home/business-edit/edit/" + id;
 }
 
 function getcoursebyId_admin(id) {

@@ -1,0 +1,212 @@
+<div class="update_business">
+    <div class="container mt-5">
+        
+        <div class="row">
+            <!-- nếu chưa update lần đầu thì luôn hiển thị "Please update your profile for the first time" -->
+            <% if (data.profileUpdated === false) { %>
+            <div class="alert alert-warning" role="alert">
+                <h2>PLEASE UPDATE YOUR PROFILE FOR THE FIRST TIME </h2>
+            </div>
+            <% } else { %>
+                <h2 class="alert">BUSINESS PROFILE</h2>
+            <% } %>
+            <!-- Tên công ty -->
+            <div class="col-12 mb-3">
+                <div class="row">
+                    <label for="inputBusinessName" class="col-sm-2 col-form-label">Business Name
+                        <span class="text-danger">*</span>
+                    </label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="inputBusinessName" name="name" placeholder="Business Name" 
+                        value="<%= data.company.name %>"
+                        required>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lĩnh vực hoạt động -->
+            <div class="col-12 mb-3">
+                <div class="row">
+                    <label for="inputIndustry" class="col-sm-2 col-form-label">Industry
+                        <span class="text-danger">*</span>
+                    </label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="inputIndustry" name="industry" 
+                        placeholder="Industry (e.g., IT, AI, Marketing)" 
+                        value="<%= data.company.industry %>"
+                        required>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quy mô công ty -->
+            <div class="col-12 mb-3">
+                <div class="row">
+                    <label for="inputSize" class="col-sm-2 col-form-label">Company Size</label>
+                    <div class="col-sm-10">
+                        <select id="inputSize" name="size" class="form-select" required>
+                            <option value="Small" <%= data.company.size === 'Small' ? 'selected' : '' %>>Small</option>
+                            <option value="Medium" <%= data.company.size === 'Medium' ? 'selected' : '' %>>Medium</option>
+                            <option value="Large" <%= data.company.size === 'Large' ? 'selected' : '' %>>Large</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Website -->
+            <div class="col-12 mb-3">
+                <div class="row">
+                    <label for="inputWebsite" class="col-sm-2 col-form-label">Website
+                        <span class="text-danger">*</span>
+                    </label>
+                    <div class="col-sm-10">
+                        <input type="url" class="form-control" id="inputWebsite" name="website" 
+                        value="<%= data.company.website %>"
+                        placeholder="https://example.com">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mô tả -->
+            <div class="col-12 mb-3">
+                <div class="row">
+                    <label for="inputProfile" class="col-sm-2 col-form-label">Profile Description</label>
+                    <div class="col-sm-10">
+                        <textarea class="form-control" id="inputProfile" name="profile" rows="3" 
+                        placeholder="The company has not updated their profile yet" required>
+                        <%= data.company.profile %>
+                        </textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Email liên hệ -->
+            <div class="col-12 mb-3">
+                <div class="row">
+                    <label for="inputContactEmail" class="col-sm-2 col-form-label">Contact Email
+                        <span class="text-danger">*</span>
+                    </label>
+                    <div class="col-sm-10">
+                        <input type="email" class="form-control" id="inputContactEmail" name="contactEmail" 
+                        value="<%= data.company.contactEmail %>"
+                        placeholder="Contact Email" required>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Số điện thoại -->
+            <div class="col-12 mb-3">
+                <div class="row">
+                    <label for="inputPhoneNumber" class="col-sm-2 col-form-label">Phone Number
+                        <span class="text-danger">*</span>
+                    </label>
+                    <div class="col-sm-10">
+                        <input type="tel" class="form-control" id="inputPhoneNumber" name="phoneNumber"
+                        value="<%= data.company.phoneNumber %>"
+                        placeholder="Phone Number" required>
+                    </div>
+                </div>
+            </div>
+            <!-- Địa chỉ -->
+            <div class="col-12 mb-3">
+                <div class="row">
+                    <label for="inputAddress" class="col-sm-2 col-form-label">Address
+                        <span class="text-danger">*</span>
+                    </label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="inputAddress" name="address" 
+                        placeholder="Address" 
+                        value="<%= data.company.address %>"
+                        required>
+                    </div>
+                </div>
+            </div>
+            <!-- Địa chỉ với Google Maps API -->
+            <div class="col-12 mb-3">
+                <div class="row">
+                    <label for="inputLocation" class="col-sm-2 col-form-label">Location</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="inputLocation" name="location" placeholder="Move the marker below to your business location"
+                        value="<%= data.company.location.coordinates[1] %>, <%= data.company.location.coordinates[0] %>"
+                        required>
+                        <div id="map" class="mt-3" style="height: 300px; width: 100%;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Danh sách hình ảnh -->
+            <div class="col-12 mb-3">
+                <div class="row">
+                    <label for="inputImages" class="col-sm-2 col-form-label">Your Company Images</label>
+                    <div class="col-sm-10">
+                        <!-- Input để upload ảnh -->
+                        <input type="file" id="inputImages" name="images" class="form-control" accept="image/*" multiple>
+                        
+                        <!-- Khu vực preview các ảnh đã lưu -->
+                        <div id="imagePreview" class="mt-3 d-flex flex-wrap">
+                            <% if (data.company.images && data.company.images.length > 0) { %>
+                                <% data.company.images.forEach(function(image) { %>
+                                    <img src="<%= image %>" class="img-thumbnail me-2" style="width: 100px; height: 100px;">
+                                <% }); %>
+                            <% } else { %>
+                                <p class="text-muted">No images uploaded to display.</p>
+                            <% } %>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- Video quảng cáo -->
+            <div class="form-group">
+                <label for="inputPromotionVideo"><strong>Your YouTube Promotion Video Embed Link</strong></label>
+                <input type="text" class="form-control" id="inputPromotionVideo" placeholder="https://www.youtube.com/embed/VIDEO_ID">
+                <button class="btn btn-primary mt-2" id="setVideoBtn">Watch Preview</button>
+            </div>
+            
+            <div id="promotionVideoPreview" class="mt-3">
+                <!-- Video preview will be shown here -->
+                <% if (data.company.promotionVideos && data.company.promotionVideos.length > 0) { %>
+                    <iframe class="embed-responsive-item" src="<%= data.company.promotionVideos[0] %>" allowfullscreen></iframe>
+                <% } else { %>
+                    <p class="text-muted">No promotion video available.</p>
+                <% } %>
+            </div>            
+
+            <!-- Document Upload -->
+            <div class="form-group">
+                <label for="inputDocuments" class="col-sm-2 col-form-label"><strong>Business Documents
+                    <span class="text-danger">*</span></strong></label>
+                <span class="text-danger">(Including: Business License, Business Registration Certificate, Tax Identification Number,
+                    Certificate of Good Standing, Articles of Incorporation, Operating Agreement, 
+                    Proof of Address, Insurance Certificate, Professional License) 
+                </span>
+
+                <div class="col-sm-15">
+                    <input type="file" class="form-control" id="inputDocuments" name="documents" 
+                    multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
+                    <div id="documentPreview" class="mt-3"></div>
+                </div>
+            </div>
+
+            <!-- Nút Lưu -->
+            <div class="d-grid gap-2 col-6 mx-auto" style="margin-bottom: 20px;">
+                <button id="updateBusinessBtn" type="button" class="btn btn-success">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    window.companyId = "<%= data.companyId %>";
+</script>
+
+<script 
+src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBs2CCj3DSth7s_9YHuG5EazDGskh5uKGk&libraries=places&callback=initMap" 
+async 
+defer>
+</script>
+<script src="/javascripts/update-business.js"></script>
+
+<%- include('../partials/flash-message') %>
+<%- include('../partials/css-library') %>
+<%- include('../partials/footer') %>

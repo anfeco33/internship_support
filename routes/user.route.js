@@ -2,7 +2,8 @@ var express = require('express');
 const router = express.Router();
 const User = require('../models/users');
 // const Course = require('../models/courses');
-const Exercise = require('../models/exercises');
+const { ensureProfileUpdated } = require('../middleware/authentication');
+const Company = require('../models/companies');
 const Review = require('../models/reviews');
 const Comment = require('../models/lecturecomments');
 const userController = require('../controllers/user.controllers');
@@ -12,52 +13,69 @@ const { check } = require('express-validator');
 const multer = require('multer');
 const path = require('path');
 const uploadsFolderPath = path.join(__dirname, '../uploads');
+const upload = require('../middleware/upload');
 
-// multer lưu ảnh của khóa học
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, uploadsFolderPath + '/courses');
-    },
-    filename: function (req, file, cb) {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
-    }
-});
-
-const upload = multer({ storage: storage });
-
-//TODO: Tạo page mặc định cho role student
 router.get('/', function (req, res) {
   res.redirect('/home/business');
 })
-  .get('/business', async function (req, res, next) {
+  .get('/business', ensureProfileUpdated, async function (req, res, next) {
+    const company = await Company.findOne({ representativeId: req.session.account });
     const partial = 'partials/business';
     const layout = 'layouts/main';
 
-    // if (req.session.role == "company") {
-    //   // res.redirect('/home/course_create');
-    //   res.redirect('/home/business');
-    // } else {
-    //   req.partial_path = partial
-    //   req.layout_path = layout
-
-    //   req.page_data = {
-    //     listcourse: await businessController.get_list_business(),
-    //   }
-    //   await userController.getpage(req, res, next);
-    // }
     req.partial_path = partial
       req.layout_path = layout
 
       req.page_data = {
         listcourse: await businessController.get_list_business(),
+        businessId: company._id,
       }
       await userController.getpage(req, res, next);
   })
+  .get('/business/update', async function (req, res, next) {
+    const partial = 'partials/business_update';
+    const layout = 'layouts/main';
+    // lấy trường isProfileUpdated từ db
+    const company = await Company.findOne({ representativeId: req.session.account });
+    const isProfileUpdated = company.isProfileUpdated;
+    console.log("isProfileUpdateddd:", isProfileUpdated);
+    // truyền trường profileUpdated vào ui
+    req.page_data = {
+      profileUpdated: isProfileUpdated,
+    }
+
+    req.partial_path = partial;
+    console.log("partial_path: ", req.partial_path);
+    req.layout_path = layout;
+
+    await userController.getpage(req, res, next);
+  })
+  .post('/business/update', upload.fields([
+    { name: 'images', maxCount: 10 },
+    { name: 'documents', maxCount: 10 }, 
+  ]), businessController.updateProfile)
+  .get('/business-edit/edit/:companyId', async (req, res, next) => {
+    console.log('route: /business-edit/edit/', req.params.companyId);
+    const partial = 'partials/business_edit';
+    const layout = 'layouts/main';
+    req.partial_path = partial
+    req.layout_path = layout
+    
+    req.page_data = {
+      companyId: req.params.companyId,
+      company: await businessController.getBusinessProfile(req.params.companyId),
+    }
+    await userController.getpage(req, res, next);
+  })
+  .put('/business-edit/edit/:companyId', upload.fields([
+    { name: 'images', maxCount: 10 }, // max 10 images
+    { name: 'documents', maxCount: 10 }, 
+  ]), 
+  businessController.editCompanyProfile)
+
   // .get('/course_create', async function (req, res, next) {
   //   const partial = 'partials/course_create';
   //   const layout = 'layouts/main';
-
 
   //   req.partial_path = partial
   //   req.layout_path = layout

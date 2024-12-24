@@ -3,12 +3,13 @@ const jwt = require("jsonwebtoken");
 const GoogleStrategy = require('passport-google-oauth20').Strategy
 const passport = require('passport')
 const User = require('../models/users');
+const Company = require('../models/companies');
 var path = require('path');
 var moment = require('moment');
 const envPath = path.join(__dirname, '.env.example');
 require('dotenv').config({ path: envPath });
 const student_feature_list = [
-  { access: "Student_Homepage", icon: "<i class='fa-solid fa-house'></i>" },
+  { access: "Home", icon: "<i class='fa-solid fa-house'></i>" },
   { access: "Subscribed", icon: "<i class='fa-solid fa-square-check'></i>" }
 ]
 
@@ -16,24 +17,37 @@ const company_feature_list = [
   // LƯU Ý: khi thay đổi trong này, cần tạo lại acc mới vì acc cũ chỉ lưu các access cũ
   // sửa luôn trong main.js
 
-  { access: "Course", icon: "<i class='fa-solid fa-graduation-cap'></i>" },
+  { access: "Home", icon: "<i class='fa-solid fa-house'></i>" },
   { access: "Exercise", icon: "<i class='fa-solid fa-pen-to-square'></i>" }
 ]
 
+async function ensureProfileUpdated(req, res, next) {
+  console.log("Checking profile update for:", req.session.account);
+  
+  // if (req.path === '/home/business/update') {
+  if (req.path.startsWith('/home/business/update') || req.path.startsWith('/home/business-edit/edit')) {
+    console.log("ensureProfileUpdated called for path:", req.path);
+    return next();
+  }
+  console.log("ensureProfileUpdated called for path:", req.path);
+  if (req.session.role === 'company') {
+      const company = await Company.findOne({ representativeId: req.session.account });
+
+      if (company && !company.isProfileUpdated) { 
+        // Nếu hồ sơ công ty chưa được cập nhật và người dùng là người đại diện công ty 
+        // thì chuyển hướng đến trang cập nhật hồ sơ
+        console.log("Company profile not updated. Redirecting to /home/business/update");
+          return res.redirect('/home/business/update'); // Chuyển hướng nếu chưa cập nhật hồ sơ
+      }
+  }
+  next();
+}
+
 // middleware/authentication.js
 function authentication(req, res, next) {
-  // console.log("Session in authentication middleware:", req.session);
-  // if (req.session.loggedIn) {
-  //   console.log("User is logged in:", req.session);
-  //   next();
-  // }
-  // else {
-  //   console.log("NOT LOGGED IN. Redirecting to /login");
-  //   res.redirect('/login');
-  // }
     // Passport xác nhận người dùng đã được xác thực
     if (req.session.loggedIn) {
-      console.log("User is authenticated:", req.user);
+      console.log("User is authenticated:", req.user ? req.session.account : "undefined");
       return next();
     }
   
@@ -141,6 +155,15 @@ async (req, accessToken, refreshToken, profile, done) => {
       } else {
           // Nếu người dùng chưa tồn tại, tạo người dùng mới
           user = await User.create(newUser);
+
+          if (user.role === 'company') {
+            await Company.create({
+                representativeId: user._id, // Gán người đại diện là user mới tạo
+                name: '', // Để trống hoặc mặc định
+                isProfileUpdated: false, 
+            });
+          }
+
           await req.login(user, function(err) {
             if (err) { return done(err); 
           }
@@ -162,4 +185,4 @@ async (req, accessToken, refreshToken, profile, done) => {
   }
 }));
 
-module.exports = { authentication , isAdmin };
+module.exports = { authentication , isAdmin, ensureProfileUpdated  };

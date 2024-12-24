@@ -92,7 +92,7 @@ class FileController {
             const find = await User.findById(req.session.account);
             // console.log(find)
             if (find) {
-                find.profilePicture = "../../avatars/"+files[0].filename; 
+                find.profilePicture = "/avatars/"+files[0].filename; 
                 await find.save(); // Lưu thay đổi
                 req.session.flash = {
                     type: 'success',

@@ -2,27 +2,29 @@ const User = require('./users');
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
+// Mô hình dữ liệu cho công ty khác user company
 const companySchema = new Schema({
-    access: [
-        { access: { type: String, required: true }, icon: { type: String, required: true } }
-    ],
-    // // courses: [{ type: Schema.Types.ObjectId, ref: 'Course' }],
-    // business: [{ type: Schema.Types.ObjectId, ref: 'Business' }],
-    // major: { type: String, required: false },
-    // technique: { type: String, required: false }
+    // updatedAt: { type: Date, default: Date.now }, // Ngày cập nhật hồ sơ công ty
+    representativeId: { type: Schema.Types.ObjectId, ref: 'User', required: true }, // ID người đại diện
+    name: { type: String, default: '' },
+    isProfileUpdated: { type: Boolean, default: false }, // Đánh dấu đã cập nhật hồ sơ
+    industry: { type: String, default: '' },
+    address: { type: String, default: '' },
+    website: { type: String, default: '' },
+    profile: { type: String, default: '' },
+    contactEmail: { type: String, default: '' },
+    phoneNumber: { type: String, default: '' },
+    promotionVideos: [{ type: String }],
+    documents: [{ type: String }], // document file paths
+    images: [{ type: String }],
+    createdAt: { type: Date, default: new Date().toUTCString() },
+    location: {
+        type: { type: String, enum: ['Point'], default: 'Point' },
+        coordinates: { type: [Number], default: [106.660172, 10.762622] }, // [lng, lat]
+    },
 
-    // Thông tin cơ bản
-    name: { type: String, required: true }, // Tên công ty
-    logo: { type: String, ref: 'User' },
-    industry: { type: String, required: true }, // Lĩnh vực hoạt động (ví dụ: IT, AI, Marketing)
-    size: { type: String, enum: ['Small', 'Medium', 'Large'], default: 'Medium' }, // Quy mô công ty
-    location: { type: String, required: true }, // Địa chỉ công ty
-    website: { type: String, default: '' }, // Trang web công ty
-
-    // Mô tả và thông tin bổ sung
-    profile: { type: String, required: true }, // Mô tả chi tiết công ty
-    culture: { type: String, default: '' }, // Văn hóa công ty
-    projects: [{ type: String }], // Dự án tiêu biểu của công ty
+    // // Mô tả và thông tin bổ sung
+    profile: { type: String , default: '' }, // Mô tả công ty gồm văn hóa, project (tùy)
 
     // Cơ hội thực tập và việc làm
     internships: [{ type: Schema.Types.ObjectId, ref: 'Job' }], // Danh sách cơ hội thực tập
@@ -36,21 +38,10 @@ const companySchema = new Schema({
         learningOpportunities: { type: Number, default: 0 }, // Cơ hội học hỏi
         benefits: { type: Number, default: 0 } // Phúc lợi
     },
-
-    // Liên hệ và người đại diện
-    representative: { type: Schema.Types.ObjectId, ref: 'User' }, // Người đại diện công ty
-    contactEmail: { type: String, required: true }, // Email liên hệ
-    phoneNumber: { type: String, required: true }, // Số điện thoại liên hệ
-
-    // Hình ảnh và video
-    images: [{ type: String }], // Danh sách URL hình ảnh công ty
-    promotionVideos: [{ type: String }], // Danh sách URL video quảng bá
-
-    // Thông tin quản trị
     isVerified: { type: Boolean, default: false }, // Công ty đã được xác minh chưa
-    createdAt: { type: Date, default: Date.now }, // Ngày tạo hồ sơ công ty
-    updatedAt: { type: Date, default: Date.now } // Ngày cập nhật hồ sơ công ty
+    isLocked: { type: Boolean, default: false }, // profile công ty không được hiển thị lên website
+
 });
 
-const Company = User.discriminator('Company', companySchema);
+const Company = mongoose.model('Company', companySchema);
 module.exports = Company;

@@ -1,22 +1,3 @@
-// document.addEventListener('DOMContentLoaded', function () {
-//     var swiper = new Swiper(".mySwiper", {
-//         rewind: true,
-//         spaceBetween: 30,
-//         centeredSlides: true,
-//         autoplay: {
-//             delay: 5000,
-//             disableOnInteraction: false,
-//         },
-//         pagination: {
-//             el: ".swiper-pagination",
-//             clickable: true,
-//         },
-//         navigation: {
-//             nextEl: ".swiper-button-next",
-//             prevEl: ".swiper-button-prev",
-//         },
-//     });
-// });
 const imgPosition = document.querySelectorAll(".aspect-ratio-169 img");
 const imgContainer = document.querySelector('.aspect-ratio-169');
 const dots = document.querySelectorAll('.dot'); // Lấy tất cả các dot
@@ -26,13 +7,25 @@ imgPosition.forEach(function(image, index) {
     image.style.left = index * 100 + "%";
 });
 
+// function updateDots() {
+//     // Loại bỏ class 'active' khỏi tất cả các dot
+//     dots.forEach(dot => {
+//         dot.classList.remove('active');
+//     });
+//     // Thêm class 'active' vào dot hiện tại
+//     dots[count].classList.add('active');
+// }
+
 function updateDots() {
-    // Loại bỏ class 'active' khỏi tất cả các dot
-    dots.forEach(dot => {
-        dot.classList.remove('active');
-    });
-    // Thêm class 'active' vào dot hiện tại
-    dots[count].classList.add('active');
+    // Ensure count is within the valid range
+    if (count >= 0 && count < dots.length) {
+        // Loại bỏ class 'active' khỏi tất cả các dot
+        dots.forEach(dot => {
+            dot.classList.remove('active');
+        });
+        // Thêm class 'active' vào dot hiện tại
+        dots[count].classList.add('active');
+    }
 }
 
 let sliderInterval; // Biến để giữ giá trị của setInterval

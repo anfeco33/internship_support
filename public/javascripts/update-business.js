@@ -1,444 +1,262 @@
-const result = document.getElementById('addResult');
-if (result) {
-    // Thêm kết quả đạt được
-    result.addEventListener('click', function () {
-        var motaInput = document.getElementById('inputCourseResult').value.trim();
-        if (motaInput !== '') {
-            var li = document.createElement('li');
-            li.className = 'list-group-item';
-            li.innerHTML = motaInput + '<button type="button" class="btn btn-danger btn-sm float-end delete-btn" style="display:none;">Remove</button>';
-            document.getElementById('inputCourseResultList').appendChild(li);
-            document.getElementById('inputCourseResult').value = '';
+document.getElementById('updateBusinessBtn').addEventListener('click', function () {
+    // Nếu companyId tồn tại thì PUT, không POST
+    const companyId = window.companyId; // từ backend truyền
+    const method = companyId ? 'PUT' : 'POST';
+    const url = companyId ? `/home/business-edit/edit/${companyId}` : '/home/business/update';
 
-            // Hiển thị nút Xóa khi hover
-            li.addEventListener('mouseenter', function () {
-                li.querySelector('.delete-btn').style.display = 'inline-block';
-            });
+    handleBusinessProfile(url, method);
+});
 
-            // Ẩn nút Xóa khi rời khỏi
-            li.addEventListener('mouseleave', function () {
-                li.querySelector('.delete-btn').style.display = 'none';
-            });
+function handleBusinessProfile(url, method) {
+    const name = document.getElementById('inputBusinessName').value.trim();
+    const industry = document.getElementById('inputIndustry').value.trim();
+    const size = document.getElementById('inputSize').value;
+    const address = document.getElementById('inputAddress').value.trim();
+    const website = document.getElementById('inputWebsite').value.trim();
+    
+    const locationId = method === 'PUT' ? 'inputLocation' : 'inputLocation_post';
+    const locationElement = document.getElementById(locationId);
+    const location = locationElement ? locationElement.value.trim() : '';
 
-            // Xóa mô tả khi nhấn vào nút Xóa
-            li.querySelector('.delete-btn').addEventListener('click', function () {
-                li.remove();
-            });
-        }
-    });
-}
+    const profile = document.getElementById('inputProfile').value.trim();
+    const contactEmail = document.getElementById('inputContactEmail').value.trim();
+    const phoneNumber = document.getElementById('inputPhoneNumber').value.trim();
 
-const add_req = document.getElementById('addReq');
-if (add_req) {
-    // Thêm yêu cầu khóa học
-    add_req.addEventListener('click', function () {
-        var motaInput = document.getElementById('inputCourseReq').value.trim();
-        if (motaInput !== '') {
-            var li = document.createElement('li');
-            li.className = 'list-group-item';
-            li.innerHTML = motaInput + '<button type="button" class="btn btn-danger btn-sm float-end delete-btn" style="display:none;">Remove</button>';
-            document.getElementById('inputCourseReqList').appendChild(li);
-            document.getElementById('inputCourseReq').value = '';
+    // Lấy giá trị video trực tiếp từ trường input
+    const promotionVideo = document.getElementById('inputPromotionVideo').value.trim();
 
-            // Hiển thị nút Xóa khi hover
-            li.addEventListener('mouseenter', function () {
-                li.querySelector('.delete-btn').style.display = 'inline-block';
-            });
+    if (!name || !industry || !address || !website || !contactEmail || !phoneNumber) {
+        showflashmessage('warning', 'Please fill in all required fields!');
+        return;
+    }
 
-            // Ẩn nút Xóa khi rời khỏi
-            li.addEventListener('mouseleave', function () {
-                li.querySelector('.delete-btn').style.display = 'none';
-            });
+    console.log('locationn: ', location);
 
-            // Xóa mô tả khi nhấn vào nút Xóa
-            li.querySelector('.delete-btn').addEventListener('click', function () {
-                li.remove();
-            });
-        }
-    });
-}
-
-
-function convertToSlug(text) {
-    return text.toLowerCase().replace(/ /g, '');
-}
-
-// Thêm chương học + video bài giảng
-const addChapterBtn = document.getElementById('addChapterBtn');
-const addChapterForm = document.getElementById('addChapterForm');
-const cancelChapterBtn = document.getElementById('cancelChapterBtn');
-const confirmChapterBtn = document.getElementById('confirmChapterBtn');
-const chaptersContainer = document.getElementById('chapters');
-const confirmVideoBtn = document.getElementById('confirmVideoBtn');
-if (addChapterBtn) {
-    addChapterBtn.addEventListener('click', () => {
-        addChapterForm.classList.remove('d-none');
-    });
-}
-
-if (cancelChapterBtn) {
-    cancelChapterBtn.addEventListener('click', () => {
-        addChapterForm.classList.add('d-none');
-    });
-
-}
-
-if (confirmChapterBtn) {
-    confirmChapterBtn.addEventListener('click', () => {
-        const chapterName = document.getElementById('chapterName').value;
-        const chapterTitle = document.getElementById('chapterTitle').value;
-        addChapter(chapterName, chapterTitle);
-        addChapterForm.classList.add('d-none');
-    });
-
-}
-
-function addChapter(name, title) {
-    const chapterCard = document.createElement('div');
-    chapterCard.classList.add('card', 'mt-3', 'chapter-card');
-    chapterCard.innerHTML = `
-    <div class="card-body">
-        <h5 class="chapter-name card-title" contenteditable="true">${name}</h5>
-        <h6 class="chapter-title card-subtitle mb-2 text-muted" contenteditable="true">${title}</h6>
-        <div class="w-100 mb-3">
-            <button class="btn btn-primary" onclick="showVideoForm('${name}')">New Lecture</button>
-            <button class="btn btn-danger ms-2 float-end" onclick="deleteChapter(this)">Remove</button>
-        </div>
-        <div class="mt-3" id="videos-${convertToSlug(name).replace(/\s+/g, '-')}"></div>
-    </div>
-  `;
-    chaptersContainer.appendChild(chapterCard);
-}
-
-function deleteChapter(button) {
-    const chapterCard = button.closest('.chapter-card');
-    chapterCard.remove();
-}
-
-function showVideoForm(chapterName) {
-    const modal = new bootstrap.Modal(document.getElementById('videoModalCreate'));
-    confirmVideoBtn.onclick = () => {
-        const videoTitle = document.getElementById('videoTitle').value;
-        const videoLink = document.getElementById('videoLink').value;
-        const videoDesc = document.getElementById('videoDesc').value;
-        addVideo(chapterName, videoTitle, videoLink, videoDesc);
-        modal.hide();
-    };
-    modal.show();
-    $('.modal-backdrop').remove();
-}
-
-function addVideo(chapterName, title, link, desc) {
-    const videoContainer = document.getElementById(`videos-${convertToSlug(chapterName).replace(/\s+/g, '-')}`);
-    videoContainer.innerHTML += `
-        <div class="card mt-2 video-card">
-            <div class="row">
-                <div class="col-md-4">
-                    <div class="embed-responsive embed-responsive-16by9">
-                        <iframe class="embed-responsive-item" src="${link}" allowfullscreen></iframe>
-                    </div>
-                </div>
-                <div class="col-md-8">
-                    <div class="card-body">
-                        <h6 class="video-title card-title" contenteditable="true">${title}</h6>
-                        <p class="video-desc card-text">${desc}</p>
-                        <div class="w-100 mb-3">
-                            <button class="btn btn-danger ms-2 float-end" onclick="deleteVideo(this)">Remove</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-  `;
-}
-
-function deleteVideo(button) {
-    const videoCard = button.closest('.card');
-    videoCard.remove();
-}
-const add_course = document.getElementById('addCourseBtn');
-// Thêm khóa học
-if (add_course) {
-    add_course.addEventListener('click', function () {
-        var courseImageFile = document.getElementById('inputCourseImage').files[0];
-
-        var courseName = document.getElementById('inputCourseTitle').value.trim();
-        var coursePrice = document.getElementById('inputCoursePrice').value.trim();
-        var courseCategory = document.getElementById('inputCategory').value;
-        var coursePreview = document.getElementById('inputCoursePreview').value.trim();
-        var courseDescription = document.getElementById('inputCourseDescription').value.trim();
-        var courseAudience = document.getElementById('inputCourseAudience').value.trim();
-
-        var courseResultList = document.querySelectorAll('#inputCourseResultList li');
-        var courseResult = [];
-        courseResultList.forEach(function (item) {
-            var textNodes = Array.from(item.childNodes).filter(node => node.nodeType === Node.TEXT_NODE);
-            var result = textNodes.map(node => node.textContent.trim()).join('');
-            courseResult.push(result);
-        });
-
-        var courseReqList = document.querySelectorAll('#inputCourseReqList li');
-        var courseReq = [];
-        courseReqList.forEach(function (item) {
-            var textNodes = Array.from(item.childNodes).filter(node => node.nodeType === Node.TEXT_NODE);
-            var req = textNodes.map(node => node.textContent.trim()).join('');
-            courseReq.push(req);
-        });
-
-        var course = {
-            "courseName": courseName,
-            "coursePrice": parseInt(coursePrice),
-            "courseCategory": courseCategory,
-            "coursePreview": coursePreview,
-            "courseDescription": courseDescription,
-            "courseAudience": courseAudience,
-            "courseResult": courseResult,
-            "courseRequirement": courseReq,
-            "sections": []
-        };
-
-        var chapters = document.querySelectorAll('#chapters .chapter-card');
-
-        chapters.forEach(function (chapter) {
-            var chapterName = chapter.querySelector('.chapter-name').textContent;
-            var chapterTitle = chapter.querySelector('.chapter-title').textContent;
-
-            var videos = chapter.querySelectorAll('.video-card');
-
-            var chapterObj = {
-                "sectionNumber": chapterName,
-                "sectionTitle": chapterTitle,
-                "lectures": []
-            };
-
-            videos.forEach(function (video) {
-                var videoTitle = video.querySelector('.video-title').textContent;
-                var videoLink = video.querySelector('iframe').src;
-                var videoDesc = video.querySelector('.video-desc').textContent;
-
-                var videoObj = {
-                    "lectureTitle": videoTitle,
-                    "lectureLink": videoLink,
-                    "lectureDescription": videoDesc
-                };
-
-                chapterObj["lectures"].push(videoObj);
-            });
-
-            course["sections"].push(chapterObj);
-        });
-
-        // Phải có ít nhất 1 section và 1 lecture
-        if (course.sections.length === 0 || course.sections.some(section => section.lectures.length === 0)) {
-
-            const dangerAlert = `
-                <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    <strong>Error!</strong> You must add at least one section and one lecture per section.
-                    <button type="button" class="close btn" data-bs-dismiss="alert" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                    </div>
-                `;
-            document.getElementById('alert-container').innerHTML = dangerAlert;
-            $(".alert").alert();
-
-            return;
-        }
-
-        if (parseInt(coursePrice) < 30000) {
-            const dangerAlert = `
-                <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    <strong>Error!</strong> Course's price must be higher than 30.000 VNĐ.
-                    <button type="button" class="close btn" data-bs-dismiss="alert" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                    </div>
-                `;
-            document.getElementById('alert-container').innerHTML = dangerAlert;
-            $(".alert").alert();
-
-            return;
-        }
-
-        // Tạm thời in ra tab console
-        console.log(JSON.stringify(course));
-
-        var formData = new FormData();
-        formData.append("courseData", JSON.stringify(course));
-        formData.append("courseImage", courseImageFile);
-
-        // Gửi dữ liệu lên server bằng phương thức POST
-        fetch('/home/course/create', {
-            method: 'POST',
-            body: formData
-        })
-            .then(response => {
-                if (response.ok) {
-                    return response.json();
-                }
-                throw new Error('Network response was not ok.');
-            })
-            .then(data => {
-                console.log('Course added successfully:', data);
-
-                const successAlert = `
-                    <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    <strong>Successfully!</strong> New course created.
-                    <button type="button" class="close btn" data-bs-dismiss="alert" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                    </div>
-                    `;
-                document.getElementById('alert-container').innerHTML = successAlert;
-                // Đóng alert sau một thời gian
-                $(".alert").alert();
-                // Đợi 2 giây trước khi tải lại trang
-                setTimeout(() => {
-                    location.reload();
-                }, 2000);
-            })
-            .catch(error => {
-                console.error('Error adding course:', error);
-
-                const errorAlert = `
-                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    <strong>Error!</strong> Failed to create new course.
-                    <button type="button" class="close btn" data-bs-dismiss="alert" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                    </div>
-                    `;
-                document.getElementById('alert-container').innerHTML = errorAlert;
-                // Đóng alert sau một thời gian
-                $(".alert").alert();
-            });
-    });
-}
-
-
-// Edit course
-function editCourse() {
-    var courseId = document.getElementById('courseId').value;
-    var courseImageFile = document.getElementById('inputCourseImage').files[0];
-    var existImage = document.getElementById('existImageUrl').src;
-
-    var courseName = document.getElementById('inputCourseTitle').value.trim();
-    var coursePrice = document.getElementById('inputCoursePrice').value.trim();
-    var courseCategory = document.getElementById('inputCategory').value;
-    var coursePreview = document.getElementById('inputCoursePreview').value.trim();
-    var courseDescription = document.getElementById('inputCourseDescription').value.trim();
-    var courseAudience = document.getElementById('inputCourseAudience').value.trim();
-
-    var courseResultList = document.querySelectorAll('#inputCourseResultList li');
-    var courseResult = [];
-    courseResultList.forEach(function (item) {
-        var textNodes = Array.from(item.childNodes).filter(node => node.nodeType === Node.TEXT_NODE);
-        var result = textNodes.map(node => node.textContent.trim()).join('');
-        courseResult.push(result);
-    });
-
-    var courseReqList = document.querySelectorAll('#inputCourseReqList li');
-    var courseReq = [];
-    courseReqList.forEach(function (item) {
-        var textNodes = Array.from(item.childNodes).filter(node => node.nodeType === Node.TEXT_NODE);
-        var req = textNodes.map(node => node.textContent.trim()).join('');
-        courseReq.push(req);
-    });
-
-    var course = {
-        "courseId": courseId,
-        "courseName": courseName,
-        "coursePrice": parseInt(coursePrice),
-        "courseImage": courseImageFile ? null : existImage,
-        "courseCategory": courseCategory,
-        "coursePreview": coursePreview,
-        "courseDescription": courseDescription,
-        "courseAudience": courseAudience,
-        "courseResult": courseResult,
-        "courseRequirement": courseReq,
-        "sections": []
+    const businessProfile = {
+        name,
+        industry,
+        size,
+        address,
+        website,
+        location,
+        profile,
+        contactEmail,
+        phoneNumber,
+        promotionVideo,
     };
 
-    var chapters = document.querySelectorAll('#chapters .chapter-card');
+    const formData = new FormData();
+    formData.append('businessProfile', JSON.stringify(businessProfile));
 
-    chapters.forEach(function (chapter) {
-        var chapterName = chapter.querySelector('.chapter-name').textContent;
-        var chapterTitle = chapter.querySelector('.chapter-title').textContent;
+    // Thêm hình ảnh vào FormData
+    const imageFiles = document.getElementById('inputImages').files;
+    for (const file of imageFiles) {
+        formData.append('images', file);
+    }
 
-        var videos = chapter.querySelectorAll('.video-card');
+    // Thêm tài liệu vào FormData
+    const documentFiles = document.getElementById('inputDocuments').files;
+    for (const file of documentFiles) {
+        formData.append('documents', file);
+    }
 
-        var chapterObj = {
-            "sectionNumber": chapterName,
-            "sectionTitle": chapterTitle,
-            "lectures": []
-        };
-
-        videos.forEach(function (video) {
-            var videoTitle = video.querySelector('.video-title').textContent;
-            var videoLink = video.querySelector('iframe').src;
-            var videoDesc = video.querySelector('.video-desc').textContent;
-
-            var videoObj = {
-                "lectureTitle": videoTitle,
-                "lectureLink": videoLink,
-                "lectureDescription": videoDesc
-            };
-
-            chapterObj["lectures"].push(videoObj);
-        });
-
-        course["sections"].push(chapterObj);
-    });
-
-    var formData = new FormData();
-    formData.append("courseData", JSON.stringify(course));
-    if (courseImageFile) formData.append("courseImage", courseImageFile);
-
-    console.log(JSON.stringify(course));
-
-    // Gửi dữ liệu lên server bằng phương thức PUT
-    fetch('/home/courseedit/' + courseId, {
-        method: 'PUT',
-        body: formData
+    fetch(url, {
+        method,
+        body: formData,
     })
         .then(response => {
-            if (response.ok) {
-                return response.json();
-            }
-            throw new Error('Network response was not ok.');
+            if (response.ok) return response.json();
+            throw new Error('Failed to process profile.');
         })
         .then(data => {
-            console.log('Course added successfully:', data);
-
-            const successAlert = `
-                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                <strong>Successfully!</strong> Edit course successfully.
-                <button type="button" class="close btn" data-bs-dismiss="alert" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-                </div>
-                `;
-            document.getElementById('alert-container').innerHTML = successAlert;
-            // Đóng alert sau một thời gian
-            $(".alert").alert();
-            // Đợi 2 giây trước khi tải lại trang
-            setTimeout(() => {
-                location.reload();
-            }, 2000);
+            const successMessage = method === 'POST' ? 'Profile created successfully!' : 'Profile updated successfully!';
+            showflashmessage('success', successMessage);
+            window.location.href = '/home';
         })
         .catch(error => {
-            console.error('Error adding course:', error);
-
-            const errorAlert = `
-                <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <strong>Error!</strong> Failed to update course.
-                <button type="button" class="close btn" data-bs-dismiss="alert" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-                </div>
-                `;
-            document.getElementById('alert-container').innerHTML = errorAlert;
-            // Đóng alert sau một thời gian
-            $(".alert").alert();
+            console.error(`Error processing profile (${method}):`, error);
+            showflashmessage('error', 'Error processing profile. Please try again!');
         });
-};
+}
+
+document.getElementById('inputImages').addEventListener('change', function () {
+    const imagePreview = document.getElementById('imagePreview');
+    imagePreview.innerHTML = ''; // Xóa preview cũ
+
+    Array.from(this.files).forEach(file => {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            const img = document.createElement('img');
+            img.src = e.target.result;
+            img.classList.add('img-thumbnail', 'me-2');
+            img.style.width = '100px';
+            img.style.height = '100px';
+            imagePreview.appendChild(img);
+        };
+        reader.readAsDataURL(file);
+    });
+});
+
+// Hiển thị video xem trước
+document.getElementById('setVideoBtn').addEventListener('click', function () {
+    const videoLink = document.getElementById('inputPromotionVideo').value.trim();
+
+    if (!videoLink) {
+        videoLink = [];
+        return;
+    }
+
+    const isValidYouTubeLink = videoLink.includes('youtube.com/embed/');
+    if (!isValidYouTubeLink) {
+        showflashmessage('warning', 'You must provide a valid YouTube video "embed" link!');
+    }
+
+    // Hiển thị video xem trước
+    const previewContainer = document.getElementById('promotionVideoPreview');
+    previewContainer.innerHTML = `
+        <div class="card mt-2 video-card">
+            <div class="embed-responsive embed-responsive-16by9">
+                <iframe class="embed-responsive-item" src="${videoLink}" allowfullscreen></iframe>
+            </div>
+        </div>
+    `;
+});
+
+document.getElementById('inputDocuments').addEventListener('change', function () {
+    const documentPreview = document.getElementById('documentPreview');
+    documentPreview.innerHTML = ''; // Clear previous preview
+
+    Array.from(this.files).forEach(file => {
+        const fileName = document.createElement('p');
+        fileName.textContent = file.name;
+        documentPreview.appendChild(fileName);
+    });
+});
+
+let map, marker;
+
+function initMap() {
+    const locationId = window.companyId ? 'inputLocation' : 'inputLocation_post';
+    const inputLocation = document.getElementById(locationId);
+    if (!inputLocation) {
+        console.error('Location input element not found');
+        return;
+    }
+    const locationValue = inputLocation.value.trim();
+    let locationCoordinates;
+
+    if (locationValue) {
+        locationCoordinates = locationValue.split(',').map(coord => parseFloat(coord.trim()));
+    } else {
+        // Set default coordinates if location is not provided
+        locationCoordinates = [10.762622, 106.660172]; // Default to Ho Chi Minh City
+    }
+
+    if (locationCoordinates.length !== 2 || isNaN(locationCoordinates[0]) || isNaN(locationCoordinates[1])) {
+        console.error('Invalid coordinates:', locationCoordinates);
+        return;
+    }
+
+    const location = { lat: locationCoordinates[0], lng: locationCoordinates[1] };
+    map = new google.maps.Map(document.getElementById('map'), {
+        zoom: 15,
+        center: location,
+    });
+    marker = new google.maps.Marker({
+        position: location,
+        map: map,
+        draggable: true,
+    });
+
+    marker.addListener('dragend', function () {
+        const position = marker.getPosition();
+        inputLocation.value = `${position.lat()}, ${position.lng()}`;
+    });
+
+    // Auto-complete địa chỉ từ Google Maps
+    const autocomplete = new google.maps.places.Autocomplete(inputLocation);
+    autocomplete.addListener('place_changed', function () {
+        const place = autocomplete.getPlace();
+        if (place.geometry) {
+            const location = place.geometry.location;
+            marker.setPosition(location);
+            map.setCenter(location);
+            inputLocation.value = `${location.lat()}, ${location.lng()}`;
+        }
+    });
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    // Load the Google Maps script dynamically
+    const script = document.createElement('script');
+    script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyBs2CCj3DSth7s_9YHuG5EazDGskh5uKGk&libraries=places&callback=initMap`;
+    script.async = true;
+    script.defer = true;
+    document.head.appendChild(script);
+});
+
+// function initMap() {
+//     // Kiểm tra nếu có giá trị lưu sẵn trong inputLocation
+//     const savedLocation = document.getElementById("inputLocation").value.trim();
+//     const defaultLocation = savedLocation 
+//         ? { lat: parseFloat(savedLocation.split(',')[0]), lng: parseFloat(savedLocation.split(',')[1]) }
+//         : { lat: 10.762622, lng: 106.660172 }; // Vị trí mặc định: Ho Chi Minh City
+
+//     map = new google.maps.Map(document.getElementById("map"), {
+//         center: defaultLocation,
+//         zoom: 13,
+//     });
+
+//     marker = new google.maps.Marker({
+//         position: defaultLocation,
+//         map: map,
+//         draggable: true,
+//     });
+
+//     // Cập nhật input khi kéo marker
+//     marker.addListener('dragend', function () {
+//         const position = marker.getPosition();
+//         document.getElementById("inputLocation").value = `${position.lat()}, ${position.lng()}`;
+//     });
+// }
+
+
+// // Auto-complete địa chỉ từ Google Maps
+// const autocomplete = new google.maps.places.Autocomplete(document.getElementById('inputLocation'));
+// autocomplete.addListener('place_changed', function () {
+//     const place = autocomplete.getPlace();
+//     if (place.geometry) {
+//         const location = place.geometry.location;
+//         marker.setPosition(location);
+//         map.setCenter(location);
+//         document.getElementById("inputLocation").value = `${location.lat()}, ${location.lng()}`;
+//     }
+// });
+
+function showflashmessage(type, message) {
+    const validTypes = ['success', 'error', 'info', 'warning']; // Các kiểu hợp lệ của Toastr
+      if (!validTypes.includes(type)) {
+          console.warn('Invalid toastr type:', type); // coi log f12
+          type = 'info'; // Mặc định dùng kiểu `info`
+      }
+  
+    toastr[type](message);
+  
+    toastr.options = {
+      "closeButton": true,
+      "debug": false,
+      "newestOnTop": false,
+      "progressBar": false,
+      "positionClass": "toast-top-right",
+      "preventDuplicates": false,
+      "onclick": null,
+      "showDuration": "300",
+      "hideDuration": "1000",
+      "timeOut": "5000",
+      "extendedTimeOut": "1000",
+      "showEasing": "swing",
+      "hideEasing": "linear",
+      "showMethod": "fadeIn",
+      "hideMethod": "fadeOut"
+    }
+}
