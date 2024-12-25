@@ -26,35 +26,37 @@ const { validationResult } = require('express-validator');
 const fs = require('fs');
 
 class BusinessController {
-  async get_list_business() {
+  async get_list_business(filter = {}) {
     try {
-      // dòng lúc đầu để list course
-      // const course = await Course.find().populate('companyID', 'profilePicture fullName');
+      filter.isProfileUpdated = true;
+      const businesses = await Company.find(filter)
+      .select('name images averageRating address isVerified industry size');
 
-      // const business = await Company.find().populate('companyID', 'profilePicture fullName');
-      // // Lọc bỏ các khóa học không có companyID hợp lệ
-      // const validBusiness = business.filter(business => business.companyID);
-
-
-      //   const profilePicture = company.profilePicture; // Ảnh đại diện logo của doanh nghiệp
-      //   const fullName = company.fullName; // Tên đầy đủ của doanh nghiệp
-
-      const businesses = await Company.find()
-
-
-        // console.log(profilePicture, fullName);
       return businesses;
     } catch (error) {
-      console.log(error);
+      console.error('Error fetching business list:', error);
+    }
+  }
+
+  async get_top_supportive_companies() {
+    try {
+      const topCompanies = await Company.find({ isProfileUpdated: true, isVerified: true })
+        .sort({ averageRating: -1 }) // Sort by average rating in descending order
+        .limit(3) // Limit to top 3 companies
+        .select('name images averageRating address isVerified industry size');
+      return topCompanies;
+    } catch (error) {
+      console.error('Error fetching top supportive companies:', error);
     }
   }
 
   async get_my_business(req, res, next) {
     try {
-      const companyID = req.session.account; // Lấy companyID từ session hoặc nguồn dữ liệu khác
+      const company = await Company.findOne({ representativeId: req.session.account });
 
-      console.log(companyID); // Xử lý kết quả tìm kiếm
-      const businesses = await Business.find({ companyID }).populate('companyID', 'profilePicture fullName');
+      console.log("get my business : " + company._id.toString());
+      const companyId = company._id.toString();
+      const businesses = await Business.find({ companyId }).populate('companyID', 'profilePicture fullName');
 
       for (const business of businesses) {
         const company = business.companyID; // Người hướng dẫn tương ứng với khóa học

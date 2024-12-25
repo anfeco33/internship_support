@@ -23,13 +23,13 @@ const company_feature_list = [
 
 async function ensureProfileUpdated(req, res, next) {
   console.log("Checking profile update for:", req.session.account);
-  
+  console.log("Query parameters in middleware:", req.query);
   // if (req.path === '/home/business/update') {
   if (req.path.startsWith('/home/business/update') || req.path.startsWith('/home/business-edit/edit')) {
     console.log("ensureProfileUpdated called for path:", req.path);
     return next();
   }
-  console.log("ensureProfileUpdated called for path:", req.path);
+
   if (req.session.role === 'company') {
       const company = await Company.findOne({ representativeId: req.session.account });
 

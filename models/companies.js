@@ -9,6 +9,7 @@ const companySchema = new Schema({
     name: { type: String, default: '' },
     isProfileUpdated: { type: Boolean, default: false }, // Đánh dấu đã cập nhật hồ sơ
     industry: { type: String, default: '' },
+    size: { type: String, default: '' },
     address: { type: String, default: '' },
     website: { type: String, default: '' },
     profile: { type: String, default: '' },

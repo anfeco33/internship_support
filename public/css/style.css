@@ -1229,7 +1229,7 @@ section#product_page {
     font-weight: bold;
 }
 
-.course-item .course-content {
+.business-item .business-content {
 
     padding: 8px;
 
@@ -1238,7 +1238,7 @@ section#product_page {
 
 }
 
-.course-item #course_pic {
+.business-item #course_pic {
     background-color:lightblue;
     /* background-color: bisque; */
     object-fit: contain;
@@ -1247,7 +1247,7 @@ section#product_page {
 }
 
 
-.course-item .course-content .category {
+.business-item .business-content .category {
     /* border: 2px solid rgb(204, 255, 0); */
     font-style: normal;
     font-weight: bold;
@@ -1257,14 +1257,14 @@ section#product_page {
 
 }
 
-.course-item .course-content .price {
+.business-item .business-content .price {
     font-style: normal;
     font-weight: bold;
     font-size: x-large;
 
 }
 
-.course-item .course-content .course-name {
+.business-item .business-content .business-name {
     /* border: 2px solid rgb(47, 0, 255); */
     cursor: pointer;
     font-style: normal;
@@ -1280,7 +1280,7 @@ section#product_page {
 }
 
 
-.course-item .course-content .description {
+.business-item .business-content .description {
     /* border: 2px solid rgb(47, 0, 255); */
 
     height: 30px;
@@ -1291,7 +1291,7 @@ section#product_page {
 
 
 
-.course-item .course-content .trainer .trainer-profile img {
+.business-item .business-content .trainer .trainer-profile img {
     /* border: 2px solid red; */
     width: 100%;
     max-width: 50px;
@@ -1302,7 +1302,7 @@ section#product_page {
 
 }
 
-.course-item .course-content .trainer .trainer-name {
+.business-item .business-content .trainer .trainer-name {
     padding-left: 5px;
     font-style: normal;
     font-weight: bold;
@@ -2372,7 +2372,7 @@ body.dark {
         color: var(--text-light-color);
     }
 
-    .course-item .course-content {
+    .business-item .business-content {
 
         background-color: #9DBC98;
     }
@@ -2552,7 +2552,7 @@ body.dark {
     #section_bar{
         color: var(--text-light-color)
     }
-    .course-item #course_pic {
+    .business-item #course_pic {
         background-color: bisque;
 
     }

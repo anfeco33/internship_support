@@ -59,19 +59,6 @@ function handleSearchResults(searchValue) {
             `
       $("#search_result_row").html(data);
 
-      // const ul = document.createElement('ul');
-      // ul.classList.add('list-group');
-
-      // // Giả sử có một mảng kết quả tìm kiếm
-      // const searchResults = ['Result 1', 'Result 2', 'Result 3'];
-
-      // searchResults.forEach(result => {
-      //   const li = document.createElement('li');
-      //   li.classList.add('list-group-item');
-      //   li.textContent = result;
-      //   ul.appendChild(li);
-      // });
-    // sendData(keyword);
       sendData(keyword);
       $collap.show(); // Hiển thị collapseExample
       $clearIcon.show();
@@ -80,8 +67,6 @@ function handleSearchResults(searchValue) {
       $collap.hide(); // Ẩn collapseExample
       $clearIcon.hide();
     }
-
-
 }
 if (searchInput) {
 
@@ -175,7 +160,7 @@ profile.addEventListener('click', function () {
 log_out.addEventListener('click', function () {
   // Gửi yêu cầu đăng xuất đến máy chủ
   fetch('/logout', {
-    method: 'POST', // Hoặc GET, tùy thuộc vào cách bạn triển khai
+    method: 'POST',
     credentials: 'same-origin' // Đảm bảo gửi cookie và thông tin xác thực cùng phiên
   })
     .then(function (response) {
@@ -198,7 +183,7 @@ log_out.addEventListener('click', function () {
     })
     .catch(function (error) {
       // Xử lý lỗi khi gửi yêu cầu
-      console.log('Lỗi khi gửi yêu cầu đăng xuất:', error);
+      console.log('Error while sending logout require:', error);
       window.location.href = '/login'
     });
 });
@@ -232,19 +217,8 @@ closeBtn.addEventListener("click", () => {
   if (offcanvasElement) {
     bsOffcanvas.hide();
   }
-  // offcanvasElement.classList.remove('show');
-  // homeSection.classList.remove('offcanvas-open');
-  // if (menuIcon) {
-  //   if (homeSection.classList.contains('offcanvas-open'))
-  //   homeSection.classList.toggle('sidebar-open');
-  // }
 
-  // if (sidebar.classList.contains('open')) {
-  //   localStorage.setItem("status", "open");
-  // } else {
-  //   localStorage.setItem("status", "");
-  // }
-  menuBtnChange();//calling the function(optional)
+  menuBtnChange();
 });
 
 
@@ -569,9 +543,9 @@ function gotocart() {
   window.location.href = "/home/cart";
 }
 
-function getcoursebyId(id) {
+function getBusinessById(id) {
   console.log(id)
-  window.location.href = "/home/course/" + id;
+  window.location.href = "/home/business/" + id;
 }
 
 function editByBussinessId(id) {
@@ -584,67 +558,10 @@ function getcoursebyId_admin(id) {
   window.location.href = "/admin/course/" + id;
 }
 
-
-
 function getlecturebyId(id) {
   console.log(id)
   window.location.href = "/home/lecture/" + id;
 }
-
-function addtocart(id) {
-  console.log(id)
-
-  fetch("/home/cart", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json" // Đặt kiểu dữ liệu là JSON
-    },
-    body: JSON.stringify({ courseId: id }) // Chuyển đổi dữ liệu thành chuỗi JSON
-  })
-    .then(response => response.json())
-    .then(data => {
-      // showflashmessage(data.status, data.message)
-      if (data.status === "success") {
-        // window.location.reload();
-        showflashmessage(data.status, data.message);
-      }
-      else { showflashmessage(data.status, data.message); }
-    })
-    .catch(function (error) {
-      // Xử lý lỗi (nếu có)
-      console.error("Error:", error);
-    });
-
-}
-
-function delcart(id) {
-  console.log(id)
-
-  fetch("/home/cart", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json" // Đặt kiểu dữ liệu là JSON
-    },
-    body: JSON.stringify({ del_courseId: id }) // Chuyển đổi dữ liệu thành chuỗi JSON
-  })
-    .then(response => response.json())
-    .then(data => {
-      // showflashmessage(data.status, data.message)
-      if (data.status === "success") {
-        window.location.reload();
-        showflashmessage(data.status, data.message);
-      }
-      else { showflashmessage(data.status, data.message); }
-    })
-    .catch(function (error) {
-      // Xử lý lỗi (nếu có)
-      console.error("Error:", error);
-    });
-
-}
-
-
-
 
 function callback(url) {
   window.location.href = url;
@@ -724,8 +641,6 @@ function deletecoursebyId(target , id) {
     });
 
 }
-
-
 
 function resendVerifyEmail(email, accountid) {
   console.log(email)
@@ -938,6 +853,34 @@ function rmComment(id) {
     });
 }
 
+/** filter */
+document.getElementById('filterForm').addEventListener('submit', function (e) {
+  e.preventDefault();
+
+  const params = {};
+  const industry = document.getElementById('filterIndustry').value.trim();
+  const size = document.getElementById('filterSize').value.trim();
+  const isVerified = document.getElementById('filterIsVerified').value.trim();
+
+  if (industry) params.industry = industry;
+  if (size) params.size = size;
+  if (isVerified) params.isVerified = isVerified;
+
+  const queryString = new URLSearchParams(params).toString();
+  const url = queryString ? `/home/business?${queryString}#allCompanies` : '/home/business#allCompanies';
+
+  console.log('Redirecting to:', url); // Log URL
+  window.location.href = url;
+});
+
+document.getElementById('showAllBtn').addEventListener('click', function () {
+  window.location.href = '/home/business#allCompanies';
+});
+
+// Scroll to the "All List of Company" section if the URL contains the hash
+if (window.location.hash === '#allCompanies') {
+  document.getElementById('allCompanies').scrollIntoView();
+}
 
 /**
  * Scroll top button

@@ -31,10 +31,28 @@
                         <span class="text-danger">*</span>
                     </label>
                     <div class="col-sm-10">
-                        <input type="text" class="form-control" id="inputIndustry" name="industry" 
-                        placeholder="Industry (e.g., IT, AI, Marketing)" 
-                        value="<%= data.company.industry %>"
-                        required>
+                        <select class="form-select" id="inputIndustry" name="industry" required>
+                            <option value="" disabled selected>Select Industry</option>
+                            <option value="IT" <%= data.company.industry === 'IT' ? 'selected' : '' %>>IT</option>
+                            <option value="Marketing" <%= data.company.industry === 'Marketing' ? 'selected' : '' %>>Marketing</option>
+                            <option value="Finance" <%= data.company.industry === 'Finance' ? 'selected' : '' %>>Finance</option>
+                            <option value="Healthcare" <%= data.company.industry === 'Healthcare' ? 'selected' : '' %>>Healthcare</option>
+                            <option value="Education" <%= data.company.industry === 'Education' ? 'selected' : '' %>>Education</option>
+                            <option value="Manufacturing" <%= data.company.industry === 'Manufacturing' ? 'selected' : '' %>>Manufacturing</option>
+                            <option value="Retail" <%= data.company.industry === 'Retail' ? 'selected' : '' %>>Retail</option>
+                            <option value="Construction" <%= data.company.industry === 'Construction' ? 'selected' : '' %>>Construction</option>
+                            <option value="Transportation" <%= data.company.industry === 'Transportation' ? 'selected' : '' %>>Transportation</option>
+                            <option value="Real Estate" <%= data.company.industry === 'Real Estate' ? 'selected' : '' %>>Real Estate</option>
+                            <option value="Telecommunications" <%= data.company.industry === 'Telecommunications' ? 'selected' : '' %>>Telecommunications</option>
+                            <option value="Energy" <%= data.company.industry === 'Energy' ? 'selected' : '' %>>Energy</option>
+                            <option value="Hospitality" <%= data.company.industry === 'Hospitality' ? 'selected' : '' %>>Hospitality</option>
+                            <option value="Legal" <%= data.company.industry === 'Legal' ? 'selected' : '' %>>Legal</option>
+                            <option value="Agriculture" <%= data.company.industry === 'Agriculture' ? 'selected' : '' %>>Agriculture</option>
+                            <option value="Media" <%= data.company.industry === 'Media' ? 'selected' : '' %>>Media</option>
+                            <option value="Entertainment" <%= data.company.industry === 'Entertainment' ? 'selected' : '' %>>Entertainment</option>
+                            <option value="Consulting" <%= data.company.industry === 'Consulting' ? 'selected' : '' %>>Consulting</option>
+                            <option value="Nonprofit" <%= data.company.industry === 'Nonprofit' ? 'selected' : '' %>>Nonprofit</option>
+                        </select>
                     </div>
                 </div>
             </div>

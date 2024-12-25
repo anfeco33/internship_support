@@ -18,25 +18,48 @@ const upload = require('../middleware/upload');
 router.get('/', function (req, res) {
   res.redirect('/home/business');
 })
-  .get('/business', ensureProfileUpdated, async function (req, res, next) {
-    const company = await Company.findOne({ representativeId: req.session.account });
-    const partial = 'partials/business';
-    const layout = 'layouts/main';
+.get('/business', ensureProfileUpdated, async function (req, res, next) {
+    try {
+      const company = await Company.findOne({ representativeId: req.session.account });
+      const partial = 'partials/business';
+      const layout = 'layouts/main';
 
-    req.partial_path = partial
-      req.layout_path = layout
-    // company
-    if (company)
-      req.page_data = {
-        listcourse: await businessController.get_list_business(),
-        businessId: company._id,
+      req.partial_path = partial;
+      req.layout_path = layout;
+
+      console.log("Query received:", req.query); // Log query string
+      console.log("Path:", req.path); // Log đường dẫn
+      console.log("Original URL:", req.originalUrl); // Log URL gốc
+      console.log("Full URL:", req.protocol + "://" + req.get('host') + req.originalUrl); // Log toàn bộ URL
+      const { industry, size, isVerified } = req.query;
+
+      // Chỉ thêm các tham số vào filter nếu có giá trị
+      const filter = {};
+      if (industry) filter.industry = industry;
+      if (size) filter.size = size;
+      if (isVerified !== undefined && isVerified !== '') {
+        filter.isVerified = isVerified === 'true';
       }
-    else
-      req.page_data = {
-        listcourse: await businessController.get_list_business(),
+      console.log("Filter criteria:", filter);
+
+      if (company) {
+        req.page_data = {
+          listOfBusiness: await businessController.get_list_business(filter),
+          topSupportiveCompanies: await businessController.get_top_supportive_companies(),
+          businessId: company._id,
+        };
+      } else {
+        req.page_data = {
+          listOfBusiness: await businessController.get_list_business(filter),
+          topSupportiveCompanies: await businessController.get_top_supportive_companies(),
+        };
       }
 
       await userController.getpage(req, res, next);
+    } catch (error) {
+      console.error('Error fetching business list:', error);
+      next(error);
+    }
   })
   .get('/business/update', async function (req, res, next) {
     const partial = 'partials/business_update';
@@ -78,52 +101,25 @@ router.get('/', function (req, res) {
     { name: 'documents', maxCount: 10 }, 
   ]), 
   businessController.editCompanyProfile)
+  .get('/business/:companyId', async function (req, res, next) {
+    const user = await User.findById(req.session.account);
 
-  // .get('/course_create', async function (req, res, next) {
-  //   const partial = 'partials/course_create';
-  //   const layout = 'layouts/main';
+    const hasReviewsOfACourse = await Review.find({ courseId: req.params.courseId })
+    .populate('userId', 'fullName profilePicture'); 
+    const hasReviewed = await Review.findOne({ courseId: req.params.courseId, userId: req.session.account })
 
-  //   req.partial_path = partial
-  //   req.layout_path = layout
-
-  //   req.page_data = {
-  //     list_my_course: await businessController.get_my_course(req, res, next),
-  //   }
-  //   await userController.getpage(req, res, next);
-  // })
-  // .post('/course/create', upload.single('courseImage'), async (req, res, next) => {
-  //   try {
-  //       req.body = JSON.parse(req.body.courseData);
-  //       const result = await businessController.addNewCourse(req, res, next);
-  //       res.json(result);
-  //   } catch (error) {
-  //       next(error);
-  //   }
-  // })
-  // .get('/courseedit/:courseId', async function (req, res, next) {
-  //   console.log(req.params.courseId)
-  //   const partial = 'partials/edit_course';
-  //   const layout = 'layouts/main';
-  //   req.partial_path = partial
-  //   req.layout_path = layout
-  //   req.page_data = {
-  //     courseId: req.params.courseId,
-  //     course_detail: await businessController.getCourse(req.params.courseId),
-  //     section_detail: await businessController.getSectionsAndLectures(req.params.courseId)
-  //   }
-  //   // console.log(req.page_data.account_details)
-  //   await userController.getpage(req, res, next);
-
-  // })
-  // .put('/courseedit/:courseId', upload.single('courseImage'), async (req, res, next) => {
-  //   try {
-  //       req.body = JSON.parse(req.body.courseData);
-  //       const result = await businessController.editCourse(req, res, next);
-  //       res.json(result);
-  //   } catch (error) {
-  //       next(error);
-  //   }
-  // })
+    console.log(req.params.courseId)
+    const partial = 'partials/course_detail';
+    const layout = 'layouts/main';
+    req.partial_path = partial
+    req.layout_path = layout
+    req.page_data = {
+      company: await businessController.getBusinessProfile(req.params.companyId),
+    //   hasReviewed: hasReviewed,
+    //   hasReviewsOfACourse: hasReviewsOfACourse,
+    }
+    await userController.getpage(req, res, next);
+  })
   // .get('/course/:courseId', async function (req, res, next) {
   //   const user = await User.findById(req.session.account);
   //   const hasBought = user.subscribed.includes(req.params.courseId);
