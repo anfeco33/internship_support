@@ -25,11 +25,17 @@ router.get('/', function (req, res) {
 
     req.partial_path = partial
       req.layout_path = layout
-
+    // company
+    if (company)
       req.page_data = {
         listcourse: await businessController.get_list_business(),
         businessId: company._id,
       }
+    else
+      req.page_data = {
+        listcourse: await businessController.get_list_business(),
+      }
+
       await userController.getpage(req, res, next);
   })
   .get('/business/update', async function (req, res, next) {
