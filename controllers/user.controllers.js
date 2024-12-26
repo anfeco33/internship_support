@@ -288,9 +288,9 @@ class UserController {
     // const accountID = req.user._id;
     const accountID = req.session.account;
     console.log("Authenticated user ID:", accountID);
-
+    
     const account = await this.getAccount(accountID);
-
+    console.log("curr account data: " + account)
      // const account = await this.getAccount(req.session.account)
       if (account.lock) {
         var state = { status: 'warning', message: 'Account has been locked' };
@@ -329,7 +329,6 @@ class UserController {
   }
 
   async getAccount(accountID) {
-    console.log("curr account 6: " + accountID)
     try {
       const find = await User.findById(accountID);
       // console.log(find)
@@ -608,29 +607,6 @@ class UserController {
       }
   }
 
-  // async logout(req, res) {
-  //   console.log("LOGOUT : ")
-  //   try {
-  //     if (req.session.loggedIn) {
-  //       req.session.loggedIn = false;
-  //       var state = { status: 'success', message: 'Logout successful' };
-  //     }
-  //     else {
-  //       var state = { status: 'warning', message: 'Có lỗi xảy ra hãy đăng nhập lại' };
-  //     }
-
-  //     req.session.flash = {
-  //       type: state.status,
-  //       intro: 'logout feature',
-  //       message: state.message,
-  //     };
-  //     var goto = "/login"
-  //     var flashMessage = req.session.flash;
-  //     return res.status(200).json({ flashMessage: flashMessage, redirect: goto });
-  //   } catch (error) {
-  //     next(error);
-  //   }
-  // }
   async sendOTP_func(req, res, next) {
       console.log("Email input SEND OTP:", req.body.email);
 

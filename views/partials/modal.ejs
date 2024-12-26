@@ -12,48 +12,76 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-outline-danger" data-bs-dismiss="modal"
-                        id="confirm">Yes</button>
-                    <button type="button" class="btn btn-outline-primary" data-bs-dismiss="modal">Back</button>
+                        id="confirm">Logout</button>
+                    <button type="button" class="btn btn-outline-primary" data-bs-dismiss="modal">Cancel</button>
                 </div>
             </div>
         </div>
     </div>
 
+    <!--  modal create internship -->
+    <div class="modal fade" id="createInternshipModal" tabindex="-1" aria-labelledby="createInternshipModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="createInternshipModalLabel">Create Internship</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="createInternshipForm">
+                        <div class="mb-3">
+                            <label for="internshipTitle" class="form-label">Title</label>
+                            <input type="text" class="form-control" id="internshipTitle" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="internshipDescription" class="form-label">Description</label>
+                            <textarea id="internshipDescription" class="form-control" rows="10"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+<!-- sửa form tuyển intern -->
+    <div class="modal fade" id="editInternshipModal" tabindex="-1" aria-labelledby="editInternshipModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="editInternshipModalLabel">Edit Internship</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <form id="editInternshipForm">
+                <div class="mb-3">
+                  <label for="editInternshipTitle" class="form-label">Title</label>
+                  <input type="text" class="form-control" id="editInternshipTitle" required>
+                </div>
+                <div class="mb-3">
+                  <label for="editInternshipDescription" class="form-label">Description</label>
+                  <textarea id="editInternshipDescription" class="form-control" rows="10"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
 
-
-
-    <div class="modal fade" id="show_info_payment" tabindex="-1" aria-labelledby="modal-info-payment" aria-hidden="true">
+      <!-- Confirmation delete modal -->
+      <div class="modal fade" id="deleteConfirmationModal" tabindex="-1" aria-labelledby="deleteConfirmationModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="modal-delete">Payment info</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <h5 class="modal-title" id="deleteConfirmationModalLabel">Confirm Deletion</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <p>Card Owner: <strong class="payment_owner"></strong></p> <br>
-                    <p>Payment Id: <strong class="payment_id"></strong></p> <br>
-                </div>
-            </div>
-        </div>
-    </div>
-
-
-
-
-    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="modal-delete" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="modal-delete">Xóa khóa học</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <p>Bạn có chắc muốn xóa khóa học ?  <strong class="id_course"></strong></p>
+                Are you sure you want to delete this internship?
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-danger" data-bs-dismiss="modal"
-                        id="confirm_delete">Có</button>
-                    <button type="button" class="btn btn-outline-primary" data-bs-dismiss="modal">Quay lại</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" id="confirmDeleteButton" class="btn btn-danger">Delete</button>
                 </div>
             </div>
         </div>

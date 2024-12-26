@@ -27,10 +27,10 @@ router.get('/', function (req, res) {
       req.partial_path = partial;
       req.layout_path = layout;
 
-      console.log("Query received:", req.query); // Log query string
-      console.log("Path:", req.path); // Log đường dẫn
-      console.log("Original URL:", req.originalUrl); // Log URL gốc
-      console.log("Full URL:", req.protocol + "://" + req.get('host') + req.originalUrl); // Log toàn bộ URL
+      console.log("Query received:", req.query);
+      console.log("Path:", req.path);
+      console.log("Original URL:", req.originalUrl); 
+      console.log("Full URL:", req.protocol + "://" + req.get('host') + req.originalUrl); 
       const { industry, size, isVerified } = req.query;
 
       // Chỉ thêm các tham số vào filter nếu có giá trị
@@ -42,6 +42,8 @@ router.get('/', function (req, res) {
       }
       console.log("Filter criteria:", filter);
 
+      const internships = await Company.find({ "internships.0": { $exists: true } }, { internships: 1 });
+      console.log("Internships:", internships);
       if (company) {
         req.page_data = {
           listOfBusiness: await businessController.get_list_business(filter),
@@ -99,27 +101,79 @@ router.get('/', function (req, res) {
   .put('/business-edit/edit/:companyId', upload.fields([
     { name: 'images', maxCount: 10 }, // max 10 images
     { name: 'documents', maxCount: 10 }, 
-  ]), 
-  businessController.editCompanyProfile)
+    ]), 
+    businessController.editCompanyProfile
+  )
   .get('/business/:companyId', async function (req, res, next) {
-    const user = await User.findById(req.session.account);
-
-    const hasReviewsOfACourse = await Review.find({ courseId: req.params.courseId })
-    .populate('userId', 'fullName profilePicture'); 
-    const hasReviewed = await Review.findOne({ courseId: req.params.courseId, userId: req.session.account })
-
     console.log(req.params.courseId)
-    const partial = 'partials/course_detail';
+    const partial = 'partials/business_detail';
     const layout = 'layouts/main';
     req.partial_path = partial
     req.layout_path = layout
     req.page_data = {
       company: await businessController.getBusinessProfile(req.params.companyId),
-    //   hasReviewed: hasReviewed,
-    //   hasReviewsOfACourse: hasReviewsOfACourse,
+      businessId: req.params.companyId,
     }
     await userController.getpage(req, res, next);
   })
+  .post('/business/:companyId/internship', businessController.createInternship)
+  .get('/business/internship/:internshipId', async (req, res) => {
+    try {
+      console.log('Fetching internship details:', req.params.internshipId);
+      const internshipId = req.params.internshipId;
+      const company = await Company.findOne({ "internships._id": internshipId }, { "internships.$": 1 });
+      if (!company) {
+        return res.status(404).json({ status: 'error', message: 'Internship not found' });
+      }
+  
+      res.status(200).json({ status: 'success', internship: company.internships[0] });
+    } catch (error) {
+      console.error('Error fetching internship details:', error);
+      res.status(500).json({ status: 'error', message: 'Internal Server Error' });
+    }
+  })
+  .put('/business/internship/:internshipId', async (req, res) => {
+    try {
+      const internshipId = req.params.internshipId;
+      const { title, description } = req.body;
+  
+      const company = await Company.findOneAndUpdate(
+        { "internships._id": internshipId },
+        { $set: { "internships.$.title": title, "internships.$.description": description } },
+        { new: true }
+      );
+  
+      if (!company) {
+        return res.status(404).json({ status: 'error', message: 'Internship not found' });
+      }
+  
+      res.status(200).json({ status: 'success', message: 'Internship updated successfully' });
+    } catch (error) {
+      console.error('Error updating internship:', error);
+      res.status(500).json({ status: 'error', message: 'Internal Server Error' });
+    }
+  })
+  .delete('/business/internship/:internshipId', async (req, res) => {
+    try {
+      const { internshipId } = req.params;
+  
+      const company = await Company.findOneAndUpdate(
+        { "internships._id": internshipId },
+        { $pull: { internships: { _id: internshipId } } }, // Xóa internship theo ID
+        { new: true }
+      );
+  
+      if (!company) {
+        return res.status(404).json({ status: 'error', message: 'Internship not found' });
+      }
+  
+      res.status(200).json({ status: 'success', message: 'Internship deleted successfully' });
+    } catch (error) {
+      console.error('Error deleting internship:', error);
+      res.status(500).json({ status: 'error', message: 'Internal Server Error' });
+    }
+  })
+  
   // .get('/course/:courseId', async function (req, res, next) {
   //   const user = await User.findById(req.session.account);
   //   const hasBought = user.subscribed.includes(req.params.courseId);

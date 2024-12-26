@@ -96,8 +96,6 @@ if (searchInput) {
   });
 }
 
-
-
 function sendData(term) {
   console.log(term)
   fetch(`/home/search/${term}`, {
@@ -109,23 +107,22 @@ function sendData(term) {
     .then((response) => response.json())
     .then(list => {
       if (list.data.length > 0) {
-        // console.log(list);
-        list_course = list.data
+        list_business = list.data
         var data = ""
-        list_course.forEach((course) => {
+        list_business.forEach((company) => {
           data += `
           <li class="list-group-item d-flex justify-content-start align-items-center my-2"
-          onclick="getcoursebyId('${course._id.toString()}')">
-            <div class="course_res_pic  d-flex justify-content-start align-items-center">
-              <img src="${course.courseImage}" alt="err">
+          onclick="getBusinessById('${company._id.toString()}')">
+            <div class="business_res_pic  d-flex justify-content-start align-items-center">
+              <img src="${company.images[0]}" alt="business" class="img-fluid">
             </div>
             
-            <div class="course_name mx-2  d-flex justify-content-start align-items-center">
-                ${course.courseName}
+            <div class="name mx-2  d-flex justify-content-start align-items-center">
+                <span><strong>${company.name}</strong><span>
+                <span class="industry text-muted">(${company.industry})</span>
             </div>
           </li>
           `
-
         });
         $("#search_result_row").append(data);
       }else{
@@ -854,34 +851,39 @@ function rmComment(id) {
 }
 
 /** filter */
-document.getElementById('filterForm').addEventListener('submit', function (e) {
-  e.preventDefault();
+const filter = document.getElementById('filterForm');
 
-  const params = {};
-  const industry = document.getElementById('filterIndustry').value.trim();
-  const size = document.getElementById('filterSize').value.trim();
-  const isVerified = document.getElementById('filterIsVerified').value.trim();
+// add rating
+if(filter){
 
-  if (industry) params.industry = industry;
-  if (size) params.size = size;
-  if (isVerified) params.isVerified = isVerified;
+  filter.addEventListener('submit', function (e) {
+    e.preventDefault();
 
-  const queryString = new URLSearchParams(params).toString();
-  const url = queryString ? `/home/business?${queryString}#allCompanies` : '/home/business#allCompanies';
+    const params = {};
+    const industry = document.getElementById('filterIndustry').value.trim();
+    const size = document.getElementById('filterSize').value.trim();
+    const isVerified = document.getElementById('filterIsVerified').value.trim();
 
-  console.log('Redirecting to:', url); // Log URL
-  window.location.href = url;
-});
+    if (industry) params.industry = industry;
+    if (size) params.size = size;
+    if (isVerified) params.isVerified = isVerified;
 
-document.getElementById('showAllBtn').addEventListener('click', function () {
-  window.location.href = '/home/business#allCompanies';
-});
+    const queryString = new URLSearchParams(params).toString();
+    const url = queryString ? `/home/business?${queryString}#allCompanies` : '/home/business#allCompanies';
 
-// Scroll to the "All List of Company" section if the URL contains the hash
-if (window.location.hash === '#allCompanies') {
-  document.getElementById('allCompanies').scrollIntoView();
+    console.log('Redirecting to:', url); // Log URL
+    window.location.href = url;
+  });
+
+  document.getElementById('showAllBtn').addEventListener('click', function () {
+    window.location.href = '/home/business#allCompanies';
+  });
+
+  // Scroll to the "All List of Company" section if the URL contains the hash
+  if (window.location.hash === '#allCompanies') {
+    document.getElementById('allCompanies').scrollIntoView();
+  }
 }
-
 /**
  * Scroll top button
  */

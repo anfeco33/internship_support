@@ -195,44 +195,6 @@ document.addEventListener('DOMContentLoaded', function () {
     document.head.appendChild(script);
 });
 
-// function initMap() {
-//     // Kiểm tra nếu có giá trị lưu sẵn trong inputLocation
-//     const savedLocation = document.getElementById("inputLocation").value.trim();
-//     const defaultLocation = savedLocation 
-//         ? { lat: parseFloat(savedLocation.split(',')[0]), lng: parseFloat(savedLocation.split(',')[1]) }
-//         : { lat: 10.762622, lng: 106.660172 }; // Vị trí mặc định: Ho Chi Minh City
-
-//     map = new google.maps.Map(document.getElementById("map"), {
-//         center: defaultLocation,
-//         zoom: 13,
-//     });
-
-//     marker = new google.maps.Marker({
-//         position: defaultLocation,
-//         map: map,
-//         draggable: true,
-//     });
-
-//     // Cập nhật input khi kéo marker
-//     marker.addListener('dragend', function () {
-//         const position = marker.getPosition();
-//         document.getElementById("inputLocation").value = `${position.lat()}, ${position.lng()}`;
-//     });
-// }
-
-
-// // Auto-complete địa chỉ từ Google Maps
-// const autocomplete = new google.maps.places.Autocomplete(document.getElementById('inputLocation'));
-// autocomplete.addListener('place_changed', function () {
-//     const place = autocomplete.getPlace();
-//     if (place.geometry) {
-//         const location = place.geometry.location;
-//         marker.setPosition(location);
-//         map.setCenter(location);
-//         document.getElementById("inputLocation").value = `${location.lat()}, ${location.lng()}`;
-//     }
-// });
-
 function showflashmessage(type, message) {
     const validTypes = ['success', 'error', 'info', 'warning']; // Các kiểu hợp lệ của Toastr
       if (!validTypes.includes(type)) {

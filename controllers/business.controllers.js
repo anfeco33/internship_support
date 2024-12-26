@@ -4,7 +4,6 @@ const Section = require('../models/section');
 const Lecture = require('../models/lecture');
 const Review = require('../models/reviews');
 const Comment = require('../models/lecturecomments');
-const Business = require('../models/companies');
 const Exercise = require('../models/exercises');
 const Note = require('../models/note');
 const User = require('../models/users');
@@ -56,7 +55,7 @@ class BusinessController {
 
       console.log("get my business : " + company._id.toString());
       const companyId = company._id.toString();
-      const businesses = await Business.find({ companyId }).populate('companyID', 'profilePicture fullName');
+      const businesses = await Company.find({ companyId }).populate('companyID', 'profilePicture fullName');
 
       for (const business of businesses) {
         const company = business.companyID; // Người hướng dẫn tương ứng với khóa học
@@ -128,17 +127,19 @@ class BusinessController {
     try {
       const term = req.params.term;
       const regex = new RegExp(term, 'i');
-      console.log(regex);
+      console.log("regex: ", regex);
 
       let listBusiness;
       if (term === "all") {
-        listBusiness = await Company.find().populate('companyID', 'profilePicture fullName')
+        listBusiness = await Company.find().select('name images industry'); 
       } else {
-        listBusiness = await Business.find({
+        listBusiness = await Company.find({
           $or: [
-            { businessName: regex },
+            { name: regex },
+            { industry: regex },
+            { address: regex }
           ]
-        }).populate('companyID', 'profilePicture fullName');
+        }).select('name images industry'); 
       }
 
       if (listBusiness.length > 0) {
@@ -337,279 +338,7 @@ class BusinessController {
       res.status(500).json({ status: 'error', message: 'Đã xảy ra lỗi khi lấy danh sách cart' });
     }
   }
-  //TODO: thêm flash +  dark mode cho phần product
-  async addnewproduct(req, res, next) {
-    console.log("ADD new product : ")
-    try {
-
-      const errors = validationResult(req);
-
-      if (!errors.isEmpty()) {
-        var err_msg = "";
-        var list_err = errors.array();
-        list_err.forEach(err => {
-          err_msg += err.msg + " , ";
-        });
-
-        console.log(err_msg);
-
-        //CƠ CHẾ CỦA VALIDATOR KHÔNG CHO ĐI TIẾP
-        var state = { status: 'warning', message: err_msg };
-        res.json({ added: false, status: state.status, message: state.message });
-      } else {
-        console.log("SUCCESS")
-        const { productname, importprice, retailprice, inventory, category } = req.body;
-        console.log(productname, importprice, retailprice, inventory, category)
-
-
-        const find = await Product.findOne({ productName: productname });
-        if (!find) {
-          // console.log(defaultpassword);
-          const newProduct = new Product({
-            productName: productname,
-            importPrice: parseInt(importprice),
-            retailPrice: parseInt(retailprice),
-            inventory: inventory,
-            category: category,
-            productPicture: "/images/default_product.png",
-            barcode: "123"
-          });
-
-          // res.json({ added: true, status: "success", message: "Add staff successfully" });
-          await newProduct.save()
-            .then((savedProduct) => {
-              console.log('Product saved successfully:');
-              const imagePath = path.join(__dirname, '../uploads', 'tmp@product.jpg'); // Đường dẫn của hình ảnh upload
-
-              const newImagePath = path.join(__dirname, '../uploads', savedProduct._id.toString() + "@product.png"); // Đường dẫn mới với tên file tương ứng với productPicture
-              console.log(imagePath, newImagePath);
-              fs.rename(imagePath, newImagePath, function (err) {
-                if (err) {
-                  console.error('Error renaming image:', err);
-                } else {
-                  console.log('Image renamed successfully');
-                  req.session.flash = {
-                    type: 'success',
-                    intro: 'Add product',
-                    message: 'Add product successful',
-                  };
-                  res.json({ added: true, status: "success", message: "Add product successfully", product: savedProduct });
-                }
-              });
-
-            }).catch((error) => {
-              // Xử lý lỗi nếu quá trình lưu không thành công
-              console.error('Error saving product:', error);
-              res.json({ added: false, status: "warning", message: "Failed to add product" });
-            })
-        } else {
-          // res.json({ added: true, status: "success", message: "Add staff successfully" });
-          res.json({ added: false, status: "warning", message: "Product name already exists" });
-        }
-      }
-
-    } catch (error) {
-
-      next(error);
-    }
-  }
-
-  async updateproduct(req, res, next) {
-    try {
-
-      const errors = validationResult(req);
-
-      if (!errors.isEmpty()) {
-        var err_msg = "";
-        var list_err = errors.array();
-        list_err.forEach(err => {
-          err_msg += err.msg + " , ";
-        });
-
-        console.log(err_msg);
-
-        //CƠ CHẾ CỦA VALIDATOR KHÔNG CHO ĐI TIẾP
-        var state = { status: 'warning', message: err_msg };
-        res.json({ update: false, status: state.status, message: state.message });
-      } else {
-        console.log("SUCCESS")
-        const { productname, importprice, retailprice, inventory, category } = req.body;
-        console.log(productname, importprice, retailprice, inventory, category)
-
-        const find = await Product.findById(req.params.id);
-        if (find) {
-          // console.log(defaultpassword);
-
-          find.productName = productname,
-            find.importPrice = parseInt(importprice),
-            find.retailPrice = parseInt(retailprice),
-            find.inventory = parseInt(inventory),
-            find.category = category,
-
-
-            // res.json({ added: true, status: "success", message: "Add staff successfully" });
-            await find.save()
-              .then((savedProduct) => {
-                console.log('Product saved successfully:');
-
-                req.session.flash = {
-                  type: "success",
-                  intro: 'Update product',
-                  message: "Update product successfully",
-                };
-                res.json({ update: true, status: "success", message: "Update product successfully", product: savedProduct });
-              }).catch((error) => {
-                // Xử lý lỗi nếu quá trình lưu không thành công
-                console.error('Error saving product:', error);
-
-                res.json({ update: false, status: "error", message: "Failed to add staff" });
-              })
-        }
-        else {
-          // res.json({ added: true, status: "success", message: "Add staff successfully" });
-          res.json({ update: false, status: "warning", message: "Product name already exists" });
-        }
-      }
-
-    } catch (error) {
-
-      next(error);
-    }
-
-  }
-
-  // Thêm khóa học
-  async addNewCourse(req, res, next) {
-    console.log("ADD new course : ");
-    try {
-      const errors = validationResult(req);
-      console.log(errors.array());
-      if (!errors.isEmpty()) {
-        var err_msg = "";
-        var list_err = errors.array();
-        list_err.forEach(err => {
-          err_msg += err.msg + " , ";
-        });
-
-        console.log(err_msg);
-
-        var state = { status: 'warning', message: err_msg };
-        res.json({ added: false, status: state.status, message: state.message });
-      } else {
-        console.log(req.body);
-        const { courseName, coursePrice, courseCategory, coursePreview, courseDescription, courseAudience, courseResult, courseRequirement, sections } = req.body;
-        var companyID = req.session.account;
-        const newCourse = new Course({
-          companyID,
-          courseName,
-          coursePrice,
-          courseCategory,
-          coursePreview,
-          courseImage: req.file ? '../../courses/' + req.file.filename : '../images/default_course.jpg',
-          courseDescription,
-          courseAudience,
-          courseResult,
-          courseRequirement
-        });
-
-        const savedCourse = await newCourse.save();
-
-        for (const section of sections) {
-          const newSection = new Section({
-            courseID: savedCourse._id,
-            sectionNumber: section.sectionNumber,
-            sectionTitle: section.sectionTitle
-          });
-
-          const savedSection = await newSection.save();
-
-          for (const lecture of section.lectures) {
-            const newLecture = new Lecture({
-              sectionID: savedSection._id,
-              lectureTitle: lecture.lectureTitle,
-              lectureLink: lecture.lectureLink,
-              lectureDescription: lecture.lectureDescription
-            });
-
-            await newLecture.save();
-          }
-        }
-
-        res.status(201).json({ added: true, status: "success", message: "Course added successfully", course: savedCourse });
-      }
-    } catch (error) {
-      // res.status(500).json(error);
-      // console.error("Lỗi: " + error);
-      next(error);
-    }
-  }
-
-  // Edit Course
-  async editCourse(req, res, next) {
-    console.log("Edit course : ");
-    const courseId = req.params.courseId;
-
-    try {
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
-      }
-      
-      console.log("TEST:");
-      console.log(req.body);
-      console.log(req.body.sections);
-      console.log(Array.isArray(req.body.sections));
-      console.log(typeof req.body.sections);
-      const { courseName, coursePrice, courseImage, courseCategory, coursePreview, courseDescription, courseAudience, courseResult, courseRequirement, sections } = req.body;
-
-      // Update course details
-      const updatedCourse = await Course.findByIdAndUpdate(courseId, {
-        courseName,
-        coursePrice,
-        courseCategory,
-        coursePreview,
-        courseImage: req.file ? '../../courses/' + req.file.filename : courseImage,
-        courseDescription,
-        courseAudience,
-        courseResult,
-        courseRequirement
-      }, { new: true });
-
-      // Remove all existing sections and lectures, and add new ones
-      await Section.deleteMany({ courseID: courseId });
-      await Lecture.deleteMany({ courseID: courseId });
-
-      console.log(sections);
-
-      for (const section of sections) {
-        const newSection = new Section({
-          courseID: courseId,
-          sectionNumber: section.sectionNumber,
-          sectionTitle: section.sectionTitle
-        });
-
-        const savedSection = await newSection.save();
-
-        for (const lecture of section.lectures) {
-          const newLecture = new Lecture({
-            sectionID: savedSection._id,
-            lectureTitle: lecture.lectureTitle,
-            lectureLink: lecture.lectureLink,
-            lectureDescription: lecture.lectureDescription
-          });
-
-          await newLecture.save();
-        }
-      }
-
-      res.json({ status: "success", message: "Course updated successfully", course: updatedCourse });
-
-    } catch (error) {
-      console.error("Error: " + error);
-      next(error);
-    }
-  }
-
+  
   // Take note
   async addNewNote(req, res) {
     try {
@@ -1213,12 +942,9 @@ class BusinessController {
   }
 
   async getBusinessProfile(businessId) {
-    console.log("curr Busi : " + businessId);
-    console.log('getting edit business:', businessId);
-
     try {
       const find = await Company.findById(businessId);
-      // console.log(find)
+      console.log("GET business profile : ", find);
       if (find) {
         return find;
       } else {
@@ -1227,6 +953,30 @@ class BusinessController {
       }
     } catch (error) {
       console.log(error);
+    }
+  }
+
+  async createInternship(req, res, next) {
+    try {
+      const { title, description } = req.body;
+      const companyId = req.params.companyId;
+
+      console.log('Received internship data:', { title, description, companyId });
+
+      const company = await Company.findById(companyId);
+      if (!company) {
+        return res.status(404).json({ message: 'Company not found' });
+      }
+
+      company.internships.push({ title, description });
+      await company.save();
+
+      console.log('Internship created successfully:', { title, description });
+      res.status(200).json({ status: 'success', message: 'Internship created successfully' });
+      // res.redirect(`/home/business/${companyId}`);
+    } catch (error) {
+      console.error('Error creating internship:', error);
+      res.status(500).json({ status: 'error', message: 'Internal Server Error' });
     }
   }
 

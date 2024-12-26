@@ -1,7 +1,9 @@
 <header>
     <nav class="navbar">
         <div class="navbar-container">
-            <img src="../../images/logo.png" alt="err" id="header-logo">
+            <a href="/home">
+                <img src="../../images/logo.png" alt="err" id="header-logo">
+            </a>
             <div class="seach_bar d-flex justify-content-center align-items-center mb-3">
                 <div class="seach_content  input-group mx-3">
                     <input type="text" class="form-control" name="search" id="searchInput" placeholder="Find companies, for example: FPT" data-bs-toggle="collapse" data-bs-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
@@ -18,15 +20,7 @@
                     <div class="collapse custom-collapse" id="collapseExample">
                         <div class="card card-body search_result">
                             <ul id="search_result_row">
-                                <!-- <li class="list-group-item d-flex justify-content-between align-items-center"
-                                    onclick="getcoursebyId('<%#=course._id.toString() %>')">
-                                    <div class="course_picture">
-                                        <img src="<%#=course.courseImage%>" alt="err">
-                                    </div>
-                                    <div class="course_name">
-                                        <p><%#=course.courseName%></p>
-                                    </div>
-                                </li> -->
+                                <!-- search result -->
                             </ul>    
                         </div>
                     </div>
@@ -39,9 +33,15 @@
                 <!-- nếu role company thì hiện nút update profile -->
                 <% if (account.role === 'company') { %>
                     <div class="update_profile_icon mx-3" alt="update profile">
-                        <button class="btn btn-primary" onclick="editByBussinessId('<%= data.businessId %>')">
+                        <button class="btn btn-primary btn-sm" onclick="editByBussinessId('<%= data.businessId %>')">
                             <i class="bi bi-pencil-square"></i>
                         </button>
+                    </div>
+                    <div class="my_business_icon mx-3" alt="my business">
+                        <a href="/home/business/<%= data.businessId %>" class="btn btn-secondary btn-sm my-business-btn">
+                            MY BUSINESS
+                        </a>
+                    </div>
                 <% } %>
             </div>
         </div>
@@ -50,7 +50,9 @@
 
 <%- include('../partials/slide_board') %>
 <div class="container mt-5">
-    <h2 class="mb-4">MOST SUPPORTIVE COMPANIES FOR INTERNSHIPS</h2>
+    <div class="alert alert-warning" role="alert">
+        <h2 class="title-type">MOST SUPPORTIVE COMPANIES FOR INTERNSHIPS</h2>
+    </div>
         <!--  hiện thành card có width == height (nhỏ hơn 150px) trên cùng 1 dòng-->
         <!-- chỉnh css chế độ sáng/tối cho text trong /public/css/style.css-->
          <!-- image mỗi business có cùng kích thước -->
@@ -141,8 +143,10 @@
       </div>
     </form>
     <div class="row">
-      <h3 class="title-type" id="allCompanies">BELOW ARE BUSINESSES THAT ARE LOOKING TO RECRUIT INTERNS</h3>
-      <% if (data.listOfBusiness) { %>
+        <div class="alert alert-warning" role="alert">
+            <h3 class="title-type" id="allCompanies">BELOW ARE BUSINESSES THAT ARE LOOKING TO RECRUIT INTERNS</h3>
+        </div>
+        <% if (data.listOfBusiness) { %>
         <% var list = data.listOfBusiness %>
         <% if (list.length > 0) { %>
           <% list.forEach((business) => { %>

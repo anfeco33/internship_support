@@ -758,7 +758,7 @@ body.dark #searchInput {
 
 
 
-.home-section .fill_content #search_result_row .course_res_pic img {
+.home-section .fill_content #search_result_row .business_res_pic img {
     /* border: 2px solid red; */
     object-fit: contain;
 
@@ -984,6 +984,10 @@ body.dark #searchInput {
     background-color: transparent;
     color: var(--text-dark-color)
 }
+
+.industry {
+    color: #6c757d; /* Bootstrap's text-muted color */
+  }
 
 .profile_page .account-settings-links .list-group-item.active {
     font-weight: bold !important;
@@ -2617,4 +2621,27 @@ body.light .update_business {
 
 .text-danger {
     color: red;
+}
+
+/* business details page */
+.company_detail_card {
+    background: #ffffff;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+.company_info {
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 10px;
+}
+.carousel-inner img {
+    object-fit: cover;
+    height: 400px;
+}
+
+.my-business-btn {
+    width: 150px;
+    height: 50px;
+    align-content: center;
 }

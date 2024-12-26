@@ -1,0 +1,495 @@
+<% var company = data.company %>
+<!-- chỉnh darkmode cho cards -->
+<header>
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="/home">
+                <img src="../../images/logo.png" alt="err" id="header-logo">
+            </a>
+            <div class="seach_bar d-flex justify-content-center align-items-center mb-3">
+                <div class="seach_content  input-group mx-3">
+                    <input type="text" class="form-control" name="search" id="searchInput" placeholder="Find companies, for example: FPT" data-bs-toggle="collapse" data-bs-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+                    <div class="input-group-append  d-flex justify-content-center align-items-center" >
+                        <span id="clear_icon">
+                            <i class="fa fa-times"></i>
+                        </span>
+                        <span id="seach_icon" class="input-group-text" 
+                        style="height: 100%; border-radius:0px 5px 5px 0px; padding: 8.5px;">                       
+                            <i class="fa fa-search" style="border-radius: 0px;"></i>
+                        </span>
+            
+                    </div>
+                    <div class="collapse custom-collapse" id="collapseExample">
+                        <div class="card card-body search_result">
+                            <ul id="search_result_row">
+                                <!-- search result -->
+                            </ul>    
+                        </div>
+                    </div>
+                </div>
+            
+                <div class="bell_icon mx-3" onclick="gotocart()">
+                    <i class="bi bi-bell-fill"></i>
+                </div>
+                <% if (account.role === 'company' & account._id.toString() === data.company.representativeId.toString()) { %>
+                    <div class="update_profile_icon mx-3" alt="update profile">
+                        <button class="btn btn-primary btn-sm" onclick="editByBussinessId('<%= data.businessId %>')">
+                            <i class="bi bi-pencil-square"></i>
+                        </button>
+                <% } %>
+            </div>
+        </div>
+    </nav>
+</header>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<div class="container-fluid light-style flex-grow-1 container-p-y company_detail_page" style="margin-top: 80px;">
+    <% if (company) { %>
+        <div class="company_detail_card">
+            <div class="row no-gutters row-bordered row-border-light">
+                <!-- Carousel for images and videos -->
+                <div class="col col-lg-7 col-12 pt-0">
+                    <div id="mediaCarousel" class="carousel slide" data-bs-ride="carousel">
+                        <div class="carousel-inner">
+                            <!-- Promotion Video -->
+                            <% if (company.promotionVideos.length > 0) { %>
+                                <div class="carousel-item active">
+                                    <iframe width="100%" height="400px" src="<%= company.promotionVideos[0] %>"
+                                        title="Promotion Video" frameborder="0" allowfullscreen
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture">
+                                    </iframe>
+                                </div>
+                            <% } %>
+                            <!-- Images -->
+                            <% if (company.images && company.images.length > 0) { %>
+                                <% company.images.forEach(function (image, index) { %>
+                                    <div class="carousel-item <%= company.promotionVideos.length === 0 && index === 0 ? 'active' : '' %>">
+                                        <img src="<%= image %>" class="d-block w-100" alt="Company Image">
+                                    </div>
+                                <% }) %>
+                            <% } %>
+                        </div>
+                        <!-- Carousel Controls -->
+                        <button class="carousel-control-prev" type="button" data-bs-target="#mediaCarousel" data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Previous</span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#mediaCarousel" data-bs-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Next</span>
+                        </button>
+                    </div>
+                    <!-- Thumbnails -->
+                    <div class="thumbnail-container mt-3">
+                        <button class="thumbnail-control-prev" onclick="scrollThumbnails('prev')">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Previous</span>
+                        </button>
+                        <div class="thumbnail-wrapper">
+                            <% if (company.promotionVideos.length > 0) { %>
+                                <% var videoId = company.promotionVideos[0].split('v=')[1]; %>
+                                <% if (videoId) { %>
+                                    <div class="thumbnail" onclick="showMedia('video', '<%= company.promotionVideos[0] %>')">
+                                        <img src="https://img.youtube.com/vi/<%= videoId %>/0.jpg" class="img-fluid" alt="Promotion Video">
+                                    </div>
+                                <% } %>
+                            <% } %>
+                            <% if (company.images && company.images.length > 0) { %>
+                                <% company.images.forEach(function (image) { %>
+                                    <div class="thumbnail" onclick="showMedia('image', '<%= image %>')">
+                                        <img src="<%= image %>" class="img-fluid" alt="Company Image">
+                                    </div>
+                                <% }); %>
+                            <% } %>
+                        </div>
+                        <button class="thumbnail-control-next" onclick="scrollThumbnails('next')">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Next</span>
+                        </button>
+                    </div>
+
+                </div>
+                <!-- Company Info -->
+                <div class="col col-lg-5 col-12 company_info">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h4 class="mb-0"><%= company.name %></h4>
+                        <% if (company.isVerified) { %>
+                            <img src="/images/verified_icon.png" alt="Verified" style="width: 20px; height: 20px;">
+                        <% } %>
+                    </div>
+                    <p><strong>Industry</strong> <%= company.industry %></p>
+                    <p><strong>Size</strong> <%= company.size || 'Not specified' %></p>
+                    <p><strong>Address</strong> <%= company.address || 'Not specified' %></p>
+                    <p><strong>Website</strong> <a href="<%= company.website %>" target="_blank"><%= company.website || 'Not specified' %></a></p>
+                    <p><strong>Contact Email</strong> <%= company.contactEmail || 'Not specified' %></p>
+                    <p><strong>Phone Number</strong> <%= company.phoneNumber || 'Not specified' %></p>
+                    <p><strong>Average Rating</strong> <%= company.averageRating ? company.averageRating.toFixed(1) : 'Not rated yet' %> / 5 stars</p>
+                    <% if (account.role === 'company' & account._id.toString() === data.company.representativeId.toString()) { %>
+                        <div class="my_business_icon mx-3" alt="my business">
+                            <button class="btn btn-danger btn-sm my-business-btn" data-bs-toggle="modal" data-bs-target="#createInternshipModal">
+                                CREATE INTERNSHIP
+                            </button>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+        <!-- Company Description -->
+        <div class="company_detail_card" style="margin-top: 20px;">
+            <h4>COMPANY DETAILS DESCRIPTION</h4>
+            <p><%= company.profile || 'No description available' %></p>
+        </div>
+        <!-- Internship Postings -->
+        <div class="company_detail_card" style="margin-top: 20px;">
+            <h4>INTERNSHIP OPPORTUNITIES OPENINGS</h4>
+            <% if (company.internships && company.internships.length > 0) { %>
+                <% company.internships.forEach(function (internship) { %>
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h5 class="card-title"><%= internship.title %></h5>
+                                </div>
+                                <% if (account.role === 'company' && account._id.toString() === data.company.representativeId.toString()) { %>
+                                    <div class="btn-group">
+                                        <button class="btn btn-secondary btn-sm" onclick="editInternship('<%= internship._id %>')">Edit</button>
+                                        <button class="btn btn-danger btn-sm" onclick="deleteInternship('<%= internship._id %>')">Delete</button>
+                                    </div>
+                                <% } %>
+                            </div>
+                            <div class="card-text mt-3"><%- internship.description %></div>
+                            <p class="text-muted mt-3">Created at: <%= new Date(internship.createdAt).toLocaleString() %></p>
+                            <button class="btn btn-primary mt-3" onclick="applyForInternship('<%= internship._id %>')">Apply Now</button>
+                        </div>
+                    </div>
+                <% }); %>
+            <% } else { %>
+                <p>No internship opportunities available at the moment.</p>
+            <% } %>
+        </div>
+        <!-- Google Map -->
+        <div class="company_detail_card" style="margin-top: 20px;">
+            <h4>MAP LOCATION</h4>
+            <div id="map" style="height: 400px; width: 100%;"></div>
+        </div>
+        <!-- comment -->
+        <div class="company_detail_card" style="margin-top: 20px;">
+            <h4>COMMENTS</h4>
+            <div class="comment-section">
+                <div class="comment-form">
+                    <textarea class="form-control" id="commentContent" rows="3" placeholder="Write a comment..."></textarea>
+                    <button class="btn btn-primary mt-2" onclick="addComment('<%= company._id %>')">Comment</button>
+                </div>
+                <div class="comments">
+                    <% if (company.comments && company.comments.length > 0) { %>
+                        <% company.comments.forEach(function (comment) { %>
+                            <div class="comment">
+                                <div class="comment-header">
+                                    <strong><%= comment.authorName %></strong>
+                                    <span><%= new Date(comment.createdAt).toLocaleString() %></span>
+                                </div>
+                                <div class="comment-content">
+                                    <p><%= comment.content %></p>
+                                </div>
+                            </div>
+                        <% }) %>
+                    <% } else { %>
+                        <p>No comments yet</p>
+                    <% } %>
+                </div>
+            </div>
+            <% } %>
+        </div>
+
+
+<script src="https://cdn.tiny.cloud/1/rkluiijc3ceh2ffj46mafmr3qsdeijckhb4ja3bq6um2k256/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBs2CCj3DSth7s_9YHuG5EazDGskh5uKGk&libraries=places&callback=initMap" 
+async defer></script>
+<script>
+  function initMap() {
+    var companyLocation = { lat: <%= company.location.coordinates[1] %>, lng: <%= company.location.coordinates[0] %> };
+    var map = new google.maps.Map(document.getElementById('map'), {
+      zoom: 15,
+      center: companyLocation
+    });
+    var marker = new google.maps.Marker({
+      position: companyLocation,
+      map: map
+    });
+  }
+
+  function showMedia(type, src) {
+    var carouselInner = document.querySelector('.carousel-inner');
+    carouselInner.innerHTML = ''; // Clear existing items
+
+    if (type === 'video') {
+      var videoItem = document.createElement('div');
+      videoItem.className = 'carousel-item active';
+      videoItem.innerHTML = '<iframe width="100%" height="400px" src="' + src + '" title="Promotion Video" frameborder="0" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>';
+      carouselInner.appendChild(videoItem);
+    } else if (type === 'image') {
+      var imageItem = document.createElement('div');
+      imageItem.className = 'carousel-item active';
+      imageItem.innerHTML = '<img src="' + src + '" class="d-block w-100" alt="Company Image">';
+      carouselInner.appendChild(imageItem);
+    }
+  }
+
+  
+  function applyForInternship(internshipId) {
+    // student only
+    if ('<%= account.role %>' !== 'student') {
+      showflashmessage('warning', 'You should be a student to apply for internships');
+      return;
+    }
+    // Implement the logic to apply for the internship
+    alert('Applying for internship with ID: ' + internshipId);
+  }
+
+  function scrollThumbnails(direction) {
+    var thumbnailWrapper = document.querySelector('.thumbnail-wrapper');
+    if (direction === 'prev') {
+      thumbnailWrapper.scrollBy({ left: -150, behavior: 'smooth' });
+    } else if (direction === 'next') {
+      thumbnailWrapper.scrollBy({ left: 150, behavior: 'smooth' });
+    }
+  }
+</script>
+<script>
+  tinymce.init({
+    selector: '#internshipDescription',
+    plugins: 'advlist autolink lists link image charmap preview anchor pagebreak',
+    toolbar_mode: 'floating',
+  });
+
+  document.addEventListener('DOMContentLoaded', function () {
+  const form = document.getElementById('createInternshipForm');
+  if (form) {
+    form.addEventListener('submit', function (event) {
+      event.preventDefault(); // Ngăn form gửi đi mặc định
+
+      // Đảm bảo TinyMCE đã được khởi tạo trước khi lấy nội dung
+      const descriptionEditor = tinymce.get('internshipDescription');
+      if (!descriptionEditor) {
+        showflashmessage('error', 'TinyMCE editor not initialized');
+        return;
+      }
+
+      const title = document.getElementById('internshipTitle').value.trim();
+      const description = descriptionEditor.getContent(); // Lấy nội dung từ TinyMCE
+      const companyId = '<%= data.company._id.toString() %>'; // Truyền đúng ID công ty từ EJS
+
+      if(!title || !description) {
+        showflashmessage('warning', 'Please enter title and description!');
+        return;
+      }
+
+      console.log('Sending data:', { title, description, companyId });
+
+      // Gửi dữ liệu đến server
+      fetch(`/home/business/${companyId}/internship`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ title, description }),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.status === 'success') {
+            showflashmessage('success', 'You have successfully posted!');
+            location.reload(); // Reload lại trang
+          } else {
+            showflashmessage('error', 'Error creating internship: ' + data.message);
+          }
+        })
+        .catch((error) => {
+          console.error('Error creating internship:', error);
+          showflashmessage('error', 'Error creating internship');
+        });
+    });
+  }
+});
+// edit internship
+function editInternship(internshipId) {
+    editingInternshipId = internshipId; // Lưu lại ID của internship đang chỉnh sửa.
+
+    fetch(`/home/business/internship/${internshipId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                // Đặt tiêu đề và mô tả vào modal.
+                document.getElementById('editInternshipTitle').value = data.internship.title;
+
+                if (tinymce.get('editInternshipDescription')) {
+                    tinymce.get('editInternshipDescription').setContent(data.internship.description);
+                } else {
+                    tinymce.init({
+                        selector: '#editInternshipDescription',
+                        setup: function (editor) {
+                            editor.on('init', function () {
+                                editor.setContent(data.internship.description);
+                            });
+                        },
+                    });
+                }
+
+                // show modal sửa
+                const editModal = new bootstrap.Modal(document.getElementById('editInternshipModal'));
+                editModal.show();
+            } else {
+                showflashmessage('error', 'Error fetching internship: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching internship:', error);
+            showflashmessage('error', 'Error fetching internship');
+        });
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+  const form = document.getElementById('editInternshipForm');
+  if (form) {
+    form.addEventListener('submit', function (event) {
+      event.preventDefault();
+
+        const title = document.getElementById('editInternshipTitle').value.trim();
+        const description = tinymce.get('editInternshipDescription').getContent().trim();
+
+        if (!title || !description) {
+            showflashmessage('warning', 'Please enter title and description!');
+            return;
+        }
+
+        fetch(`/home/business/internship/${editingInternshipId}`, {
+                method: 'PUT',
+                headers: {
+                'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ title, description }),
+        }   )
+            .then(response => response.json())
+            .then(data => {
+            if (data.status === 'success') {
+                showflashmessage('success', 'You have successfully updated!');
+                location.reload(); // Tải lại trang
+            } else {
+                showflashmessage('error', 'Error updating internship: ' + data.message);
+            }
+            })
+            .catch(error => {
+                console.error('Error updating internship:', error);
+                showflashmessage('error', 'Error updating internship');
+            });
+
+            if (tinymce.get('editInternshipDescription')) {
+                tinymce.get('editInternshipDescription').remove();
+            }
+        });
+    }
+});
+// delete internship
+let deletingInternshipId = null;
+
+function deleteInternship(internshipId) {
+  deletingInternshipId = internshipId;
+  const deleteModal = new bootstrap.Modal(document.getElementById('deleteConfirmationModal'));
+  deleteModal.show(); // Hiển thị modal xác nhận
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+  const confirmDeleteButton = document.getElementById('confirmDeleteButton');
+
+  if (confirmDeleteButton) {
+    confirmDeleteButton.addEventListener('click', function () {
+      if (!deletingInternshipId) {
+        showflashmessage('error', 'No internship selected for deletion');
+        return;
+      }
+
+      fetch(`/home/business/internship/${deletingInternshipId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.status === 'success') {
+            showflashmessage('success', 'Internship deleted successfully!');
+            location.reload(); // Reload lại trang
+          } else {
+            showflashmessage('error', 'Error deleting internship: ' + data.message);
+          }
+        })
+        .catch((error) => {
+          console.error('Error deleting internship:', error);
+          showflashmessage('error', 'Error deleting internship');
+        });
+    });
+  }
+});
+
+function showflashmessage(type, message) {
+    const validTypes = ['success', 'error', 'info', 'warning'];
+      if (!validTypes.includes(type)) {
+          console.warn('Invalid toastr type:', type); // coi log f12
+          type = 'info'; 
+      }
+  
+    toastr[type](message);
+  
+    toastr.options = {
+      "closeButton": true,
+      "debug": false,
+      "newestOnTop": false,
+      "progressBar": false,
+      "positionClass": "toast-top-right",
+      "preventDuplicates": false,
+      "onclick": null,
+      "showDuration": "300",
+      "hideDuration": "1000",
+      "timeOut": "5000",
+      "extendedTimeOut": "1000",
+      "showEasing": "swing",
+      "hideEasing": "linear",
+      "showMethod": "fadeIn",
+      "hideMethod": "fadeOut"
+    }
+}
+</script>
+
+<style>
+    .thumbnail-container {
+      display: flex;
+      align-items: center;
+    }
+  
+    .thumbnail-wrapper {
+      display: flex;
+      overflow-x: auto;
+      scroll-behavior: smooth;
+      -webkit-overflow-scrolling: touch;
+    }
+  
+    .thumbnail {
+      flex: 0 0 auto;
+      margin-right: 10px;
+      cursor: pointer;
+    }
+  
+    .thumbnail img {
+      max-width: 100px;
+      max-height: 100px;
+    }
+  
+    .thumbnail-control-prev,
+    .thumbnail-control-next {
+      background: rgba(0, 0, 0, 0.5);
+      border: none;
+      cursor: pointer;
+    }
+  </style>
+
+  <% include('../partials/footer') %> 
+

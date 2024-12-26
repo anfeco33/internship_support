@@ -4,7 +4,7 @@ const Schema = mongoose.Schema;
 
 // Mô hình dữ liệu cho công ty khác user company
 const companySchema = new Schema({
-    // updatedAt: { type: Date, default: Date.now }, // Ngày cập nhật hồ sơ công ty
+    updatedAt: { type: Date, default: new Date().toUTCString()}, 
     representativeId: { type: Schema.Types.ObjectId, ref: 'User', required: true }, // ID người đại diện
     name: { type: String, default: '' },
     isProfileUpdated: { type: Boolean, default: false }, // Đánh dấu đã cập nhật hồ sơ
@@ -28,7 +28,11 @@ const companySchema = new Schema({
     profile: { type: String , default: '' }, // Mô tả công ty gồm văn hóa, project (tùy)
 
     // Cơ hội thực tập và việc làm
-    internships: [{ type: Schema.Types.ObjectId, ref: 'Job' }], // Danh sách cơ hội thực tập
+    internships: [{
+        title: { type: String, required: true },
+        description: { type: String, required: true },
+        createdAt: { type: Date, default: new Date().toUTCString() }
+    }],
     openings: [{ type: Schema.Types.ObjectId, ref: 'Job' }], // Các vị trí tuyển dụng hiện tại
 
     reviews: [{ type: Schema.Types.ObjectId, ref: 'Review' }], // Danh sách đánh giá
