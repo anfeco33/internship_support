@@ -42,17 +42,17 @@
     --sidebar-light-color:  rgba(252, 243, 243, 0.579);
 
     --sidebar-dark-color:  rgba(232, 232, 221, 0.248);
-    --navlink-sidebar-dark: #1d1b31;
-    --navlink-sidebar-light: #FF9800;
+    --navlink-sidebar-dark: #04a1bd5f;
+    --navlink-sidebar-light: #1cf94c58;
 
     --icon-dark-color: #352F44;
-    --icon-light-color: #F9B572;
+    --icon-light-color: #8672f9b3;
 
     --text-light-color: whitesmoke;
     --text-dark-color: #040D12;
 
     --toggler-color-dark: #868591;
-    --toggler-color-light: #A2678A;
+    --toggler-color-light: #d5101063;
     --switch-color: #B4B4B8;
 }
 
