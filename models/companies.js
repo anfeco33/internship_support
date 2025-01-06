@@ -27,12 +27,7 @@ const companySchema = new Schema({
     // // Mô tả và thông tin bổ sung
     profile: { type: String , default: '' }, // Mô tả công ty gồm văn hóa, project (tùy)
 
-    // Cơ hội thực tập và việc làm
-    internships: [{
-        title: { type: String, required: true },
-        description: { type: String, required: true },
-        createdAt: { type: Date, default: new Date().toUTCString() }
-    }],
+    internships: [{ type: Schema.Types.ObjectId, ref: 'Internship' }],
     openings: [{ type: Schema.Types.ObjectId, ref: 'Job' }], // Các vị trí tuyển dụng hiện tại
 
     reviews: [{ type: Schema.Types.ObjectId, ref: 'Review' }], // Danh sách đánh giá

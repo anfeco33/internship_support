@@ -4,6 +4,7 @@ const User = require('../models/users');
 // const Course = require('../models/courses');
 const { ensureProfileUpdated } = require('../middleware/authentication');
 const Company = require('../models/companies');
+const Internship = require('../models/internships');
 const Review = require('../models/reviews');
 const Comment = require('../models/lecturecomments');
 const userController = require('../controllers/user.controllers');
@@ -105,13 +106,13 @@ router.get('/', function (req, res) {
     businessController.editCompanyProfile
   )
   .get('/business/:companyId', async function (req, res, next) {
-    console.log(req.params.courseId)
+    console.log(req.params.companyId)
     const partial = 'partials/business_detail';
     const layout = 'layouts/main';
     req.partial_path = partial
     req.layout_path = layout
     req.page_data = {
-      company: await businessController.getBusinessProfile(req.params.companyId),
+      company: await Company.findById(req.params.companyId).populate('internships'),
       businessId: req.params.companyId,
     }
     await userController.getpage(req, res, next);
@@ -121,51 +122,28 @@ router.get('/', function (req, res) {
     try {
       console.log('Fetching internship details:', req.params.internshipId);
       const internshipId = req.params.internshipId;
-      const company = await Company.findOne({ "internships._id": internshipId }, { "internships.$": 1 });
-      if (!company) {
+      const internship = await Internship.findById(internshipId).populate('company');
+      if (!internship) {
         return res.status(404).json({ status: 'error', message: 'Internship not found' });
       }
   
-      res.status(200).json({ status: 'success', internship: company.internships[0] });
+      res.status(200).json({ status: 'success', internship });
     } catch (error) {
       console.error('Error fetching internship details:', error);
       res.status(500).json({ status: 'error', message: 'Internal Server Error' });
     }
   })
-  .put('/business/internship/:internshipId', async (req, res) => {
-    try {
-      const internshipId = req.params.internshipId;
-      const { title, description } = req.body;
-  
-      const company = await Company.findOneAndUpdate(
-        { "internships._id": internshipId },
-        { $set: { "internships.$.title": title, "internships.$.description": description } },
-        { new: true }
-      );
-  
-      if (!company) {
-        return res.status(404).json({ status: 'error', message: 'Internship not found' });
-      }
-  
-      res.status(200).json({ status: 'success', message: 'Internship updated successfully' });
-    } catch (error) {
-      console.error('Error updating internship:', error);
-      res.status(500).json({ status: 'error', message: 'Internal Server Error' });
-    }
-  })
+  .put('/business/internship/:internshipId', businessController.editInternship)
   .delete('/business/internship/:internshipId', async (req, res) => {
     try {
       const { internshipId } = req.params;
   
-      const company = await Company.findOneAndUpdate(
-        { "internships._id": internshipId },
-        { $pull: { internships: { _id: internshipId } } }, // Xóa internship theo ID
-        { new: true }
-      );
-  
-      if (!company) {
+      const internship = await Internship.findByIdAndDelete(internshipId);
+      if (!internship) {
         return res.status(404).json({ status: 'error', message: 'Internship not found' });
       }
+  
+      await Company.findByIdAndUpdate(internship.company, { $pull: { internships: internshipId } });
   
       res.status(200).json({ status: 'success', message: 'Internship deleted successfully' });
     } catch (error) {
@@ -173,7 +151,7 @@ router.get('/', function (req, res) {
       res.status(500).json({ status: 'error', message: 'Internal Server Error' });
     }
   })
-  
+  .post('/business/internship/:internshipId/apply', businessController.applyForInternship)
   // .get('/course/:courseId', async function (req, res, next) {
   //   const user = await User.findById(req.session.account);
   //   const hasBought = user.subscribed.includes(req.params.courseId);

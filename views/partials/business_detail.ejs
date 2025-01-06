@@ -144,6 +144,7 @@
             <h4>INTERNSHIP OPPORTUNITIES OPENINGS</h4>
             <% if (company.internships && company.internships.length > 0) { %>
                 <% company.internships.forEach(function (internship) { %>
+                    <h1><% internship._id.toString() %></h1>
                     <div class="card mb-3">
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-center">
@@ -235,6 +236,11 @@ async defer></script>
     }
   }
 
+  tinymce.init({
+    selector: '#coverLetter',
+    plugins: 'advlist autolink lists link image charmap print preview hr anchor pagebreak',
+    toolbar_mode: 'floating',
+  });
   
   function applyForInternship(internshipId) {
     // student only
@@ -242,8 +248,44 @@ async defer></script>
       showflashmessage('warning', 'You should be a student to apply for internships');
       return;
     }
-    // Implement the logic to apply for the internship
-    alert('Applying for internship with ID: ' + internshipId);
+    alert('Apply for internship: ' + internshipId);
+
+    // const applyModal = new bootstrap.Modal(document.getElementById('applyInternshipModal'));
+    // applyModal.show();
+
+    // const form = document.getElementById('applyInternshipForm');
+    // form.onsubmit = function(event) {
+    //   event.preventDefault();
+
+    //   const applicantName = document.getElementById('applicantName').value;
+    //   const applicantEmail = document.getElementById('applicantEmail').value;
+    //   const coverLetter = tinymce.get('coverLetter').getContent();
+    //   const cvFile = document.getElementById('cvFile').files[0];
+
+    //   const formData = new FormData();
+    //   formData.append('applicantName', applicantName);
+    //   formData.append('applicantEmail', applicantEmail);
+    //   formData.append('coverLetter', coverLetter);
+    //   formData.append('cvFile', cvFile);
+
+    //   fetch(`/home/business/internship/${internshipId}/apply`, {
+    //     method: 'POST',
+    //     body: formData
+    //   })
+    //   .then(response => response.json())
+    //   .then(data => {
+    //     if (data.status === 'success') {
+    //       showflashmessage('success', 'Application submitted successfully');
+    //       applyModal.hide();
+    //     } else {
+    //       showflashmessage('error', 'Error submitting application: ' + data.message);
+    //     }
+    //   })
+    //   .catch(error => {
+    //     console.error('Error submitting application:', error);
+    //     showflashmessage('error', 'Error submitting application');
+    //   });
+    // };
   }
 
   function scrollThumbnails(direction) {
@@ -312,13 +354,13 @@ async defer></script>
 });
 // edit internship
 function editInternship(internshipId) {
-    editingInternshipId = internshipId; // Lưu lại ID của internship đang chỉnh sửa.
+    editingInternshipId = internshipId;
 
     fetch(`/home/business/internship/${internshipId}`)
         .then(response => response.json())
         .then(data => {
             if (data.status === 'success') {
-                // Đặt tiêu đề và mô tả vào modal.
+                // tiêu đề và mô tả vào modal
                 document.getElementById('editInternshipTitle').value = data.internship.title;
 
                 if (tinymce.get('editInternshipDescription')) {

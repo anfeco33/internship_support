@@ -86,3 +86,35 @@
             </div>
         </div>
     </div>
+
+    <div class="modal fade" id="applyInternshipModal" tabindex="-1" aria-labelledby="applyInternshipModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="applyInternshipModalLabel">Apply for Internship</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <form id="applyInternshipForm" enctype="multipart/form-data">
+                <div class="mb-3">
+                  <label for="applicantName" class="form-label">Name</label>
+                  <input type="text" class="form-control" id="applicantName" required>
+                </div>
+                <div class="mb-3">
+                  <label for="applicantEmail" class="form-label">Email (Personal)</label>
+                  <input type="email" class="form-control" id="applicantEmail" required>
+                </div>
+                <div class="mb-3">
+                  <label for="cvFile" class="form-label">Upload CV</label>
+                  <input type="file" class="form-control" id="cvFile" accept=".pdf,.doc,.docx" required>
+                </div>
+                <div class="mb-3">
+                  <label for="coverLetter" class="form-label">Cover Letter</label>
+                  <textarea class="form-control" id="coverLetter" rows="3" required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Submit Application</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>

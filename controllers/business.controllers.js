@@ -8,8 +8,7 @@ const Exercise = require('../models/exercises');
 const Note = require('../models/note');
 const User = require('../models/users');
 const Company = require('../models/companies')
-const Student = require('../models/students')
-const Admin = require('../models/admins')
+const Internship = require('../models/internships');
 const Progress = require('../models/progress');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
@@ -968,7 +967,10 @@ class BusinessController {
         return res.status(404).json({ message: 'Company not found' });
       }
 
-      company.internships.push({ title, description });
+      const internship = new Internship({ title, description, company: companyId });
+      await internship.save();
+  
+      company.internships.push(internship._id);
       await company.save();
 
       console.log('Internship created successfully:', { title, description });
@@ -980,6 +982,56 @@ class BusinessController {
     }
   }
 
+  async editInternship(req, res, next) {
+    try {
+      const internshipId = req.params.internshipId;
+      const { title, description } = req.body;
+      console.log('Editing internship with ID:', internshipId);
 
+      const internship = await Internship.findByIdAndUpdate(
+        internshipId,
+        { title, description, createdAt: new Date().toUTCString() },
+        { new: true }
+      );
+  
+      if (!internship) {
+        return res.status(404).json({ status: 'error', message: 'Internship not found' });
+      }
+  
+      console.log('Internship updated successfully:', { title, description });
+      res.status(200).json({ status: 'success', message: 'Internship updated successfully' });
+    } catch (error) {
+      console.error('Error updating internship:', error);
+      res.status(500).json({ status: 'error', message: 'Internal Server Error' });
+    }
+  }
+
+  async applyForInternship(req, res, next) {
+    try {
+      const { internshipId } = req.params;
+      const { applicantName, applicantEmail, coverLetter } = req.body;
+
+      const internship = await Internship.findById(internshipId);
+      if (!internship) {
+        return res.status(404).json({ status: 'error', message: 'Internship not found' });
+      }
+
+      const application = new Application({
+        internship: internshipId,
+        applicantName,
+        applicantEmail,
+        coverLetter,
+        appliedAt: new Date()
+      });
+
+      await application.save();
+
+      console.log('Application submitted successfully:', { applicantName, applicantEmail });
+      res.status(200).json({ status: 'success', message: 'Application submitted successfully' });
+    } catch (error) {
+      console.error('Error submitting application:', error);
+      res.status(500).json({ status: 'error', message: 'Internal Server Error' });
+    }
+  }
 }
 module.exports = new BusinessController();
