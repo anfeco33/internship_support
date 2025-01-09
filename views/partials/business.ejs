@@ -51,46 +51,78 @@
 <%- include('../partials/slide_board') %>
 <div class="container mt-5">
     <div class="alert alert-warning" role="alert">
-        <h2 class="title-type">MOST SUPPORTIVE COMPANIES FOR INTERNSHIPS</h2>
+        <h2 class="title-type">THE TOP COMPANIES PROVIDING THE BEST INTERNSHIP SUPPORT</h2>
     </div>
         <!--  hiện thành card có width == height (nhỏ hơn 150px) trên cùng 1 dòng-->
         <!-- chỉnh css chế độ sáng/tối cho text trong /public/css/style.css-->
          <!-- image mỗi business có cùng kích thước -->
         <!-- company đã verified -->
-    <div class="row">
-        <% if (data.topSupportiveCompanies && data.topSupportiveCompanies.length > 0) { %>
-            <% var topCompanies = data.topSupportiveCompanies %>
-            <% if (topCompanies.length > 0) { %>
-            <% topCompanies.forEach((company, index) => { %>
-                <div class="col-md-4 mb-4" onclick="getBusinessById('<%= company._id.toString() %>')">
-                <div class="normal-business-card">
-                    <div class="card-header">
-                    <span class="badge bg-primary">Top <%= index + 1 %></span>
-                    </div>
-                    <img src="<%= company.images.length > 0 ? company.images[0] : '/images/default_companyImage_details.jpg' %>" class="card-img-top" alt="<%= company.name %>">
-                    <div class="card-body">
-                    <h5 class="card-title">
-                        <%= company.name %>
-                        <% if (company.isVerified) { %>
-                        <img src="/images/verified_icon.png" alt="Verified" style="width: 20px; height: 20px;">
-                        <% } else { %>
-                        <img src="/images/unverified_icon.png" alt="Unverified" style="width: 20px; height: 20px;">
-                        <% } %>
-                    </h5>
-                    <p class="card-text">Industry: <%= company.industry %></p>
-                    <p class="card-text">Rating: starIcon <%= company.averageRating.toFixed(1) %>/5</p>
-                    <p class="card-text">Address: <%= company.address %></p>
-                    </div>
+    <div class="row cardListTop">
+      <% if (data.topSupportiveCompanies && data.topSupportiveCompanies.length > 0) { %>
+        <% var topCompanies = data.topSupportiveCompanies; %>
+        <% if (topCompanies.length > 0) { %>
+          <% topCompanies.forEach((company, index) => { %>
+            <div class="col-md-4 mb-4" onclick="getBusinessById('<%= company._id.toString() %>')">
+              <div 
+                class="normal-business-card card shadow-sm rounded bg-white mb-3 
+                <%= index === 0 ? 'top-1' : index === 1 ? 'top-2' : index === 2 ? 'top-3' : 'default-card' %>"
+              >
+                <div class="card-header p-0 rounded-top">
+                  <div class="card-img-container">
+                    <img 
+                      src="<%= company.images.length > 0 ? company.images[0] : '/images/default_companyImage_details.jpg' %>" 
+                      class="card-img-top rounded-top" 
+                      alt="<%= company.name %>"
+                    >
+                  </div>
                 </div>
+                <span 
+                  class="badge position-absolute" 
+                  style="
+                    top: 10px; left: 10px; 
+                    background-color: <%= index === 0 ? 'gold' : index === 1 ? 'silver' : index === 2 ? '#cd7f32' : '#007bff' %>;
+                    color: <%= index === 0 || index === 1 || index === 2 ? 'black' : 'white' %>;
+                  "
+                >
+                  Top <%= index + 1 %>
+                </span>
+                <div class="card-body">
+                  <h5 class="card-title d-flex align-items-center">
+                    <%= company.name %>
+                    <% if (company.isVerified) { %>
+                      <img 
+                        src="/images/verified_icon.png" 
+                        alt="Verified" 
+                        class="ms-2" 
+                        style="width: 20px; height: 20px;"
+                      >
+                    <% } else { %>
+                      <img 
+                        src="/images/unverified_icon.png" 
+                        alt="Unverified" 
+                        class="ms-2" 
+                        style="width: 20px; height: 20px;"
+                      >
+                    <% } %>
+                  </h5>
+                  <p class="card-text" id="industry">Industry: <%= company.industry %></p>
+                  <p class="card-text" id= "rating">Rating: starIcon <%= company.averageRating.toFixed(1) %>/5</p>
+                  <p class="card-text" id="address" style="font-size: 10px;">Address: <%= company.address %></p>
                 </div>
-            <% }); %>
-            <% } %>
-        <% } else { %>
-            <div class="col-12">
-              <p class="text-center">We would show you the most supportive companies for internships soon.</p>
+              </div>
             </div>
+          <% }); %>
         <% } %>
+      <% } else { %>
+        <div class="col-12">
+          <p class="text-center">We would show you the most supportive companies for internships soon.</p>
+        </div>
+      <% } %>
     </div>
+        
+        
+        
+        
 
     <form id="filterForm" class="mb-4">
       <div class="row">
@@ -144,37 +176,50 @@
     </form>
     <div class="row">
         <div class="alert alert-warning" role="alert">
-            <h3 class="title-type" id="allCompanies">BELOW ARE BUSINESSES THAT ARE LOOKING TO RECRUIT INTERNS</h3>
+            <h3 class="title-type" id="allCompanies">BELOW ARE COMPANIES ACTIVELY SEEKING TO RECRUIT INTERNS</h3>
         </div>
-        <% if (data.listOfBusiness) { %>
+      <% if (data.listOfBusiness) { %>
         <% var list = data.listOfBusiness %>
         <% if (list.length > 0) { %>
           <% list.forEach((business) => { %>
             <div class="col-md-4 mb-4" onclick="getBusinessById('<%= business._id.toString() %>')">
-              <div class="normal-business-card">
-                <img src="<%= business.images.length > 0 ? business.images[0] : '/images/default_companyImage_details.jpg' %>" class="card-img-top" alt="<%= business.name %>">
+              <div class="business-card">
+                <img 
+                  src="<%= business.images.length > 0 ? business.images[0] : '/images/default_companyImage_details.jpg' %>" 
+                  class="card-img-top" 
+                  alt="<%= business.name %>"
+                >
                 <div class="card-body">
-                  <h5 class="card-title">
+                  <h5 class="card-title d-flex align-items-center">
                     <%= business.name %>
                     <% if (business.isVerified) { %>
-                      <img src="/images/verified_icon.png" alt="Verified" style="width: 20px; height: 20px;">
+                      <img 
+                        src="/images/verified_icon.png" 
+                        alt="Verified" 
+                        class="ms-2" 
+                        style="width: 20px; height: 20px;"
+                      >
                     <% } else { %>
-                      <img src="/images/unverified_icon.png" alt="Unverified" style="width: 20px; height: 20px;">
+                      <img 
+                        src="/images/unverified_icon.png" 
+                        alt="Unverified" 
+                        class="ms-2" 
+                        style="width: 20px; height: 20px;"
+                      >
                     <% } %>
                   </h5>
-                  <p class="card-text">Industry: <%= business.industry %></p>
-                  <p class="card-text">Rating: starIcon <%= business.averageRating.toFixed(1) %>/5</p>
-                  <p class="card-text">Address: <%= business.address %></p>
+                  <p class="card-text" id="industry">Industry: <%= business.industry %></p>
+                  <p class="card-text" id= "rating">Rating: starIcon <%= business.averageRating.toFixed(1) %>/5</p>
+                  <p class="card-text" id="address" style="font-size: 10px;">Address: <%= business.address %></p>
                 </div>
               </div>
             </div>
           <% }); %>
-        <% } %>
-        <h2 id="empty-list">
-          <% if (list.length == 0) { %>
+        <% } else { %>
+          <h2 id="empty-list" class="text-center">
             Sorry, there are no appropriate businesses found.
-          <% }; %>
-        </h2>
+          </h2>
+        <% } %>
       <% } %>
     </div>
   </div>
