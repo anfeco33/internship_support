@@ -811,6 +811,8 @@ body.dark #searchInput {
 
 .bell_icon {
     margin-right: 5px;
+    position: relative;
+    display: inline-block;
 }
 
 .bell_icon, .update_profile_icon {
@@ -819,6 +821,78 @@ body.dark #searchInput {
 }
 .bell_icon:hover, .update_profile_icon:hover {
     color: #f5dabe
+}
+
+.bell_icon .bi-bell-fill {
+    font-size: 24px; 
+}
+
+.bell_icon .badge {
+    position: absolute;
+    top:15px; 
+    right: -5px; 
+    background-color: red;
+    color: white;
+    border-radius: 50%;
+    padding: 5px;
+    font-size: 8px;
+    width: 15px;
+    height: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    user-select: none;
+    transition: background-color 0.3s ease;
+}
+
+.bell_icon:hover .badge {
+    background-color: darkred;
+    cursor: pointer; 
+    pointer-events: auto;
+}
+
+.applications-dropdown {
+    display: none; /* Mặc định ẩn */
+    position: absolute;
+    right: 0; /* Canh phải */
+    top: 50px; /* Căn chỉnh với biểu tượng chuông */
+    background: #fff;
+    color: #333;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    max-height: 200px; /* Giới hạn chiều cao */
+    overflow-y: auto; /* Cuộn khi nội dung vượt quá chiều cao */
+    width: 300px; /* Chiều rộng cố định */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Hiệu ứng đổ bóng */
+    z-index: 9999; /* Đảm bảo nằm trên các phần tử khác */
+}
+
+.applications-dropdown.show {
+    display: block; /* Hiển thị khi có class `show` */
+}
+
+.applications-dropdown {
+    padding: 10px;
+    font-weight: bold;
+    border-bottom: 1px solid #ddd;
+    background: #f9f9f9; /* Màu nền tiêu đề */
+}
+
+.applications-dropdown .list-group {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.applications-dropdown .list-group-item {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+    font-size: 14px;
+}
+
+.applications-dropdown .list-group-item:last-child {
+    border-bottom: none;
 }
 
 .home-section .fill_content .text {
@@ -2604,6 +2678,182 @@ body.light .update_business {
     color: var(--text-dark-color);
 }
 
+/* Áp dụng gradient xanh dương-xanh lá cho tiêu đề */
+.title-type {
+    background: linear-gradient(45deg, #1e90ff, #32cd32); /* Gradient từ xanh dương sang xanh lá */
+    background-clip: text; /* Chỉ áp dụng gradient lên text */
+    -webkit-background-clip: text; /* Chỉ áp dụng gradient lên text */
+    -webkit-text-fill-color: transparent; /* Làm text trong suốt để hiện gradient */
+    text-align: center; /* Căn giữa nội dung */
+    font-weight: bold; /* Đậm nét chữ */
+    font-size: 24px; /* Tăng kích thước chữ */
+    margin-bottom: 20px; /* Tạo khoảng cách dưới */
+}
+/* .row.cardListTop {
+    color: rgb(79, 79, 228);
+}
+.row.cardListTop:hover {
+    color: rgb(24, 171, 68);
+} */
+.card-img-container {
+    height: 200px; /* Chiều cao cố định cho khung ảnh */
+    overflow: hidden; /* Ẩn phần ảnh bị vượt ra ngoài */
+  }
+  
+.card-img-container img {
+    width: 100%; /* Ảnh chiếm toàn bộ chiều rộng */
+    height: 100%; /* Ảnh chiếm toàn bộ chiều cao */
+    object-fit: cover; /* Cắt ảnh để phù hợp với khung */
+}
+/* Top 1 với hiệu ứng động */
+@keyframes top1-glow {
+    0% {
+      transform: scale(1);
+      box-shadow: 0px 10px 30px rgba(255, 215, 0, 0.8);
+    }
+    50% {
+      transform: scale(1.05);
+      box-shadow: 0px 15px 40px rgba(255, 215, 0, 1);
+    }
+    100% {
+      transform: scale(1);
+      box-shadow: 0px 10px 30px rgba(255, 215, 0, 0.8);
+    }
+  }
+  
+  .top-1 {
+    border: 2px solid gold;
+    box-shadow: 0px 10px 30px rgba(255, 215, 0, 0.8);
+    animation: top1-glow 2s infinite ease-in-out;
+    transition: transform 0.3s ease;
+  }
+  
+  .top-1:hover {
+    transform: scale(1.1);
+  }
+  
+  /* Top 2 màu bạc */
+  .top-2 {
+    border: 2px solid silver;
+    box-shadow: 0px 8px 20px rgba(192, 192, 192, 0.7);
+  }
+  /* Top 3 màu đồng */
+  .top-3 {
+    border: 2px solid #cd7f32;
+    box-shadow: 0px 6px 15px rgba(205, 127, 50, 0.6);
+  }
+  
+  /* Các thẻ mặc định */
+  .default-card {
+    border: 2px solid #dee2e6;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  }
+  /* Show doanh nghiệp 2:
+/* Card chính với nền trắng và viền gradient */
+.business-card {
+    position: relative; /* Để sử dụng ::before cho gradient */
+    border-radius: 10px; /* Bo góc mềm mại hơn */
+    background-color: white; /* Nền màu trắng */
+    overflow: hidden; /* Đảm bảo nội dung không tràn */
+    z-index: 1; /* Đặt nội dung card lên trên */
+    box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.1); /* Đổ bóng mềm mại */
+    transition: transform 0.3s ease, box-shadow 0.3s ease; /* Hiệu ứng hover */
+}
+/* Pseudo-element tạo viền gradient */
+.business-card::before {
+    content: ""; /* Nội dung rỗng */
+    position: absolute; /* Đặt pseudo-element lên viền */
+    top: -2px; /* Kéo gradient ra ngoài một chút */
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    border-radius: 10px; /* Bo góc lớn hơn nội dung */
+    background: linear-gradient(45deg, white, rgba(56, 178, 226, 0.885)); /* Màu gradient */
+    z-index: -1; /* Đặt phía sau nội dung card */
+}
+/* Hover với hiệu ứng nổi bật */
+.business-card:hover::before {
+    background: linear-gradient(135deg, white, #b8ffe2); /* Gradient nổi bật hơn khi hover */
+}
+.business-card:hover {
+    transform: translateY(-10px); /* Hiệu ứng di chuyển nổi bật hơn */
+    box-shadow: 0px 12px 30px rgba(0, 0, 0, 0.2); /* Đổ bóng sâu hơn */
+}
+/* Hình ảnh trong card */
+.card-img-top {
+    border-radius: 10px 10px 0 0; /* Bo góc trên cùng */
+    height: 200px; /* Chiều cao cố định */
+    width: 100%; /* Chiều rộng đầy đủ */
+    object-fit: cover; /* Đảm bảo căn chỉnh ảnh */
+    transition: transform 0.3s ease; /* Hiệu ứng hover ảnh */
+}
+/* Hover vào ảnh tạo hiệu ứng zoom nhẹ */
+.card-img-top:hover {
+    transform: scale(1.05); /* Zoom ảnh nhẹ khi hover */
+}
+/* Card nội dung */
+.card-body {
+    padding: 15px; /* Tăng khoảng cách nội dung */
+    text-align: center; /* Căn giữa nội dung */
+}
+/* Tiêu đề */
+.card-title {
+    font-size: 18px; /* Kích thước lớn hơn */
+    font-weight: bold; /* In đậm */
+    color: #333; /* Màu chữ chính */
+    margin-bottom: 10px; /* Khoảng cách dưới */
+}
+/* Văn bản mô tả */
+.card-text {
+    font-size: 14px; /* Kích thước vừa phải */
+    color: #555; /* Màu chữ phụ */
+    margin-bottom: 8px; /* Khoảng cách giữa các đoạn văn bản */
+}
+/* Badge xác thực */
+.card-title img {
+    width: 24px; /* Tăng kích thước biểu tượng */
+    height: 24px;
+    margin-left: 8px; /* Khoảng cách bên trái */
+    vertical-align: middle; /* Canh giữa với text */
+}
+#rating {
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+  }
+  
+#rating::before {
+content: '⭐';
+margin-right: 5px;
+color: #FFD700; /* Màu vàng cho ngôi sao */
+font-size: 16px;
+}
+#address {
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+  }
+  
+  #address::before {
+    content: '📌'; /* Icon địa chỉ dạng emoji */
+    margin-right: 8px;
+    font-size: 18px;
+    color: #007bff;
+  }  
+  #industry {
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+  }
+  
+  #industry::before {
+    content: '🏢'; /* Icon tòa nhà mặc định cho lĩnh vực */
+    margin-right: 8px;
+    font-size: 18px;
+    color: #007bff;
+  }
+  
+
 .center-container {
     display: flex;
     justify-content: center;
@@ -2643,3 +2893,4 @@ body.light .update_business {
     height: 50px;
     align-content: center;
 }
+

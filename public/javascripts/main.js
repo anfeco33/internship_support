@@ -884,10 +884,172 @@ if(filter){
     document.getElementById('allCompanies').scrollIntoView();
   }
 }
+
+/**
+ * Bell notification dropdown
+ */
+document.addEventListener('DOMContentLoaded', function () {
+  let isDropdownVisible = false;
+
+  function fetchApplications(updateDropdown = false) {
+    fetch(`/home/business/${businessId}/applications`, {
+      method: 'GET',
+      headers: {
+        'Cache-Control': 'no-cache',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+      },
+    })
+      .then(response => {
+        console.log('Response received:', response);
+        return response.json();
+      })
+      .then(data => {
+        console.log('Data received:', data);
+        if (data.status === 'success') {
+          const applications = data.applications;
+          const unreadCount = data.unreadCount; // Lấy số lượng thông báo chưa đọc
+          const applicationCount = document.getElementById('applicationCount');
+          const applicationsList = document.getElementById('applicationsList');
+
+          // Luôn cập nhật số lượng thông báo
+          if (!isDropdownVisible) {
+            applicationCount.textContent = unreadCount; // Cập nhật số lượng thông báo
+          }
+
+          if (updateDropdown) {
+            console.log('Applications:', applications);
+            console.log('Unread Count:', unreadCount);
+
+            applicationsList.innerHTML = ''; // Làm trống danh sách cũ
+            if (applications.length > 0) {
+              applications.forEach(application => {
+                const listItem = document.createElement('li');
+                listItem.className = 'list-group-item';
+                listItem.innerHTML = `
+                  <div>
+                    <strong>${application.applicantName}</strong> applied for "${application.internship.title}"
+                  </div>
+                  <div class="text-muted" style="font-size: 0.8em;">
+                    ${new Date(application.appliedAt).toLocaleString()}
+                  </div>
+                `;
+                listItem.style.cursor = 'pointer';
+                listItem.addEventListener('mouseover', () => {
+                  listItem.style.backgroundColor = '#f0f0f0';
+                });
+                listItem.addEventListener('mouseout', () => {
+                  listItem.style.backgroundColor = '';
+                });
+                listItem.addEventListener('click', () => {
+                  showResponseModal(application);
+                });
+                applicationsList.appendChild(listItem);
+              });
+            } else {
+              const listItem = document.createElement('li');
+              listItem.className = 'list-group-item';
+              listItem.textContent = 'No new notifications received';
+              listItem.style.pointerEvents = 'none';
+              listItem.style.userSelect = 'none';
+              applicationsList.appendChild(listItem);
+            }
+          }
+        } else {
+          console.error('Error in application data:', data.message);
+        }
+      })
+      .catch(error => {
+        console.error('Error fetching applications:', error);
+      });
+  }
+
+  // modal trả yêu cầu apply
+  function showResponseModal(application) {
+    const responseModal = new bootstrap.Modal(document.getElementById('responseApplicationModal'));
+    document.getElementById('applicantName').value = application.applicantName;
+    document.getElementById('applicantEmail').value = application.applicantEmail;
+    document.getElementById('greetingMessage').value = application.greeting;
+    responseModal.show();
+
+    const responseForm = document.getElementById('responseApplicationForm');
+    responseForm.onsubmit = function (event) {
+      event.preventDefault();
+
+      const status = document.getElementById('responseStatus').value;
+      const reason_mess = document.getElementById('responseMessage').value.trim();
+
+      if (!status || !reason_mess) {
+        showflashmessage('warning', 'Please provide both status and your message!');
+        return;
+      }
+
+      fetch(`/home/business/application/${application._id}/response`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status, reason_mess }),
+      })
+        .then(response => response.json())
+        .then(data => {
+          if (data.status === 'success') {
+            showflashmessage('success', 'Response sent successfully!');
+            location.reload(); // Reload
+          } else {
+            showflashmessage('error', 'Error sending response.' + data.message);
+          }
+        })
+        .catch(error => {
+          console.error('Lỗi khi gửi phản hồi:', error);
+          showflashmessage('error', 'Error sending response: ' + error.message);
+        });
+    };
+  }
+
+  function toggleApplicationsDropdown() {
+    const dropdown = document.getElementById('applicationsDropdown');
+    const applicationCount = document.getElementById('applicationCount');
+
+    dropdown.classList.toggle('show'); // Toggle visibility
+    isDropdownVisible = dropdown.classList.contains('show');
+    console.log('Dropdown visible:', isDropdownVisible);
+
+    if (isDropdownVisible) {
+      console.log('Fetching applications for dropdown...');
+      fetchApplications(true); // Cập nhật danh sách ứng dụng
+
+      // Đặt lại số lượng thông báo nhưng không thay đổi danh sách
+      fetch(`/home/business/${businessId}/applications/viewed`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+        .then(response => response.json())
+        .then(data => {
+          if (data.status === 'success') {
+            console.log('Applications marked as viewed');
+            applicationCount.textContent = '0'; // Đặt lại số lượng thông báo
+          } else {
+            console.error('Error marking applications as viewed:', data.message);
+          }
+        })
+        .catch(error => {
+          console.error('Error marking applications as viewed:', error);
+        });
+    }
+  }
+
+  // Gọi fetchApplications khi nhấn chuông
+  document.querySelector('.bell_icon').addEventListener('click', toggleApplicationsDropdown);
+
+  // Fetch số lượng ng apply ngay khi trang load
+  fetchApplications(false); // Không cập nhật dropdown
+});
 /**
  * Scroll top button
  */
-// Tệp main.js - External JavaScript
 const scrollTopButton = document.querySelector('.scroll-top');
 
 if(scrollTopButton){

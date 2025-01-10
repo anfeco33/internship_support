@@ -28,14 +28,25 @@
                     </div>
                 </div>
             
-                <div class="bell_icon mx-3" onclick="gotocart()">
+                <div class="bell_icon mx-3">
                     <i class="bi bi-bell-fill"></i>
+                    <% if (account.role === 'company' & account._id.toString() === data.company.representativeId.toString()) { %>
+                      <span id="applicationCount" class="badge">0</span>
+                    <% } %>
                 </div>
+                
                 <% if (account.role === 'company' & account._id.toString() === data.company.representativeId.toString()) { %>
-                    <div class="update_profile_icon mx-3" alt="update profile">
-                        <button class="btn btn-primary btn-sm" onclick="editByBussinessId('<%= data.businessId %>')">
-                            <i class="bi bi-pencil-square"></i>
-                        </button>
+                  <!-- Applications Dropdown -->
+                  <div id="applicationsDropdown" class="applications-dropdown">
+                    <ul id="applicationsList" class="list-group">
+                      <!-- Applications will be listed here -->
+                    </ul>
+                  </div>  
+                  <div class="update_profile_icon mx-3" alt="update profile">
+                      <button class="btn btn-primary btn-sm" onclick="editByBussinessId('<%= data.businessId %>')">
+                          <i class="bi bi-pencil-square"></i>
+                      </button>
+                  </div>
                 <% } %>
             </div>
         </div>
@@ -207,6 +218,8 @@
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBs2CCj3DSth7s_9YHuG5EazDGskh5uKGk&libraries=places&callback=initMap" 
 async defer></script>
 <script>
+  const businessId = '<%= data.businessId %>';
+
   function initMap() {
     var companyLocation = { lat: <%= company.location.coordinates[1] %>, lng: <%= company.location.coordinates[0] %> };
     var map = new google.maps.Map(document.getElementById('map'), {
@@ -236,10 +249,64 @@ async defer></script>
     }
   }
 
-  tinymce.init({
-    selector: '#coverLetter',
-    plugins: 'advlist autolink lists link image charmap print preview hr anchor pagebreak',
-    toolbar_mode: 'floating',
+  document.addEventListener('DOMContentLoaded', function () {
+    tinymce.init({
+      selector: '#greetingMessage',
+      plugins: 'advlist autolink lists link image charmap preview anchor pagebreak',
+      toolbar_mode: 'floating',
+      height: 200,
+    });
+
+    const applyForm = document.getElementById('applyInternshipForm');
+    if (applyForm) {
+      applyForm.addEventListener('submit', function (event) {
+        event.preventDefault();
+
+        const applicantName = document.getElementById('applicantName').value.trim();
+        const applicantEmail = document.getElementById('applicantEmail').value.trim();
+        const greeting = tinymce.get('greetingMessage').getContent();
+        const documents = document.getElementById('applicationDocuments').files;
+
+        if (!applicantName || !applicantEmail || !greeting) {
+          showflashmessage('warning', 'Please fill in all required fields.');
+          return;
+        }
+
+        const formData = new FormData();
+        formData.append('applicantName', applicantName);
+        formData.append('applicantEmail', applicantEmail);
+        formData.append('greeting', greeting);
+        for (let file of documents) {
+          formData.append('documents', file);
+        }
+        console.log('Form Data:', formData);
+        console.log('Applying for internship:', applyingInternshipId);
+        fetch(`/home/business/internship/${applyingInternshipId}/apply`, {
+          method: 'POST',
+          body: formData,
+        })
+          .then(response => {
+            if (!response.ok) {
+              console.error('Error response:', response);
+              throw new Error('Failed to submit application');
+            }
+            return response.json();
+          })
+          .then(data => {
+            console.log('Server Response:', data);
+            if (data.status === 'success') {
+              showflashmessage('success', 'Application submitted successfully!');
+              location.reload();
+            } else {
+              showflashmessage('error', 'Error submitting application: ' + data.message);
+            }
+          })
+          .catch(error => {
+            console.error('Error submitting application:', error);
+            showflashmessage('error', 'Error submitting application.');
+          });
+      });
+    }
   });
   
   function applyForInternship(internshipId) {
@@ -248,44 +315,10 @@ async defer></script>
       showflashmessage('warning', 'You should be a student to apply for internships');
       return;
     }
-    alert('Apply for internship: ' + internshipId);
+    applyingInternshipId = internshipId;
 
-    // const applyModal = new bootstrap.Modal(document.getElementById('applyInternshipModal'));
-    // applyModal.show();
-
-    // const form = document.getElementById('applyInternshipForm');
-    // form.onsubmit = function(event) {
-    //   event.preventDefault();
-
-    //   const applicantName = document.getElementById('applicantName').value;
-    //   const applicantEmail = document.getElementById('applicantEmail').value;
-    //   const coverLetter = tinymce.get('coverLetter').getContent();
-    //   const cvFile = document.getElementById('cvFile').files[0];
-
-    //   const formData = new FormData();
-    //   formData.append('applicantName', applicantName);
-    //   formData.append('applicantEmail', applicantEmail);
-    //   formData.append('coverLetter', coverLetter);
-    //   formData.append('cvFile', cvFile);
-
-    //   fetch(`/home/business/internship/${internshipId}/apply`, {
-    //     method: 'POST',
-    //     body: formData
-    //   })
-    //   .then(response => response.json())
-    //   .then(data => {
-    //     if (data.status === 'success') {
-    //       showflashmessage('success', 'Application submitted successfully');
-    //       applyModal.hide();
-    //     } else {
-    //       showflashmessage('error', 'Error submitting application: ' + data.message);
-    //     }
-    //   })
-    //   .catch(error => {
-    //     console.error('Error submitting application:', error);
-    //     showflashmessage('error', 'Error submitting application');
-    //   });
-    // };
+    const applyModal = new bootstrap.Modal(document.getElementById('applyInternshipModal'));
+    applyModal.show();
   }
 
   function scrollThumbnails(direction) {

@@ -9,6 +9,7 @@ const Note = require('../models/note');
 const User = require('../models/users');
 const Company = require('../models/companies')
 const Internship = require('../models/internships');
+const Application = require('../models/applications');
 const Progress = require('../models/progress');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
@@ -768,18 +769,6 @@ class BusinessController {
     }
   }
 
-  async getAboutUS() {
-    const students = await User.find({ role: 'student' });
-    const courses = await Course.find({});
-    const companies = await User.find({ role: 'company' });
-  
-    return {
-      students: students,
-      courses: courses,
-      companies: companies,
-    };
-  }
-
   async addCommentsForALecture(req, res, lectureID) {
     console.log("ADD new comment : ");
     console.log(lectureID);
@@ -1009,29 +998,103 @@ class BusinessController {
   async applyForInternship(req, res, next) {
     try {
       const { internshipId } = req.params;
-      const { applicantName, applicantEmail, coverLetter } = req.body;
-
+      const { applicantName, applicantEmail, greeting } = req.body;
+  
+      console.log('Received Data:', { internshipId, applicantName, applicantEmail, greeting });
+      console.log('Uploaded Files:', req.files);
+  
+      // Kiểm tra yêu cầu
+      if (!applicantName || !applicantEmail || !greeting) {
+        return res.status(400).json({ status: 'error', message: 'Missing required fields.' });
+      }
+  
       const internship = await Internship.findById(internshipId);
       if (!internship) {
-        return res.status(404).json({ status: 'error', message: 'Internship not found' });
+        return res.status(404).json({ status: 'error', message: 'Internship not found.' });
       }
-
+  
+      // Xử lý file upload
+      const documents = req.files && req.files.documents
+        ? req.files.documents.map(file => `/documents/${file.filename}`)
+        : [];
+  
+      // Tạo application
       const application = new Application({
-        internship: internshipId,
+        internship: internship._id,
         applicantName,
         applicantEmail,
-        coverLetter,
-        appliedAt: new Date()
+        greeting,
+        documents,
+        appliedAt: new Date(),
       });
-
+  
       await application.save();
-
-      console.log('Application submitted successfully:', { applicantName, applicantEmail });
-      res.status(200).json({ status: 'success', message: 'Application submitted successfully' });
+  
+      // Cập nhật internship
+      internship.applications.push(application._id);
+      await internship.save();
+  
+      res.status(200).json({ status: 'success', message: 'Application submitted successfully!' });
     } catch (error) {
-      console.error('Error submitting application:', error);
+      console.error('Error applying for internship:', error.message, error.stack);
       res.status(500).json({ status: 'error', message: 'Internal Server Error' });
     }
   }
+
+  async getApplicationsNoti(req, res) {
+    try {
+      console.log("GET applications noti");
+      const { companyId } = req.params;
+  
+      const internships = await Internship.find({ company: companyId }).select('_id');
+  
+      // danh sách chưa đọc
+      const unreadApplicationsCount = await Application.countDocuments({
+        internship: { $in: internships.map(i => i._id) },
+        isViewed: false,
+      });
+  
+      // Lấy 5 ng gần đây
+      const recentApplications = await Application.find({
+        internship: { $in: internships.map(i => i._id) },
+      })
+        .populate({
+          path: 'internship',
+          select: 'title',
+        })
+        .sort({ appliedAt: -1 }) // Sắp xếp theo thời gian apply gần nhất
+        .limit(5);
+  
+      console.log("Recent Applications: ", recentApplications);
+      res.status(200).json({
+        status: 'success',
+        applications: recentApplications,
+        unreadCount: unreadApplicationsCount, // Trả về số lượng thông báo chưa đọc
+      });
+    } catch (error) {
+      console.error('Error fetching applications:', error);
+      res.status(500).json({ status: 'error', message: 'Internal Server Error' });
+    }
+  }
+
+  async markApplicationsAsViewed(req, res) {
+    try {
+      console.log("Marking applications as viewed");
+      const { companyId } = req.params;
+  
+      const internships = await Internship.find({ company: companyId }).select('_id');
+  
+      await Application.updateMany(
+        { internship: { $in: internships.map(i => i._id) } },
+        { $set: { isViewed: true } }
+      );
+  
+      res.status(200).json({ status: 'success', message: 'Applications marked as viewed' });
+    } catch (error) {
+      console.error('Error marking applications as viewed:', error);
+      res.status(500).json({ status: 'error', message: 'Internal Server Error' });
+    }
+  }
+
 }
 module.exports = new BusinessController();

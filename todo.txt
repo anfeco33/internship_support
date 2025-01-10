@@ -1,6 +1,3 @@
-Chỉnh ở phần main cho web client
-làm đơn giản chú trọng phần tính năng trước
-
 TODO: Chỉnh giao diện 
 model:
 User
@@ -9,3 +6,6 @@ Review
 Job
 Comment
 Blog
+
+kịp:
+admin gửi thông báo cập nhật hồ sơ cho company chưa nộp đủ docs

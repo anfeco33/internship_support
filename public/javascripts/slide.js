@@ -17,15 +17,13 @@ imgPosition.forEach(function(image, index) {
 // }
 
 function updateDots() {
-    // Ensure count is within the valid range
-    if (count >= 0 && count < dots.length) {
-        // Loại bỏ class 'active' khỏi tất cả các dot
-        dots.forEach(dot => {
-            dot.classList.remove('active');
-        });
-        // Thêm class 'active' vào dot hiện tại
-        dots[count].classList.add('active');
-    }
+    if (!dots) return; // Check if dots is null
+    dots.forEach((dot, index) => {
+        dot.classList.remove('active');
+        if (index === count) {
+            dot.classList.add('active');
+        }
+    });
 }
 
 let sliderInterval; // Biến để giữ giá trị của setInterval
@@ -44,6 +42,7 @@ dots.forEach((dot, index) => {
 });
 
 function moveSlider(index) {
+    if (!imgContainer) return; // Check if imgContainer is null
     count = index; // Đặt count bằng index của dot được nhấp
     imgContainer.style.left = "-" + count * 100 + "%"; // Di chuyển slider
     updateDots(); // Cập nhật các dot

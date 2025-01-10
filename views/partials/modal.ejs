@@ -88,33 +88,75 @@
     </div>
 
     <div class="modal fade" id="applyInternshipModal" tabindex="-1" aria-labelledby="applyInternshipModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title" id="applyInternshipModalLabel">Apply for Internship</h5>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-              <form id="applyInternshipForm" enctype="multipart/form-data">
-                <div class="mb-3">
-                  <label for="applicantName" class="form-label">Name</label>
-                  <input type="text" class="form-control" id="applicantName" required>
-                </div>
-                <div class="mb-3">
-                  <label for="applicantEmail" class="form-label">Email (Personal)</label>
-                  <input type="email" class="form-control" id="applicantEmail" required>
-                </div>
-                <div class="mb-3">
-                  <label for="cvFile" class="form-label">Upload CV</label>
-                  <input type="file" class="form-control" id="cvFile" accept=".pdf,.doc,.docx" required>
-                </div>
-                <div class="mb-3">
-                  <label for="coverLetter" class="form-label">Cover Letter</label>
-                  <textarea class="form-control" id="coverLetter" rows="3" required></textarea>
-                </div>
-                <button type="submit" class="btn btn-primary">Submit Application</button>
-              </form>
-            </div>
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="applyInternshipModalLabel">Apply for Internship</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <form id="applyInternshipForm">
+              <div class="mb-3">
+                <label for="applicantName" class="form-label">Name</label>
+                <input type="text" class="form-control" id="applicantName" required>
+              </div>
+              <div class="mb-3">
+                <label for="applicantEmail" class="form-label">Email (Personal)</label>
+                <input type="email" class="form-control" id="applicantEmail" required>
+              </div>
+              <div class="mb-3">
+                <label for="greetingMessage" class="form-label">Greeting Message</label>
+                <textarea id="greetingMessage"></textarea>
+              </div>
+              <div class="mb-3">
+                <label for="applicationDocuments" class="form-label">Upload Documents
+                  (It can be your CV, Cover Letter, Introduduction Letter, etc.) <span class="text-danger">max 5 files</span>
+                </label>
+                <input type="file" class="form-control" id="applicationDocuments" multiple>
+              </div>
+              <button type="submit" class="btn btn-primary">Submit Application</button>
+            </form>
           </div>
         </div>
       </div>
+    </div>
+
+    <!-- đáp yêu cầu apply -->
+    <div class="modal fade" id="responseApplicationModal" tabindex="-1" aria-labelledby="responseApplicationModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="responseApplicationModalLabel">Response to Internship Application</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <form id="responseApplicationForm">
+              <div class="mb-3">
+                <label for="applicantName" class="form-label">Applicant Name</label>
+                <input type="text" class="form-control" id="applicantName" readonly>
+              </div>
+              <div class="mb-3">
+                <label for="applicantEmail" class="form-label">Email</label>
+                <input type="email" class="form-control" id="applicantEmail" readonly>
+              </div>
+              <div class="mb-3">
+                <label for="greetingMessage" class="form-label">Greeting Message</label>
+                <textarea class="form-control" id="greetingMessage" rows="3" readonly></textarea>
+              </div>
+              <div class="mb-3">
+                <label for="responseStatus" class="form-label">Response Status</label>
+                <select class="form-select" id="responseStatus" required>
+                  <option value="accepted">Accept</option>
+                  <option value="rejected">Reject</option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label for="responseMessage" class="form-label">Reason or Message</label>
+                <textarea class="form-control" id="responseMessage" rows="3" required></textarea>
+              </div>
+              <button type="submit" class="btn btn-primary">Submit Response</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>

@@ -5,6 +5,7 @@ const User = require('../models/users');
 const { ensureProfileUpdated } = require('../middleware/authentication');
 const Company = require('../models/companies');
 const Internship = require('../models/internships');
+const Application = require('../models/applications');
 const Review = require('../models/reviews');
 const Comment = require('../models/lecturecomments');
 const userController = require('../controllers/user.controllers');
@@ -106,7 +107,6 @@ router.get('/', function (req, res) {
     businessController.editCompanyProfile
   )
   .get('/business/:companyId', async function (req, res, next) {
-    console.log(req.params.companyId)
     const partial = 'partials/business_detail';
     const layout = 'layouts/main';
     req.partial_path = partial
@@ -151,7 +151,12 @@ router.get('/', function (req, res) {
       res.status(500).json({ status: 'error', message: 'Internal Server Error' });
     }
   })
-  .post('/business/internship/:internshipId/apply', businessController.applyForInternship)
+  .post('/business/internship/:internshipId/apply',
+    upload.fields([{ name: 'documents', maxCount: 5 }]),
+    businessController.applyForInternship
+  )  
+  .get('/business/:companyId/applications', businessController.getApplicationsNoti)
+  .post('/business/:companyId/applications/viewed', businessController.markApplicationsAsViewed)
   // .get('/course/:courseId', async function (req, res, next) {
   //   const user = await User.findById(req.session.account);
   //   const hasBought = user.subscribed.includes(req.params.courseId);
