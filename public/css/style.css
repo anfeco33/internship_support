@@ -2678,6 +2678,47 @@ body.light .update_business {
     color: var(--text-dark-color);
 }
 
+.center-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh; /* Full viewport height */
+    width: 100%; /* Full viewport width */
+}
+
+/* dòng pls update firsttime */
+.alert {
+    text-align: center; 
+}
+
+.text-danger {
+    color: red;
+}
+
+/* business details page */
+.company_detail_card {
+    background: #ffffff;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+.company_info {
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 10px;
+}
+.carousel-inner img {
+    object-fit: cover;
+    height: 400px;
+}
+
+.my-business-btn {
+    width: 150px;
+    height: 50px;
+    align-content: center;
+}
+
+/* === HEAD*/
 /* Áp dụng gradient xanh dương-xanh lá cho tiêu đề */
 .title-type {
     background: linear-gradient(45deg, #1e90ff, #32cd32); /* Gradient từ xanh dương sang xanh lá */
@@ -2689,12 +2730,16 @@ body.light .update_business {
     font-size: 24px; /* Tăng kích thước chữ */
     margin-bottom: 20px; /* Tạo khoảng cách dưới */
 }
+
+
 /* .row.cardListTop {
     color: rgb(79, 79, 228);
 }
+
 .row.cardListTop:hover {
     color: rgb(24, 171, 68);
 } */
+
 .card-img-container {
     height: 200px; /* Chiều cao cố định cho khung ảnh */
     overflow: hidden; /* Ẩn phần ảnh bị vượt ra ngoài */
@@ -2705,6 +2750,7 @@ body.light .update_business {
     height: 100%; /* Ảnh chiếm toàn bộ chiều cao */
     object-fit: cover; /* Cắt ảnh để phù hợp với khung */
 }
+
 /* Top 1 với hiệu ứng động */
 @keyframes top1-glow {
     0% {
@@ -2759,6 +2805,7 @@ body.light .update_business {
     box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.1); /* Đổ bóng mềm mại */
     transition: transform 0.3s ease, box-shadow 0.3s ease; /* Hiệu ứng hover */
 }
+
 /* Pseudo-element tạo viền gradient */
 .business-card::before {
     content: ""; /* Nội dung rỗng */
@@ -2771,14 +2818,17 @@ body.light .update_business {
     background: linear-gradient(45deg, white, rgba(56, 178, 226, 0.885)); /* Màu gradient */
     z-index: -1; /* Đặt phía sau nội dung card */
 }
+
 /* Hover với hiệu ứng nổi bật */
 .business-card:hover::before {
     background: linear-gradient(135deg, white, #b8ffe2); /* Gradient nổi bật hơn khi hover */
 }
+
 .business-card:hover {
     transform: translateY(-10px); /* Hiệu ứng di chuyển nổi bật hơn */
     box-shadow: 0px 12px 30px rgba(0, 0, 0, 0.2); /* Đổ bóng sâu hơn */
 }
+
 /* Hình ảnh trong card */
 .card-img-top {
     border-radius: 10px 10px 0 0; /* Bo góc trên cùng */
@@ -2787,15 +2837,18 @@ body.light .update_business {
     object-fit: cover; /* Đảm bảo căn chỉnh ảnh */
     transition: transform 0.3s ease; /* Hiệu ứng hover ảnh */
 }
+
 /* Hover vào ảnh tạo hiệu ứng zoom nhẹ */
 .card-img-top:hover {
     transform: scale(1.05); /* Zoom ảnh nhẹ khi hover */
 }
+
 /* Card nội dung */
 .card-body {
     padding: 15px; /* Tăng khoảng cách nội dung */
     text-align: center; /* Căn giữa nội dung */
 }
+
 /* Tiêu đề */
 .card-title {
     font-size: 18px; /* Kích thước lớn hơn */
@@ -2803,12 +2856,14 @@ body.light .update_business {
     color: #333; /* Màu chữ chính */
     margin-bottom: 10px; /* Khoảng cách dưới */
 }
+
 /* Văn bản mô tả */
 .card-text {
     font-size: 14px; /* Kích thước vừa phải */
     color: #555; /* Màu chữ phụ */
     margin-bottom: 8px; /* Khoảng cách giữa các đoạn văn bản */
 }
+
 /* Badge xác thực */
 .card-title img {
     width: 24px; /* Tăng kích thước biểu tượng */
@@ -2816,81 +2871,55 @@ body.light .update_business {
     margin-left: 8px; /* Khoảng cách bên trái */
     vertical-align: middle; /* Canh giữa với text */
 }
+
 #rating {
     display: flex;
     align-items: center;
     font-size: 14px;
-  }
+}
   
 #rating::before {
-content: '⭐';
-margin-right: 5px;
-color: #FFD700; /* Màu vàng cho ngôi sao */
-font-size: 16px;
+    content: '⭐';
+    margin-right: 5px;
+    color: #FFD700; /* Màu vàng cho ngôi sao */
+    font-size: 16px;
 }
+
 #address {
     display: flex;
     align-items: center;
     font-size: 14px;
-  }
-  
-  #address::before {
+}
+
+#address::before {
     content: '📌'; /* Icon địa chỉ dạng emoji */
     margin-right: 8px;
     font-size: 18px;
     color: #007bff;
-  }  
-  #industry {
+}  
+
+#industry {
     display: flex;
     align-items: center;
     font-size: 14px;
-  }
-  
-  #industry::before {
+}
+
+#industry::before {
     content: '🏢'; /* Icon tòa nhà mặc định cho lĩnh vực */
     margin-right: 8px;
     font-size: 18px;
     color: #007bff;
-  }
+}
+
+.student-data {
+    background-color: #f0f8ff; /* Màu nền khác */
+    color: #333; /* Màu chữ */
+    border: 1px solid #ccc; /* Đường viền */
+    padding: 10px; /* Khoảng cách bên trong */
+    border-radius: 5px; /* Bo góc */
+}
   
-
-.center-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh; /* Full viewport height */
-    width: 100%; /* Full viewport width */
+  .student-data:read-only {
+    background-color: #f0f8ff; /* Màu nền khác */
+    color: #333; /* Màu chữ */
 }
-
-/* dòng pls update firsttime */
-.alert {
-    text-align: center; 
-}
-
-.text-danger {
-    color: red;
-}
-
-/* business details page */
-.company_detail_card {
-    background: #ffffff;
-    border-radius: 10px;
-    padding: 20px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-.company_info {
-    padding: 20px;
-    background: #f8f9fa;
-    border-radius: 10px;
-}
-.carousel-inner img {
-    object-fit: cover;
-    height: 400px;
-}
-
-.my-business-btn {
-    width: 150px;
-    height: 50px;
-    align-content: center;
-}
-
