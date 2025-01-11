@@ -72,39 +72,50 @@
          <!-- image mỗi business có cùng kích thước -->
         <!-- company đã verified -->
     <div class="row">
-        <% if (data.topSupportiveCompanies && data.topSupportiveCompanies.length > 0) { %>
-            <% var topCompanies = data.topSupportiveCompanies %>
-            <% if (topCompanies.length > 0) { %>
-            <% topCompanies.forEach((company, index) => { %>
-                <div class="col-md-4 mb-4" onclick="getBusinessById('<%= company._id.toString() %>')">
-                <div class="normal-business-card">
-                    <div class="card-header">
-                    <span class="badge bg-primary">Top <%= index + 1 %></span>
-                    </div>
-                    <img src="<%= company.images.length > 0 ? company.images[0] : '/images/default_companyImage_details.jpg' %>" class="card-img-top" alt="<%= company.name %>">
-                    <div class="card-body">
-                    <h5 class="card-title">
-                        <%= company.name %>
-                        <% if (company.isVerified) { %>
-                        <img src="/images/verified_icon.png" alt="Verified" style="width: 20px; height: 20px;">
-                        <% } else { %>
-                        <img src="/images/unverified_icon.png" alt="Unverified" style="width: 20px; height: 20px;">
-                        <% } %>
-                    </h5>
-                    <p class="card-text">Industry: <%= company.industry %></p>
-                    <p class="card-text">Rating: starIcon <%= company.averageRating.toFixed(1) %>/5</p>
-                    <p class="card-text">Address: <%= company.address %></p>
+      <% if (data.topSupportiveCompanies && data.topSupportiveCompanies.length > 0) { %>
+        <% var topCompanies = data.topSupportiveCompanies %>
+        <% if (topCompanies.length > 0) { %>
+            <% topCompanies.forEach((company, index) => { 
+                var rankClass = index === 0 ? 'top1' 
+                              : index === 1 ? 'top2' 
+                              : index === 2 ? 'top3' 
+                              : 'default'; 
+                var badgeClass = index === 0 ? 'badge-top1'
+                              : index === 1 ? 'badge-top2'
+                              : index === 2 ? 'badge-top3'
+                              : 'badge-default';
+            %>
+            <div class="col-12 mb-4">
+                <div class="normal-business-card <%= rankClass %>" onclick="getBusinessById('<%= company._id.toString() %>')">
+                    <img src="<%= company.images.length > 0 ? company.images[0] : '/images/default_companyImage_details.jpg' %>" class="card-img-top-top" alt="<%= company.name %>">
+                    <div class="card-body-top">
+                        <div class="card-header">
+                            <span class="badge <%= badgeClass %>">Top <%= index + 1 %></span>
+                        </div>
+                        <h5 class="card-title">
+                            <%= company.name %>
+                            <% if (company.isVerified) { %>
+                            <img src="/images/verified_icon.png" alt="Verified" style="width: 20px; height: 20px;">
+                            <% } else { %>
+                            <img src="/images/unverified_icon.png" alt="Unverified" style="width: 20px; height: 20px;">
+                            <% } %>
+                        </h5>
+                        <p class="card-text" id="industry">Industry: <%= company.industry %></p>
+                        <p class="card-text" id="rating">Rating: starIcon <%= company.averageRating.toFixed(1) %>/5</p>
+                        <p class="card-text" id="address" >Address: <%= company.address %></p>
                     </div>
                 </div>
-                </div>
-            <% }); %>
-            <% } %>
-        <% } else { %>
-            <div class="col-12">
-              <p class="text-center">We would show you the most supportive companies for internships soon.</p>
             </div>
+            <% }); %>
         <% } %>
+    <% } else { %>
+        <div class="col-12">
+            <p class="text-center">We would show you the most supportive companies for internships soon.</p>
+        </div>
+    <% } %>
+    
     </div>
+        
         
         
         
@@ -152,10 +163,10 @@
           </select>
         </div>
         <div class="col-md-3">
-          <button type="submit" class="btn btn-primary">
-            <i class="fa fa-filter" style="font-size: 24px;"></i>
+          <button type="submit" id="filter" class="btn btn-primary">
+            <i class="fa fa-filter" style="font-size: 20px;"></i>
           </button>
-          <button type="button" class="btn btn-secondary" id="showAllBtn">Show All</button>
+          <button type="button" class="btn btn-secondary" id="showAllBtn" >View All </button>
         </div>
       </div>
     </form>
@@ -163,49 +174,48 @@
         <div class="alert alert-warning" role="alert">
             <h3 class="title-type" id="allCompanies">BELOW ARE COMPANIES ACTIVELY SEEKING TO RECRUIT INTERNS</h3>
         </div>
-      <% if (data.listOfBusiness) { %>
-        <% var list = data.listOfBusiness %>
-        <% if (list.length > 0) { %>
-          <% list.forEach((business) => { %>
-            <div class="col-md-4 mb-4" onclick="getBusinessById('<%= business._id.toString() %>')">
-              <div class="business-card">
-                <img 
-                  src="<%= business.images.length > 0 ? business.images[0] : '/images/default_companyImage_details.jpg' %>" 
-                  class="card-img-top" 
-                  alt="<%= business.name %>"
-                >
-                <div class="card-body">
-                  <h5 class="card-title d-flex align-items-center">
-                    <%= business.name %>
-                    <% if (business.isVerified) { %>
-                      <img 
-                        src="/images/verified_icon.png" 
-                        alt="Verified" 
-                        class="ms-2" 
-                        style="width: 20px; height: 20px;"
-                      >
-                    <% } else { %>
-                      <img 
-                        src="/images/unverified_icon.png" 
-                        alt="Unverified" 
-                        class="ms-2" 
-                        style="width: 20px; height: 20px;"
-                      >
-                    <% } %>
-                  </h5>
-                  <p class="card-text" id="industry">Industry: <%= business.industry %></p>
-                  <p class="card-text" id= "rating">Rating: starIcon <%= business.averageRating.toFixed(1) %>/5</p>
-                  <p class="card-text" id="address" style="font-size: 10px;">Address: <%= business.address %></p>
-                </div>
-              </div>
-            </div>
-          <% }); %>
-        <% } else { %>
-          <h2 id="empty-list" class="text-center">
-            Sorry, there are no appropriate businesses found.
-          </h2>
-        <% } %>
+        <% if (data.listOfBusiness) { %>
+          <% var list = data.listOfBusiness %>
+          <% if (list.length > 0) { %>
+              <% list.forEach((business) => { %>
+                  <div class="col-12 mb-4"> <!-- Thay đổi col-md-4 thành col-12 -->
+                      <div class="business-card" onclick="getBusinessById('<%= business._id.toString() %>')">
+                          <!-- Hình ảnh nằm bên trái -->
+                          <img 
+                              src="<%= business.images.length > 0 ? business.images[0] : '/images/default_companyImage_details.jpg' %>" 
+                              class="card-img-top" 
+                              alt="<%= business.name %>"
+                          >
+                          <!-- Nội dung nằm bên phải -->
+                          <div class="card-body">
+                              <h5 class="card-title">
+                                  <%= business.name %>
+                                  <% if (business.isVerified) { %>
+                                      <img 
+                                          src="/images/verified_icon.png" 
+                                          alt="Verified"
+                                      >
+                                  <% } else { %>
+                                      <img 
+                                          src="/images/unverified_icon.png" 
+                                          alt="Unverified"
+                                      >
+                                  <% } %>
+                              </h5>
+                              <p class="card-text" id="industry">Industry: <%= business.industry %></p>
+                              <p class="card-text" id="rating">Rating: starIcon <%= business.averageRating.toFixed(1) %>/5</p>
+                              <p class="card-text" id="address" style="font-size: 10px;">Address: <%= business.address %></p>
+                          </div>
+                      </div>
+                  </div>
+              <% }); %>
+          <% } else { %>
+              <h2 id="empty-list" class="text-center">
+                  Sorry, there are no appropriate businesses found.
+              </h2>
+          <% } %>
       <% } %>
+      
     </div>
   </div>
 
