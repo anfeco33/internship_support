@@ -1,5 +1,7 @@
+<% const businessId = data.businessId ? data.businessId.toString() : ''; %>
 <script>
     const businessId = '<%= data.businessId %>';
+    const userRole = '<%= account.role %>';
 </script>
 <header>
     <nav class="navbar">
@@ -33,10 +35,18 @@
                   <i class="bi bi-bell-fill"></i>
                   <% if (account.role === 'company') { %>
                     <span id="applicationCount" class="badge">0</span>
-                  <% } else { %>
-                    <span id="feedbackCount_Stu" class="badge">0</span>
+                  <% } else if (account.role === 'student') { %>
+                    <span id="studentFeedbackCount" class="badge">0</span>
                   <% } %>
                 </div>
+
+                <% if (account.role === 'student') { %>
+                  <div id="studentFeedbackDropdown" class="applications-dropdown">
+                    <ul id="studentFeedbackList" class="list-group">
+                      <!-- Feedback items sẽ được hiển thị ở đây -->
+                    </ul>
+                  </div>
+                <% } %>
 
                 <!-- nếu role company thì hiện nút update profile -->
                 <% if (account.role === 'company') { %>

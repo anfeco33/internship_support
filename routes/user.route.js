@@ -156,50 +156,93 @@ router.get('/', function (req, res) {
     businessController.applyForInternship
   )  
   .get('/business/:companyId/applications', businessController.getApplicationsNoti)
+  .get('/student/applications/notifications', businessController.getStudentNotifications)
+  
   .post('/business/:companyId/applications/viewed', businessController.markApplicationsAsViewed)
-  // .get('/course/:courseId', async function (req, res, next) {
-  //   const user = await User.findById(req.session.account);
-  //   const hasBought = user.subscribed.includes(req.params.courseId);
-  //   const hasAddToCart = user.cart.includes(req.params.courseId);
-  //   const hasReviewsOfACourse = await Review.find({ courseId: req.params.courseId })
-  //   .populate('userId', 'fullName profilePicture'); 
-  //   const hasReviewed = await Review.findOne({ courseId: req.params.courseId, userId: req.session.account })
-  //   .populate('userId', 'fullName profilePicture');
-  //   const hasExercises = await Exercise.find({ courseId: req.params.courseId });
+  // tab con
+  .get('/internships/:businessId', businessController.getInternships)
+  .get('/business/:businessId/applications/:applicationId', async function (req, res, next) {
+    console.log('Fetching application details:', req.params.applicationId);
+    const { applicationId } = req.params;
+    const application = await Application.findById(applicationId).select('internship');
+    if (!application) {
+      console.error('Application not found:', applicationId);
+      return res.status(404).json({ status: 'error', message: 'Application not found' });
+    }
 
-  //   console.log(req.params.courseId)
-  //   const partial = 'partials/course_detail';
-  //   const layout = 'layouts/main';
-  //   req.partial_path = partial
-  //   req.layout_path = layout
-  //   req.page_data = {
-  //     course_detail: await businessController.getCourse(req.params.courseId),
-  //     hasBought: hasBought,
-  //     hasAddToCart: hasAddToCart,
-  //     hasReviewed: hasReviewed,
-  //     hasReviewsOfACourse: hasReviewsOfACourse,
-  //     hasExercises: hasExercises
-  //   }
-  //   // console.log(req.page_data.account_details)
-  //   await userController.getpage(req, res, next);
-  // })
-  // .delete('/course/:courseId', businessController.delete_course)
-  // .get('/exercise', async function (req, res, next) {
-  //   const partial = 'partials/exercise';
-  //   const layout = 'layouts/main';
+    const internshipId = application.internship;
+
+    const internship = await Internship.findById(internshipId).select('title company').populate({
+      path: 'company',
+      select: 'name',
+    });
+
+    if (!internship) {
+      console.log('Internship not found for application:', applicationId);
+      return res.status(404).json({ status: 'error', message: 'Internship not found' });
+    }
+
+    const partial = 'partials/student_applied_list';
+    const layout = 'layouts/main';
+    req.partial_path = partial
+    req.layout_path = layout
+
+    const applications = await businessController.getApplicationDetails(req, res);
+    req.page_data = {
+      applications,
+      applicationId: req.params.applicationId,
+      businessId: req.params.businessId,
+      internshipTitle: internship.title,
+    }
+    await userController.getpage(req, res, next);
+  })
+  .get('/business/:businessId/application-list/:internshipId', async function (req, res, next) {
+      console.log('Fetching applications for internship:', req.params.internshipId);
+      const { internshipId } = req.params;
+        // Lấy title
+      const internship = await Internship.findById(internshipId).select('title company').populate({
+        path: 'company',
+        select: 'name',
+      });
+
+      if (!internship) {
+        console.log('Internship not found:', internshipId);
+        return res.status(404).json({ status: 'error', message: 'Internship not found' });
+      }
+      
+      const partial = 'partials/student_applied_list';
+      const layout = 'layouts/main';
+      req.partial_path = partial;
+      req.layout_path = layout;
   
-  //   const coursesWithExercises = await businessController.getCoursesWithExercises(req, res, next);
-  //   console.log("Courses with exercises: ", coursesWithExercises);
-  
-  //   req.partial_path = partial;
-  //   req.layout_path = layout;
-  
-  //   req.page_data = {
-  //     list_my_course: coursesWithExercises,
-  //     list_all_course_of_aCompany: await businessController.get_my_course(req, res, next)
-  //   }
-  //   await userController.getpage(req, res, next);
-  // })
+      req.page_data = {
+        applications: await businessController.getApplicationsByInternship(req, res),
+        internshipId: req.params.internshipId,
+        businessId: req.params.businessId,
+        internshipTitle: internship.title,
+      };
+      await userController.getpage(req, res, next);
+  })
+  .post('/applications/:applicationId/status', async function (req, res) {
+    try {
+      console.log('Updating application status:', req.params.applicationId);
+      await businessController.updateApplicationStatus(req, res);
+    } catch (error) {
+      console.error('Error in updating status route:', error);
+      res.status(500).send('Internal Server Error');
+    }
+  })
+  .get('/my-application-list', async function (req, res, next) {
+    const partial = 'partials/my_st_apps_list';
+    const layout = 'layouts/main';
+    req.partial_path = partial
+    req.layout_path = layout
+
+    req.page_data = {
+      applications: await businessController.getStudentApplications(req, res),
+    }
+    await userController.getpage(req, res, next);
+  })
   // .post('/course/exercise', async (req, res, next) => {
   //   await businessController.manageExercise(req, res, next);
   // })
@@ -222,7 +265,7 @@ router.get('/', function (req, res) {
   // .post('/course/exercise', async (req, res, next) => {
   //   await courseController.manageExercise(req, res, next);
   // })
-  // .delete('/course/:courseId', courseController.delete_course)
+ 
   // .get('/rating', async function (req, res, next) {
   //   const user = await User.findById(req.session.account);
   //   const hasBought = user.subscribed.includes(req.params.courseId);

@@ -1,0 +1,58 @@
+<% var applications = data.applications %>
+<% const businessId = data.businessId ? data.businessId.toString() : ''; %>
+<body>
+  <div class="container">
+    <h1 class="internship_list_title">
+        Applicants for the 
+        <span class="internship_title">"<%= data.internshipTitle %>"</span>
+        position
+    </h1>
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>Applicant Name</th>
+          <th>Email</th>
+          <th>Greeting Message</th>
+          <th>Documents</th>
+          <th>Status</th>
+          <th>Your Response</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% applications.forEach(application => { %>
+            <tr id="application-<%= application._id %>">
+              <td><%= application.applicantName %></td>
+              <td><%= application.applicantEmail %></td>
+              <td><div class="greeting-message-list"><%- application.greeting %></div></td>
+              <td>
+                <% if (application.documents && application.documents.length > 0) { %>
+                  <ul>
+                    <% application.documents.forEach(doc => { %>
+                      <li><a href="<%= doc %>" target="_blank"><%= doc.split('/').pop() %></a></li>
+                    <% }) %>
+                  </ul>
+                <% } else { %>
+                  No documents provided
+                <% } %>
+              </td>
+              <td>
+                <select class="form-select" id="status-<%= application._id %>" data-application-id="<%= application._id %>" <%= application.isResponded ? 'disabled' : '' %>>
+                  <option value="accepted" <%= application.status === 'accepted' ? 'selected' : '' %>>Accepted</option>
+                  <option value="rejected" <%= application.status === 'rejected' ? 'selected' : '' %>>Rejected</option>
+                </select>
+              </td>
+              <td>
+                <% if (!application.isResponded) { %>
+                  <button type="button" class="btn btn-primary" onclick="confirmStatus('<%= application._id %>')">Send</button>
+                <% } else { %>
+                  <span class="status-sent">Status Sent</span>
+                <% } %>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+</body>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet" />

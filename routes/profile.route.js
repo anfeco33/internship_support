@@ -1,6 +1,6 @@
 var express = require('express');
 const router = express.Router();
-
+const Company = require('../models/companies');
 
 var { authentication, isAdmin } = require('../middleware/authentication');
 
@@ -15,15 +15,21 @@ const sendEmail = require('../controllers/sendEmail');
 router.get('/', (req, res) => {
   res.redirect('/profile')
 })
-  //TODO: fix lỗi delay
   .get('/profile', authentication, async function (req, res, next) {
     const partial = 'partials/profile';
-    // var endpoint = '/home/profile';
     var layout = 'layouts/main';
-    
+    let company = null;
+
+    if (req.session.role === 'company') {
+      company = await Company.findOne({ representativeId: req.session.account });
+    }
+
     req.partial_path = partial
     req.layout_path = layout
-    // req.endpoint = endpoint
+    req.page_data = {
+      company: company,
+      businessId: company? company._id : null
+    }
     await userController.getpage(req, res, next);
 
   })

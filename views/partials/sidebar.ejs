@@ -1,6 +1,7 @@
 <!-- sidebar menu lấy từ các role trong dtb ứng với account -->
 <% sidedata = global.access %>
 <% account = global.account %>
+<% const businessId = data.businessId ? data.businessId.toString() : ''; %>
 <div class="sidebar">
     <div class="logo-details">     
         <img src="/images/logo.png" alt="err">
@@ -8,11 +9,6 @@
     </div>
 
     <ul class="nav-list">
-        <!-- <li>
-            <i class="bx bx-search"></i>
-            <input type="text" placeholder="Search..." />
-            <span class="tooltip">Search</span>
-        </li> -->
         <% if (sidedata) { %>
             <% sidedata.forEach((control) => { %>
                 <li class="<%=(control.access).replace(/\s/g, '')%>">
@@ -21,10 +17,15 @@
                         <span class="links_name"><%= control.access%></span>
                     </a>
                     <span class="tooltip"><%= control.access%></span>
+                    <% if (control.access === "Internship Applications") { %>
+                        <ul class="sub-nav-list" id="internshipSubNav" data-business-id="<%= businessId %>">
+                            <!-- tab con thêm here = js -->
+                        </ul>
+                    <% } %>
+
                 </li>
             <% }); %>
         <% } %>
-
 
         <li class="mode">
             <div class="moon-sun">

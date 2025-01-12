@@ -1,0 +1,34 @@
+<% var applications = data.applications %>
+<body>
+  <div class="container">
+    <h1 class="internship_list_title">
+        List of Your Submitted Internship Applications
+    </h1>
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>Sent Time & Date</th>
+          <th>Company</th>
+          <th>Internship Title</th>
+          <th>Message</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+            <% applications.forEach(application => { %>
+                <tr id="application-<%= application._id %>">
+                <td><%= new Date(application.appliedAt).toLocaleString() %></td>
+                <td><%= application.internship.companyName %></td>
+                <td><%= application.internship.title %></td>
+                <td><div class="greeting-message-list"><%- application.message %></div></td>
+                <td class="status-<%= application.status ? application.status.toLowerCase() : 'pending' %>">
+                    <%= application.status ? application.status.charAt(0).toUpperCase() + application.status.slice(1) : 'Pending' %>
+                </td>                
+                </tr>
+            <% }) %>
+       </tbody>
+    </table>
+  </div>
+</body>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet" />

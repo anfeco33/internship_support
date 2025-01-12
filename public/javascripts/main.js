@@ -53,7 +53,7 @@ function handleSearchResults(searchValue) {
                  
                   <div class="course_name mx-2  d-flex justify-content-start align-items-center">
                       
-                      Seach result for '${keyword}'
+                      Search result for "${keyword}"
                   </div>
                 </li>
             `
@@ -211,9 +211,26 @@ if (offcanvasElement) {
 closeBtn.addEventListener("click", () => {
   sidebar.classList.toggle("open");
   homeSection.classList.toggle('sidebar-open');
-  if (offcanvasElement) {
-    bsOffcanvas.hide();
-  }
+    if (sidebar.classList.contains('open')) {
+      console.log('Sidebar opened');
+    } else {
+      console.log('Sidebar closed');
+      // Ẩn các nút sub nếu sidebar đóng lại
+      const internshipSubNav = document.getElementById('internshipSubNav');
+      if (internshipSubNav) {
+        const subNavItems = internshipSubNav.querySelectorAll('.sub-nav-item');
+        subNavItems.forEach(subNavItem => {
+          subNavItem.classList.add('hide');
+        });
+        // Loại bỏ các mục khỏi DOM sau khi hiệu ứng hoàn tất
+        setTimeout(() => {
+          subNavItems.forEach(subNavItem => {
+            subNavItem.remove();
+          });
+        }, 300); // Thời gian chờ khớp với thời gian chuyển tiếp trong CSS
+        subNavVisible = false;
+      }
+    }
 
   menuBtnChange();
 });
@@ -231,15 +248,6 @@ if (offcanvasElement) {
     homeSection.classList.remove('offcanvas-open');
   });
 }
-
-
-
-// let getstatus = localStorage.getItem('status');
-// if (getstatus && getstatus === "open") {
-//   sidebar.classList.toggle("open");
-//   homeSection.classList.toggle('sidebar-open');
-// }
-
 
 function menuBtnChange() {
   if (sidebar.classList.contains("open")) {
@@ -286,8 +294,8 @@ if (body) {
 
 //Student and company page redirect
 const student_homepage = document.querySelector(".Home"),
-  subscribed_page = document.querySelector(".Subscribed"),
-  exercise_page = document.querySelector(".Exercise");
+  myintern_page = document.querySelector(".MyInternshipApps"),
+  applied_page = document.querySelector(".InternshipApplications");
 
 if (body) {
   if (student_homepage) {
@@ -297,21 +305,103 @@ if (body) {
     });
   }
 
+  if (myintern_page) {
+    myintern_page.addEventListener('click', function () {
+      console.log('My Internship list page');
+      window.location.href = "/home/my-application-list";
+    });
+  }
+  
+  let subNavVisible = false;
+  if (applied_page) {
+    applied_page.addEventListener('click', function () {
+      console.log('Applied page');
+      const internshipSubNav = document.getElementById('internshipSubNav');
+      console.log('Internship Sub Nav:', internshipSubNav);
 
-  if (subscribed_page) {
-    subscribed_page.addEventListener('click', function () {
-      console.log('Subscribed page');
-      window.location.href = "/home/subscribed"
+      // Mở sidebar nếu nó đang đóng
+      if (!sidebar.classList.contains('open')) {
+        sidebar.classList.add('open');
+        homeSection.classList.add('sidebar-open');
+        console.log('Sidebar opened automatically');
+      }
+
+      if (internshipSubNav) {
+        if (sidebar.classList.contains('open')) {
+          if (subNavVisible) {
+            // Ẩn các nút sub với hiệu ứng mượt mà
+            const subNavItems = internshipSubNav.querySelectorAll('.sub-nav-item');
+            subNavItems.forEach(subNavItem => {
+              subNavItem.classList.add('hide');
+            });
+            // Loại bỏ các mục khỏi DOM sau khi hiệu ứng hoàn tất
+            setTimeout(() => {
+              subNavItems.forEach(subNavItem => {
+                subNavItem.remove();
+              });
+            }, 300); // Thời gian chờ khớp với thời gian chuyển tiếp trong CSS
+            subNavVisible = false;
+          } else {
+            const businessId = internshipSubNav.getAttribute('data-business-id');
+            console.log('Business ID:', businessId); // Log businessId để kiểm tra
+
+            // Lấy danh sách internships từ server
+            fetch(`/home/internships/${businessId}`)
+              .then(response => response.json())
+              .then(data => {
+                console.log('API Response:', data); // Log dữ liệu trả về từ API
+                if (data.status === 'success') {
+                  const internships = data.internships;
+                  internshipSubNav.innerHTML = ''; // Làm trống danh sách cũ
+                  internships.forEach(internship => {
+                    const subNavItem = document.createElement('li');
+                    subNavItem.className = 'sub-nav-item';
+                    subNavItem.innerHTML = `
+                      <a href="#" data-internship-id="${internship._id}" title="${internship.title}">
+                        <i class="fa-solid fa-briefcase"></i> ${truncateText(internship.title, 15)}
+                      </a>
+                    `;
+                    subNavItem.addEventListener('click', function () {
+                      window.location.href = `/home/business/${businessId}/application-list/${internship._id}`;
+                    });
+                    internshipSubNav.appendChild(subNavItem);
+
+                    requestAnimationFrame(() => {
+                      subNavItem.classList.add('show');
+                    });
+                  });
+                  subNavVisible = true;
+                } else {
+                  showflashmessage('info', "You haven't posted any internships yet.");
+                }
+              })
+              .catch(error => {
+                console.error('Error fetching internships:', error);
+              });
+          }
+        } else {
+          // Sidebar đang đóng, ẩn các nút sub nếu có
+          const subNavItems = internshipSubNav.querySelectorAll('.sub-nav-item');
+          subNavItems.forEach(subNavItem => {
+            subNavItem.classList.add('hide');
+          });
+          setTimeout(() => {
+            subNavItems.forEach(subNavItem => {
+              subNavItem.remove();
+            });
+          }, 300); // Thời gian chờ khớp với thời gian chuyển tiếp trong CSS
+          subNavVisible = false;
+        }
+      }
     });
   }
 
-  if (exercise_page) {
-    exercise_page.addEventListener('click', function () {
-      window.location.href = "/home/exercise"
-    });
+  function truncateText(text, maxLength) {
+    if (text.length > maxLength) {
+      return text.substring(0, maxLength) + '...';
+    }
+    return text;
   }
-
-
 
 
 
@@ -363,7 +453,7 @@ function toggleEdit(id) {
           window.location.reload();
         }
         else {
-          showflashmessage(data.status, data.message)
+          showflashmessage('error', data.message);
 
         }
       })
@@ -475,7 +565,7 @@ function changeFullname(event) {
       if (data.status === "success") {
         window.location.reload();
       }
-      else { showflashmessage(data.status, data.message); }
+      else { showflashmessage('error', data.message); }
 
 
     })
@@ -483,13 +573,7 @@ function changeFullname(event) {
       // Xử lý lỗi (nếu có)
       console.error("Error:", error);
     });
-
-
 }
-
-
-
-
 
 function changePassword(event) {
   event.preventDefault();
@@ -520,7 +604,7 @@ function changePassword(event) {
         window.location.reload();
 
       }
-      else { showflashmessage(data.status, data.message); }
+      else { showflashmessage('error', data.message); }
     })
     .catch(function (error) {
       // Xử lý lỗi (nếu có)
@@ -629,7 +713,7 @@ function deletecoursebyId(target , id) {
         }
       }
       else {
-        showflashmessage(data.status, data.message)
+        showflashmessage('error', data.message);
       }
 
     })
@@ -652,7 +736,7 @@ function resendVerifyEmail(email, accountid) {
     .then(data => {
       // showflashmessage(data.status, data.message)
       if (data.status === "success") {
-        showflashmessage(data.status, data.message);
+        showflashmessage('success', data.message);
 
       }
 
@@ -699,64 +783,41 @@ function updateProgress(percent) {
 }
 
 
-function showflashmessage(type, message) {
+// function closeModal(id) {
+//   $(`#${id}`).modal('hide');
+// }
 
-  toastr[type](message)
-
-  toastr.options = {
-    "closeButton": true,
-    "debug": false,
-    "newestOnTop": false,
-    "progressBar": false,
-    "positionClass": "toast-top-right",
-    "preventDuplicates": false,
-    "onclick": null,
-    "showDuration": "300",
-    "hideDuration": "1000",
-    "timeOut": "5000",
-    "extendedTimeOut": "1000",
-    "showEasing": "swing",
-    "hideEasing": "linear",
-    "showMethod": "fadeIn",
-    "hideMethod": "fadeOut"
-  }
-}
-
-function closeModal(id) {
-  $(`#${id}`).modal('hide');
-}
-
-function resetModal(id) {
-  const form = document.getElementById(id);
-  if (form) {
-    form.reset();
-  }
-}
+// function resetModal(id) {
+//   const form = document.getElementById(id);
+//   if (form) {
+//     form.reset();
+//   }
+// }
 
 
-let lecture_page = document.querySelector('.lecture_page');
-var player;
+// let lecture_page = document.querySelector('.lecture_page');
+// var player;
 
-if (lecture_page) {
-  $('.toggle_show_lecture').click(function () {
-    $(this).toggleClass('fa-angle-down fa-angle-up');
-    $(this).parent().next('#all_lecture').toggleClass('open');
-  });
+// if (lecture_page) {
+//   $('.toggle_show_lecture').click(function () {
+//     $(this).toggleClass('fa-angle-down fa-angle-up');
+//     $(this).parent().next('#all_lecture').toggleClass('open');
+//   });
 
-  function change_lecture(lectureID, lectureTitle, lectureLink, lectureDescription) {
-    console.log(lectureID, lectureTitle, lectureLink, lectureDescription);
+//   function change_lecture(lectureID, lectureTitle, lectureLink, lectureDescription) {
+//     console.log(lectureID, lectureTitle, lectureLink, lectureDescription);
 
-    $('#lectureId').val(lectureID);
-    // $('#lecture_link').attr('src', lectureLink);
-    $('.lecture_title').text(lectureTitle);
-    $('.lecture_description').text(lectureDescription);
+//     $('#lectureId').val(lectureID);
+//     // $('#lecture_link').attr('src', lectureLink);
+//     $('.lecture_title').text(lectureTitle);
+//     $('.lecture_description').text(lectureDescription);
 
-    const videoId = getYouTubeVideoID(lectureLink);
-    if (player && videoId) {
-      player.loadVideoById(videoId);
-    }
-  }
-}
+//     const videoId = getYouTubeVideoID(lectureLink);
+//     if (player && videoId) {
+//       player.loadVideoById(videoId);
+//     }
+//   }
+// }
 
 
 function buyNow(courseId) {
@@ -841,9 +902,9 @@ function rmComment(id) {
       // showflashmessage(data.status, data.message)
       if (data.status === "success") {
         window.location.reload();
-        showflashmessage(data.status, "Delete comment successfully");
+        showflashmessage('success', data.message);
       }
-      else { showflashmessage(data.status, data.message); }
+      else { showflashmessage('error', data.message); }
     })
     .catch(function (error) {
       console.error("Error:", error);
@@ -889,6 +950,11 @@ if(filter){
  * Bell notification dropdown
  */
 document.addEventListener('DOMContentLoaded', function () {
+  if (typeof userRole === 'undefined' || userRole !== 'company') {
+    return;
+  }
+
+  console.log('DOM fully loaded and parsed NOTIFICATION');
   let isDropdownVisible = false;
 
   function fetchApplications(updateDropdown = false) {
@@ -942,7 +1008,7 @@ document.addEventListener('DOMContentLoaded', function () {
                   listItem.style.backgroundColor = '';
                 });
                 listItem.addEventListener('click', () => {
-                  showResponseModal(application);
+                  window.location.href = `/home/business/${businessId}/applications/${application._id}`;
                 });
                 applicationsList.appendChild(listItem);
               });
@@ -962,49 +1028,6 @@ document.addEventListener('DOMContentLoaded', function () {
       .catch(error => {
         console.error('Error fetching applications:', error);
       });
-  }
-
-  // modal trả yêu cầu apply
-  function showResponseModal(application) {
-    const responseModal = new bootstrap.Modal(document.getElementById('responseApplicationModal'));
-    document.getElementById('applicantName').value = application.applicantName;
-    document.getElementById('applicantEmail').value = application.applicantEmail;
-    document.getElementById('greetingMessage').value = application.greeting;
-    responseModal.show();
-
-    const responseForm = document.getElementById('responseApplicationForm');
-    responseForm.onsubmit = function (event) {
-      event.preventDefault();
-
-      const status = document.getElementById('responseStatus').value;
-      const reason_mess = document.getElementById('responseMessage').value.trim();
-
-      if (!status || !reason_mess) {
-        showflashmessage('warning', 'Please provide both status and your message!');
-        return;
-      }
-
-      fetch(`/home/business/application/${application._id}/response`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ status, reason_mess }),
-      })
-        .then(response => response.json())
-        .then(data => {
-          if (data.status === 'success') {
-            showflashmessage('success', 'Response sent successfully!');
-            location.reload(); // Reload
-          } else {
-            showflashmessage('error', 'Error sending response.' + data.message);
-          }
-        })
-        .catch(error => {
-          console.error('Lỗi khi gửi phản hồi:', error);
-          showflashmessage('error', 'Error sending response: ' + error.message);
-        });
-    };
   }
 
   function toggleApplicationsDropdown() {
@@ -1041,12 +1064,175 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }
 
-  // Gọi fetchApplications khi nhấn chuông
-  document.querySelector('.bell_icon').addEventListener('click', toggleApplicationsDropdown);
-
-  // Fetch số lượng ng apply ngay khi trang load
-  fetchApplications(false); // Không cập nhật dropdown
+  // fetchApplications khi nhấn chuông
+  const bellIcon = document.querySelector('.bell_icon');
+  if (bellIcon) {
+    bellIcon.addEventListener('click', toggleApplicationsDropdown);
+  
+    // Fetch số lượng ng apply ngay khi trang load
+    fetchApplications(false); // Không cập nhật dropdown
+  }
 });
+
+function confirmStatus(applicationId) {
+  const status = document.getElementById(`status-${applicationId}`).value;
+  const modalBody = document.getElementById('confirmModalBody');
+  modalBody.textContent = `Are you sure you want to set the status to "${status}" for this application?`;
+
+  const confirmButton = document.getElementById('confirmButton');
+  confirmButton.setAttribute('onclick', `showReasonModal('${applicationId}', '${status}')`);
+
+  // show modal xác nhận
+  const confirmModal = new bootstrap.Modal(document.getElementById('confirmModal'));
+  confirmModal.show();
+}
+
+function showReasonModal(applicationId, status) {
+  // Đóng modal xác nhận
+  const confirmModal = bootstrap.Modal.getInstance(document.getElementById('confirmModal'));
+  confirmModal.hide();
+
+  // Hiển thị modal nhập lý do hoặc thông báo
+  const reasonModal = new bootstrap.Modal(document.getElementById('reasonModal'));
+  reasonModal.show();
+
+  const reasonConfirmButton = document.getElementById('reasonConfirmButton');
+  reasonConfirmButton.setAttribute('onclick', `sendStatus('${applicationId}', '${status}')`);
+}
+
+async function sendStatus(applicationId, status) {
+  const reasonMessage = document.getElementById('reasonMessage').value;
+
+  try {
+    const response = await fetch(`/home/applications/${applicationId}/status`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ status, reasonOrMessage: reasonMessage }),
+    });
+
+    const data = await response.json();
+    if (response.ok) {
+      console.log('Status updated:', data.message);
+      showflashmessage('success', data.message);
+      // Đóng modal nhập lý do hoặc thông báo
+      const reasonModal = bootstrap.Modal.getInstance(document.getElementById('reasonModal'));
+      reasonModal.hide();
+      // Disable dropdown btn Send
+      const sendButton = document.querySelector(`#application-${applicationId} button`);
+      sendButton.textContent = 'Status Sent';
+      sendButton.disabled = true;
+    } else {
+      console.error('Error updating status:', data.message);
+      showflashmessage('error', data.message);
+    }
+  } catch (error) {
+    console.error('Error updating status:', error);
+    showflashmessage('error', 'An error occurred while updating the status');
+  }
+}
+
+// student notification
+document.addEventListener('DOMContentLoaded', function () {
+  if (typeof userRole === 'undefined' || userRole !== 'student') {
+    return;
+  }
+  console.log('DOM fully loaded and parsed for Student Feedback');
+  let isFeedbackDropdownVisible = false;
+
+  function fetchStudentNotifications(updateDropdown = false) {
+    fetch(`/home/student/applications/notifications`, {
+      method: 'GET',
+      headers: {
+        'Cache-Control': 'no-cache',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+      },
+    })
+      .then(response => response.json())
+      .then(data => {
+        if (data.status === 'success') {
+          const feedbacks = data.feedbacks; // danh sách phản hồi
+          const unreadCount = data.unreadCount; // slg chưa đọc
+          const feedbackCount = document.getElementById('studentFeedbackCount');
+          const feedbackList = document.getElementById('studentFeedbackList');
+
+          // Cập nhật số lượng thông báo chưa đọc
+          if (!isFeedbackDropdownVisible) {
+            feedbackCount.textContent = unreadCount;
+          }
+
+          if (updateDropdown) {
+            feedbackList.innerHTML = ''; // Xóa danh sách cũ
+            if (feedbacks.length > 0) {
+              feedbacks.forEach(feedback => {
+                const listItem = document.createElement('li');
+                listItem.className = 'list-group-item';
+                listItem.innerHTML = `
+                  <div>
+                    <strong>${feedback.internship.company.name}</strong> - "${feedback.internship.title}"
+                  </div>
+                  <div>
+                    Status: <strong>${feedback.status || 'Pending'}</strong>
+                  </div>
+                  <div class="text-muted" style="font-size: 0.8em;">
+                    ${new Date(feedback.appliedAt).toLocaleString()}
+                  </div>
+                `;
+                listItem.style.cursor = 'pointer';
+                listItem.addEventListener('mouseover', () => {
+                  listItem.style.backgroundColor = '#f0f0f0';
+                });
+                listItem.addEventListener('mouseout', () => {
+                  listItem.style.backgroundColor = '';
+                });
+                feedbackList.appendChild(listItem);
+              });
+            } else {
+              const listItem = document.createElement('li');
+              listItem.className = 'list-group-item';
+              listItem.textContent = 'No feedbacks received yet';
+              listItem.style.pointerEvents = 'none';
+              listItem.style.userSelect = 'none';
+              feedbackList.appendChild(listItem);
+            }
+          }
+        } else {
+          console.error('Error fetching student notifications:', data.message);
+        }
+      })
+      .catch(error => {
+        console.error('Error fetching student notifications:', error);
+      });
+  }
+
+  function toggleStudentFeedbackDropdown() {
+    const dropdown = document.getElementById('studentFeedbackDropdown');
+    const feedbackCount = document.getElementById('studentFeedbackCount');
+
+    dropdown.classList.toggle('show'); // Toggle visibility
+    isFeedbackDropdownVisible = dropdown.classList.contains('show');
+
+    if (isFeedbackDropdownVisible) {
+      console.log('Fetching feedbacks for dropdown...');
+      fetchStudentNotifications(true); // Cập nhật danh sách phản hồi
+
+      // Đặt lại số lượng thông báo
+      feedbackCount.textContent = '0';
+    }
+  }
+
+  // Xử lý khi nhấn chuông
+  const bellIcon = document.querySelector('.bell_icon');
+  if (bellIcon) {
+    bellIcon.addEventListener('click', toggleStudentFeedbackDropdown);
+
+    // Fetch số lượng thông báo ngay khi trang load
+    fetchStudentNotifications(false); // Không cập nhật dropdown
+  }
+});
+
 /**
  * Scroll top button
  */
@@ -1107,3 +1293,32 @@ document.addEventListener("DOMContentLoaded", () => {
       }
   });
 });
+
+
+function showflashmessage(type, message) {
+  const validTypes = ['success', 'error', 'info', 'warning'];
+    if (!validTypes.includes(type)) {
+        console.warn('Invalid toastr type:', type); // coi log f12
+        type = 'info'; 
+    }
+
+  toastr[type](message);
+
+  toastr.options = {
+    "closeButton": true,
+    "debug": false,
+    "newestOnTop": false,
+    "progressBar": false,
+    "positionClass": "toast-top-right",
+    "preventDuplicates": false,
+    "onclick": null,
+    "showDuration": "300",
+    "hideDuration": "1000",
+    "timeOut": "5000",
+    "extendedTimeOut": "1000",
+    "showEasing": "swing",
+    "hideEasing": "linear",
+    "showMethod": "fadeIn",
+    "hideMethod": "fadeOut"
+  }
+}

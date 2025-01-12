@@ -999,7 +999,7 @@ class BusinessController {
     try {
       const { internshipId } = req.params;
       const { applicantName, applicantEmail, greeting } = req.body;
-  
+    
       console.log('Received Data:', { internshipId, applicantName, applicantEmail, greeting });
       console.log('Uploaded Files:', req.files);
   
@@ -1021,6 +1021,7 @@ class BusinessController {
       // Tạo application
       const application = new Application({
         internship: internship._id,
+        applicantId: req.session.account,
         applicantName,
         applicantEmail,
         greeting,
@@ -1043,7 +1044,6 @@ class BusinessController {
 
   async getApplicationsNoti(req, res) {
     try {
-      console.log("GET applications noti");
       const { companyId } = req.params;
   
       const internships = await Internship.find({ company: companyId }).select('_id');
@@ -1096,5 +1096,223 @@ class BusinessController {
     }
   }
 
+  async getApplicationDetails(req, res) {
+    try {
+      const companyId = req.params.businessId;
+      const applicationId = req.params.applicationId;
+
+      console.log('Fetching applications for company:', companyId);
+  
+      // // all Internship thuộc công ty id
+      // const internships = await Internship.find({ company: companyId }).select('_id');
+      // if (!internships.length) {
+      //   console.log('No internships found for this company');
+      //   return [];
+      // }
+
+      // // get all appl liên quan danh sách Internship
+      // const applications = await Application.find({
+      //   internship: { $in: internships.map(i => i._id) },
+      // }).populate('internship'); // Populate lấy thêm thông tin Internship
+  
+      // if (!applications.length) {
+      //   console.log('No applications found for this company');
+      //   return [];
+      // }
+
+      // Tìm application để lấy internshipId
+      const application = await Application.findById(applicationId).select('internship');
+      if (!application) {
+        console.error('Application not found');
+        return [];
+      }
+
+      const internshipId = application.internship;
+
+      // Lấy tất cả applications thuộc cùng internship
+      const applications = await Application.find({ internship: internshipId })
+        .populate({
+          path: 'internship',
+          select: 'title company',
+          populate: {
+            path: 'company',
+            select: 'name', // Tên công ty
+          },
+        })
+        .sort({ appliedAt: -1 }); // Sắp xếp theo thời gian nộp gần nhất
+
+      console.log('Applications in same internship:', applications);
+
+      return applications;
+    } catch (error) {
+      console.error('Error fetching applications:', error);
+      res.status(500).send('Internal Server Error');
+      return [];
+    }
+  }
+
+  async updateApplicationStatus(req, res) {
+    try {
+      const { applicationId } = req.params;
+      const { status, reasonOrMessage } = req.body;
+  
+      // Validate input
+      if (!['accepted', 'rejected'].includes(status)) {
+        return res.status(400).json({ message: 'Invalid status value' });
+      }
+  
+      // Tìm ứng dụng và cập nhật
+      const application = await Application.findById(applicationId);
+      if (!application) {
+        return res.status(404).json({ message: 'Application not found' });
+      }
+  
+      // Cập nhật status, checked isResponded
+      application.status = status;
+      application.reasonOrMessage = reasonOrMessage;
+      application.responseAt = new Date().toUTCString();
+      application.isResponded = true;
+      await application.save();
+  
+      res.status(200).json({ message: `Status updated to ${status}` });
+    } catch (error) {
+      console.error('Error updating application status:', error);
+      res.status(500).json({ message: 'Internal Server Error' });
+    }
+  }
+
+  async getStudentNotifications(req, res) {
+    try {
+      const studentId = req.session.account;
+  
+      // count số lượng phản hồi chưa đọc
+      const unreadFeedbackCount = await Application.countDocuments({
+        applicantId: studentId,
+        isResponded: true,
+        isViewedByStudent: false,
+      });
+  
+      // ds phản hồi gần đây (max 5)
+      const recentFeedbacks = await Application.find({
+        applicantId: studentId,
+        isResponded: true,
+      })
+        .populate({
+          path: 'internship',
+          select: 'title company',
+          populate: {
+            path: 'company',
+            select: 'name',
+          },
+        })
+        .sort({ appliedAt: -1 }) // xếp theo thời gian gần nhất
+        .limit(5);
+  
+      res.status(200).json({
+        status: 'success',
+        feedbacks: recentFeedbacks,
+        unreadCount: unreadFeedbackCount,
+      });
+    } catch (error) {
+      console.error('Error fetching student notifications:', error);
+      res.status(500).json({ status: 'error', message: 'Internal Server Error' });
+    }
+  }
+
+  async getInternships(req, res) {
+    try {
+      console.log('Fetching internships ....');
+      const companyId = req.params.businessId;
+
+      console.log('Fetching internships for company:', companyId);
+
+      // get all Internship thuộc công ty id
+      const internships = await Internship.find({ company: companyId }).select('_id title');
+      if (!internships.length) {
+        console.log('No internships found for this company');
+        return res.status(404).json({ status: 'warning', message: 'No internships found for this company' });
+      }
+
+      res.status(200).json({ status: 'success', internships });
+    } catch (error) {
+      console.error('Error fetching internships:', error);
+      res.status(500).json({ status: 'error', message: 'Internal Server Error' });
+    }
+  }
+
+  async getApplicationsByInternship(req, res) {
+    try {
+      const { internshipId } = req.params;
+  
+      // Tìm tất cả applications liên quan đến internshipId
+      const applications = await Application.find({ internship: internshipId })
+        .populate({
+          path: 'internship',
+          select: 'title company',
+          populate: {
+            path: 'company',
+            select: 'name',
+          },
+        })
+        .sort({ appliedAt: -1 }); // Sắp xếp theo thời gian apply gần nhất
+  
+      if (!applications.length) {
+        console.log('No applications found for internship:', internshipId);
+      } else {
+        console.log('Applications found:', applications);
+      }
+  
+      return applications;
+    } catch (error) {
+      console.error('Error fetching applications by internship:', error);
+      res.status(500).json({ status: 'error', message: 'Internal Server Error' });
+      return [];
+    }
+  }
+  
+  async getStudentApplications(req, res) {
+    try {
+      const studentId = req.session.account;
+
+      // find applications thuộc sinh viên hiện tại
+      const applications = await Application.find({ applicantId: studentId })
+      .populate({
+        path: 'internship',
+        select: 'title company',
+        populate: {
+          path: 'company',
+          select: 'name', // Lấy tên công ty
+        },
+      })
+      .sort({ appliedAt: -1 }); // Sắp xếp theo thời gian apply gần nhất
+
+      // không tìm thấy application
+      if (!applications.length) {
+        console.log('No applications found for student:', studentId);
+        return [];
+      }
+
+      // Format kết quả để hợp với view
+      const formattedApplications = applications.map(app => ({
+        _id: app._id,
+        appliedAt: app.responseAt,
+        internship: {
+          title: app.internship?.title || 'Unknown',
+          companyName: app.internship?.company?.name || 'Unknown',
+        },
+        message: app.reasonOrMessage || 'Not Responded',
+        status: app.status || 'Pending',
+      }));
+
+      console.log('Student applications:', formattedApplications);
+      return formattedApplications;
+    } catch (error) {
+      console.error('Error fetching student applications:', error);
+      res.status(500).send('Internal Server Error');
+      return [];
+    }
+  }
+
+  
 }
 module.exports = new BusinessController();

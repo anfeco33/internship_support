@@ -25,10 +25,8 @@ const admin_feature_list = [
 ]
 
 const student_feature_list = [
-  //{ access: "Course", icon: "<i class='fa-solid fa-graduation-cap'></i>" },
-
   { access: "Home", icon: "<i class='fa-solid fa-house'></i>" },
-  { access: "Subscribed", icon: "<i class='fa-solid fa-square-check'></i>" }
+  { access: "My Internship Apps", icon: "<i class='fa-solid fa-square-check'></i>" }
 ]
 
 
@@ -37,7 +35,7 @@ const company_feature_list = [
   // sửa luôn trong main.js
 
   { access: "Home", icon: "<i class='fa-solid fa-house'></i>" },
-  { access: "Exercise", icon: "<i class='fa-solid fa-pen-to-square'></i>" }
+  { access: "Internship Applications", icon: "<i class='fa-solid fa-pen-to-square'></i>" }
 ]
 
 class UserController {
@@ -287,10 +285,9 @@ class UserController {
 
     // const accountID = req.user._id;
     const accountID = req.session.account;
-    console.log("Authenticated user ID:", accountID);
     
     const account = await this.getAccount(accountID);
-    console.log("curr account data: " + account)
+    console.log("all curr account data: " + account)
      // const account = await this.getAccount(req.session.account)
       if (account.lock) {
         var state = { status: 'warning', message: 'Account has been locked' };
@@ -302,18 +299,19 @@ class UserController {
         res.redirect("/login")
       }
       else{
-        // const sidebar = req.session.access;
+        const company = await Company.findOne({ representativeId: accountID });
+        const businessId = company ? company._id : null;
+
         const sidebar = account.access;
-        //TODO: chỗ này tùy chỉnh tùy theo page
+        
         const data_render = req.page_data ? req.page_data : "";
-        // Lấy flash message từ session
+        
+
         var flashMessage = req.session.flash;
         if (flashMessage) {
           console.log(flashMessage);
         }
-        // Xóa flash message khỏi session
         delete req.session.flash;
-        //RENDER KHÁC VỚI JSON NÓ VẪN CHẠY TIẾP
 
         console.log("Rendering page with partial : ", data_render)
         res.render(partial, { 
@@ -321,7 +319,9 @@ class UserController {
           access: sidebar, 
           account: account, 
           flashMessage, 
-          data: data_render });
+          businessId: businessId,
+          data: data_render 
+        });
       }
     } catch (error) {
       next(error);
@@ -522,43 +522,43 @@ class UserController {
 
 
 
-  async getProfilebyId(req, res, next) {
-    try {
-      const accountId = req.params.id;
-      const find = await User.findById(accountId);
-      if (!find) {
-        var state = { status: 'warning', message: 'Account not found' }
-      }
-      else {
-        var check_password = await bcrypt.compare(currpass, find.password);
-        if (check_password) {
-          const newpassword = await bcrypt.hash(newpass, parseInt(process.env.BCRYPT_SALT_ROUND));
-          find.password = newpassword;
-          await find.save(); // Lưu thay đổi
-          var state = { status: 'success', message: 'Change password successful' }
-        } else {
-          var state = { status: 'warning', message: 'Invalid password' }
-        }
-        // Các xử lý khác sau khi đăng nhập thành công
-        // Đăng nhập thành công, tạo flash message
-        req.session.flash = {
-          type: state.status,
-          intro: 'change pass feature',
-          message: state.message,
-        };
-        console.log(req.session.flash);
+  // async getProfilebyId(req, res, next) {
+  //   try {
+  //     const accountId = req.params.id;
+  //     const find = await User.findById(accountId);
+  //     if (!find) {
+  //       var state = { status: 'warning', message: 'Account not found' }
+  //     }
+  //     else {
+  //       var check_password = await bcrypt.compare(currpass, find.password);
+  //       if (check_password) {
+  //         const newpassword = await bcrypt.hash(newpass, parseInt(process.env.BCRYPT_SALT_ROUND));
+  //         find.password = newpassword;
+  //         await find.save(); // Lưu thay đổi
+  //         var state = { status: 'success', message: 'Change password successful' }
+  //       } else {
+  //         var state = { status: 'warning', message: 'Invalid password' }
+  //       }
+  //       // Các xử lý khác sau khi đăng nhập thành công
+  //       // Đăng nhập thành công, tạo flash message
+  //       req.session.flash = {
+  //         type: state.status,
+  //         intro: 'change pass feature',
+  //         message: state.message,
+  //       };
+  //       console.log(req.session.flash);
 
-        res.json({ status: state.status, message: state.message });
-      }
-
-
+  //       res.json({ status: state.status, message: state.message });
+  //     }
 
 
-    } catch (error) {
 
-      next(error);
-    }
-  }
+
+  //   } catch (error) {
+
+  //     next(error);
+  //   }
+  // }
 
   logout = async (req, res, next) => {
       try {

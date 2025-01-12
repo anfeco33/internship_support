@@ -8,9 +8,10 @@ var path = require('path');
 var moment = require('moment');
 const envPath = path.join(__dirname, '.env.example');
 require('dotenv').config({ path: envPath });
+
 const student_feature_list = [
   { access: "Home", icon: "<i class='fa-solid fa-house'></i>" },
-  { access: "Subscribed", icon: "<i class='fa-solid fa-square-check'></i>" }
+  { access: "My Internship Apps", icon: "<i class='fa-solid fa-square-check'></i>" }
 ]
 
 const company_feature_list = [
@@ -18,7 +19,7 @@ const company_feature_list = [
   // sửa luôn trong main.js
 
   { access: "Home", icon: "<i class='fa-solid fa-house'></i>" },
-  { access: "Exercise", icon: "<i class='fa-solid fa-pen-to-square'></i>" }
+  { access: "Internship Applications", icon: "<i class='fa-solid fa-pen-to-square'></i>" }
 ]
 
 async function ensureProfileUpdated(req, res, next) {
