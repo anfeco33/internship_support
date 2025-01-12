@@ -1180,6 +1180,9 @@ document.addEventListener('DOMContentLoaded', function () {
                     ${new Date(feedback.appliedAt).toLocaleString()}
                   </div>
                 `;
+                listItem.addEventListener('click', function() {
+                  window.location.href = '/home/my-application-list';
+                });
                 listItem.style.cursor = 'pointer';
                 listItem.addEventListener('mouseover', () => {
                   listItem.style.backgroundColor = '#f0f0f0';
