@@ -105,14 +105,15 @@
                         <h5 class="card-title">
                             <%= company.name %>
                             <% if (company.isVerified) { %>
-                            <img src="/images/verified_icon.png" alt="Verified" style="width: 20px; height: 20px;">
+                            <img src="/images/verified_icon.png" alt="Verified" style="width: 30px; height: 30px;" id="verifiedIcon">
                             <% } else { %>
-                            <img src="/images/unverified_icon.png" alt="Unverified" style="width: 20px; height: 20px;">
+                            <img src="/images/unverified_icon.png" alt="Unverified" style="width: 30px; height: 30px;" id="unverifiedIcon">
                             <% } %>
                         </h5>
                         <p class="card-text" id="industry">Industry: <%= company.industry %></p>
-                        <p class="card-text" id="rating">Rating: starIcon <%= company.averageRating.toFixed(1) %>/5</p>
-                        <p class="card-text" id="address" >Address: <%= company.address %></p>
+                        <p class="card-text" id="rating">Rating: <%= company.averageRating.toFixed(1) %>/5</p>
+                        <p class="card-text" id="address" style="font-size: 10px;">Address: <%= company.address %></p>
+                        <p class="heart-icon" id="iconheart" ><i class="fa fa-heart" id="heart" style="font-size:30px;color:red;cursor:pointer;"></i></p>
                     </div>
                 </div>
             </div>
@@ -213,8 +214,9 @@
                                   <% } %>
                               </h5>
                               <p class="card-text" id="industry">Industry: <%= business.industry %></p>
-                              <p class="card-text" id="rating">Rating: starIcon <%= business.averageRating.toFixed(1) %>/5</p>
+                              <p class="card-text" id="rating">Rating: <%= business.averageRating.toFixed(1) %>/5</p>
                               <p class="card-text" id="address" style="font-size: 10px;">Address: <%= business.address %></p>
+                              <p class="heart-icon" id="iconheart" ><i class="fa fa-heart" style="font-size:30px;color:red;cursor:pointer;"></i></p>
                           </div>
                       </div>
                   </div>

@@ -2810,21 +2810,22 @@ body.light .update_business {
 }
 
 /* Tiêu đề */
+
 .card-title {
-    font-size: 18px; /* Kích thước lớn hơn */
-    font-weight: bold; /* In đậm */
-    color: #333; /* Màu chữ chính */
-    margin-bottom: 10px; /* Khoảng cách dưới */
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 10px;
     display: flex;
     align-items: center; /* Căn giữa với biểu tượng */
 }
 
 /* Badge xác thực */
 .card-title img {
-    width: 20px; /* Kích thước biểu tượng */
-    height: 20px;
-    margin-left: 8px; /* Khoảng cách bên trái */
-    vertical-align: middle; /* Canh giữa với text */
+    width: 30px; /* Kích thước biểu tượng */
+    height: 30px;
+    margin-left: auto; /* Đẩy biểu tượng về phía bên phải */
+    vertical-align: middle; /* Căn giữa biểu tượng với chữ */
 }
 
 /* Văn bản mô tả */
@@ -3084,3 +3085,19 @@ body.light .update_business {
 #empty-list{
     background-color: white;
 }
+
+.heart-icon {
+    text-align: right; /* Căn phải nội dung trong phần tử <p> */
+    margin: 0; /* Xóa khoảng cách mặc định của <p> */
+  }
+  
+  #iconheart {
+    position: relative; /* Đặt vị trí cho phần tử nếu cần thêm tùy chỉnh */
+  }
+  #heart{
+    transition: transform 0.3s ease;
+  }
+  #heart.clicked {
+    color: darkred;
+    transform: scale(1.2); /* Hiệu ứng phóng to khi được chọn */
+  }
