@@ -1,4 +1,5 @@
 <% var company = data.company %>
+<% var companiesComments = data.companiesComments %>
 <% const businessId = data.businessId ? data.businessId.toString() : ''; %>
 <header>
     <nav class="navbar">
@@ -28,14 +29,16 @@
                     </div>
                 </div>
             
+                <% if(account.role !== 'admin') { %>
                 <div class="bell_icon mx-3">
                     <i class="bi bi-bell-fill"></i>
-                    <% if (account.role === 'company' & account._id.toString() === data.company.representativeId.toString()) { %>
+                    <% if (account.role === 'company') { %>
                       <span id="applicationCount" class="badge">0</span>
                     <% } else if (account.role === 'student') { %>
                       <span id="studentFeedbackCount" class="badge">0</span>
                     <% } %>
                 </div>
+                <% } %>
 
                 <% if (account.role === 'student') { %>
                   <div id="studentFeedbackDropdown" class="applications-dropdown">
@@ -45,7 +48,7 @@
                   </div>
                 <% } %>
                 
-                <% if (account.role === 'company' & account._id.toString() === data.company.representativeId.toString()) { %>
+                <% if (account.role === 'company') { %>
                   <!-- Applications Dropdown -->
                   <div id="applicationsDropdown" class="applications-dropdown">
                     <ul id="applicationsList" class="list-group">
@@ -134,8 +137,12 @@
                 <div class="col col-lg-5 col-12 company_info">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h4 class="mb-0"><%= company.name %></h4>
-                        <% if (company.isVerified) { %>
-                            <img src="/images/verified_icon.png" alt="Verified" style="width: 20px; height: 20px;">
+                        <% if (company.isLocked) { %>
+                          <span class="badge bg-danger" data-bs-toggle="tooltip" data-bs-placement="top" title="Your business may have violated community guidelines. Your profile will not be visible to other users. If there is a mistake, please contact support at: internchoice@support.gmail.com.">Locked</span>
+                        <% } else { %>
+                            <% if (company.isVerified) { %>
+                              <img src="/images/verified_icon.png" alt="Verified" style="width: 20px; height: 20px;">
+                            <% } %>
                         <% } %>
                     </div>
                     <p><strong>Industry</strong> <%= company.industry %></p>
@@ -144,13 +151,38 @@
                     <p><strong>Website</strong> <a href="<%= company.website %>" target="_blank"><%= company.website || 'Not specified' %></a></p>
                     <p><strong>Contact Email</strong> <%= company.contactEmail || 'Not specified' %></p>
                     <p><strong>Phone Number</strong> <%= company.phoneNumber || 'Not specified' %></p>
-                    <p><strong>Average Rating</strong> <%= company.averageRating ? company.averageRating.toFixed(1) : 'Not rated yet' %> / 5 stars</p>
-                    <% if (account.role === 'company' & account._id.toString() === data.company.representativeId.toString()) { %>
+                    <p><strong> <i class="fa fa-star" aria-hidden="true" style="color: gold;"></i></strong> <%= company.averageRating ? company.averageRating.toFixed(1) : '0' %>/5</p>
+                    <% if (account.role === 'student') { %>
+                      <% if (account.savedCompanies.includes(company._id.toString())) { %>
+                        <p class="heart-icon iconheart">
+                          <i class="fa fa-heart heart" id="heart-<%= company._id.toString() %>" onclick="saveFavoriteCompany(event, '<%= company._id.toString() %>')" style="font-size:30px;color:red;cursor:pointer;"></i>
+                        </p>
+                      <% } else { %>
+                        <p class="heart-icon iconheart">
+                          <i class="fa-regular fa-heart heart" id="heart-<%= company._id.toString() %>" onclick="saveFavoriteCompany(event, '<%= company._id.toString() %>')" style="font-size:30px;color:red;cursor:pointer;"></i>
+                        </p>
+                      <% } %>
+                    <% } %>
+                    <% if (account.role === 'company' && company.representativeIds.map(id => id.toString()).includes(account._id.toString())) { %>
+                      <div class="button-box styled-box">
                         <div class="my_business_icon mx-3" alt="my business">
-                            <button class="btn btn-danger btn-sm my-business-btn" data-bs-toggle="modal" data-bs-target="#createInternshipModal">
-                                CREATE INTERNSHIP
-                            </button>
+                          <button class="btn btn-danger btn-sm create-business-btn styled-button" data-bs-toggle="modal" data-bs-target="#createInternshipModal">
+                            <i class="fa fa-plus-circle" style="margin-right: 15px;"></i>CREATE INTERNSHIP
+                          </button>
                         </div>
+                        <% if (company.representativeIds[0].toString() === account._id.toString()) { %>
+                          <div class="add-representative-form">
+                            <button class="btn btn-primary add-representative-btn styled-button" data-bs-toggle="modal" data-bs-target="#addRepresentativeModal">
+                              <i class="fa fa-user-plus" style="margin-right: 5px;"></i>ADD REPRESENTATIVE
+                            </button>
+                          </div>
+                          <div class="view-representatives-form">
+                            <button class="btn btn-info view-representatives-btn styled-button" data-bs-toggle="modal" data-bs-target="#viewRepresentativesModal" onclick="viewRepresentatives('<%= businessId %>')">
+                              <i class="fa fa-users" style="margin-right: 5px;"></i>VIEW REPRESENTATIVES
+                            </button>
+                          </div>
+                        <% } %>
+                      </div>
                     <% } %>
                 </div>
             </div>
@@ -172,15 +204,15 @@
                                 <div>
                                     <h5 class="card-title"><%= internship.title %></h5>
                                 </div>
-                                <% if (account.role === 'company' && account._id.toString() === data.company.representativeId.toString()) { %>
-                                    <div class="btn-group">
+                                <% if (account.role === 'company' && company.representativeIds.map(id => id.toString()).includes(account._id.toString())) { %>
+                                  <div class="btn-group">
                                         <button class="btn btn-secondary btn-sm" onclick="editInternship('<%= internship._id %>')">Edit</button>
                                         <button class="btn btn-danger btn-sm" onclick="deleteInternship('<%= internship._id %>')">Delete</button>
                                     </div>
                                 <% } %>
                             </div>
                             <div class="card-text mt-3"><%- internship.description %></div>
-                            <p class="text-muted mt-3">Created at: <%= new Date(internship.createdAt).toLocaleString() %></p>
+                            <p class="text-muted mt-3"><%= new Date(internship.createdAt).toLocaleString('vi-VN') %></p>
                             <% if (account.role === 'student') { %>
                               <button class="btn btn-primary mt-3" onclick="applyForInternship('<%= internship._id %>')">Apply Now</button>
                             <% } %>
@@ -199,32 +231,284 @@
         <!-- comment -->
         <div class="company_detail_card" style="margin-top: 20px;">
             <h4>COMMENTS</h4>
+            <% if (account.role !== 'admin') { %>
+            <div class="mrt5" style="color:red;font-size:12px;font-style:italic">
+              Please share your honest feedback and help other students get a better understanding of what it's like to intern here. Please be mindful of your words and avoid making any harmful or untrue statements. Any comments that violate our guidelines will be removed. Thank you for your contribution to our community!
+            </div>
             <div class="comment-section">
-                <div class="comment-form">
-                    <textarea class="form-control" id="commentContent" rows="3" placeholder="Write a comment..."></textarea>
-                    <button class="btn btn-primary mt-2" onclick="addComment('<%= company._id %>')">Comment</button>
+              <div class="comment-form" style="border: solid 1px #e0e0e0; padding: 20px; margin-top: 5px; margin-bottom: 5px;">
+                  <textarea
+                    class="form-control"
+                    id="commentContent"
+                    rows="3"
+                    placeholder="Write a comment..."
+                  ></textarea>
+                  <div class="rating-section mt-2 d-flex justify-content-between align-items-center" style="margin-bottom: 20px;"> 
+                    <div>
+                      <label for="rating">Overall Rating <i class="fa fa-star" aria-hidden="true" style="color: gold;"></i></label>
+                      <select id="rating" class="form-select" style="width: 120px; display: inline-block;">
+                        <option value="">No Rating</option>
+                        <option value="1">⭐</option>
+                        <option value="2">⭐⭐</option>
+                        <option value="3">⭐⭐⭐</option>
+                        <option value="4">⭐⭐⭐⭐</option>
+                        <option value="5">⭐⭐⭐⭐⭐</option>
+                      </select>
+                    </div>
+                    <button class="btn btn-primary" onclick="addComment('<%= company._id %>')">
+                      <i class="fas fa-paper-plane"></i></button>
+                  </div>
+                  <h4>OR RATE BY CATEGORY</h4>
+                  <div class="rating-section mt-2">
+                    <label for="workEnvironmentRating">Work Environment</label>
+                    <div id="workEnvironmentRating" class="star-rating work-environment-stars">
+                      <i class="fa-regular fa-star" onmouseover="highlightStars('workEnvironmentRating', 1)" onmouseout="resetStars('workEnvironmentRating')" onclick="setRating('workEnvironmentRating', 1)"></i>
+                      <i class="fa-regular fa-star" onmouseover="highlightStars('workEnvironmentRating', 2)" onmouseout="resetStars('workEnvironmentRating')" onclick="setRating('workEnvironmentRating', 2)"></i>
+                      <i class="fa-regular fa-star" onmouseover="highlightStars('workEnvironmentRating', 3)" onmouseout="resetStars('workEnvironmentRating')" onclick="setRating('workEnvironmentRating', 3)"></i>
+                      <i class="fa-regular fa-star" onmouseover="highlightStars('workEnvironmentRating', 4)" onmouseout="resetStars('workEnvironmentRating')" onclick="setRating('workEnvironmentRating', 4)"></i>
+                      <i class="fa-regular fa-star" onmouseover="highlightStars('workEnvironmentRating', 5)" onmouseout="resetStars('workEnvironmentRating')" onclick="setRating('workEnvironmentRating', 5)"></i>
+                    </div>
+                    <input type="hidden" id="workEnvironmentRatingValue" value="0">
+                  
+                    <label for="trainingSupportRating">Training Support</label>
+                    <div id="trainingSupportRating" class="star-rating training-support-stars">
+                      <i class="fa-regular fa-star" onmouseover="highlightStars('trainingSupportRating', 1)" onmouseout="resetStars('trainingSupportRating')" onclick="setRating('trainingSupportRating', 1)"></i>
+                      <i class="fa-regular fa-star" onmouseover="highlightStars('trainingSupportRating', 2)" onmouseout="resetStars('trainingSupportRating')" onclick="setRating('trainingSupportRating', 2)"></i>
+                      <i class="fa-regular fa-star" onmouseover="highlightStars('trainingSupportRating', 3)" onmouseout="resetStars('trainingSupportRating')" onclick="setRating('trainingSupportRating', 3)"></i>
+                      <i class="fa-regular fa-star" onmouseover="highlightStars('trainingSupportRating', 4)" onmouseout="resetStars('trainingSupportRating')" onclick="setRating('trainingSupportRating', 4)"></i>
+                      <i class="fa-regular fa-star" onmouseover="highlightStars('trainingSupportRating', 5)" onmouseout="resetStars('trainingSupportRating')" onclick="setRating('trainingSupportRating', 5)"></i>
+                    </div>
+                    <input type="hidden" id="trainingSupportRatingValue" value="0">
+                  
+                    <label for="learningOpportunitiesRating">Learning Opportunities</label>
+                    <div id="learningOpportunitiesRating" class="star-rating learning-opportunities-stars">
+                      <i class="fa-regular fa-star" onmouseover="highlightStars('learningOpportunitiesRating', 1)" onmouseout="resetStars('learningOpportunitiesRating')" onclick="setRating('learningOpportunitiesRating', 1)"></i>
+                      <i class="fa-regular fa-star" onmouseover="highlightStars('learningOpportunitiesRating', 2)" onmouseout="resetStars('learningOpportunitiesRating')" onclick="setRating('learningOpportunitiesRating', 2)"></i>
+                      <i class="fa-regular fa-star" onmouseover="highlightStars('learningOpportunitiesRating', 3)" onmouseout="resetStars('learningOpportunitiesRating')" onclick="setRating('learningOpportunitiesRating', 3)"></i>
+                      <i class="fa-regular fa-star" onmouseover="highlightStars('learningOpportunitiesRating', 4)" onmouseout="resetStars('learningOpportunitiesRating')" onclick="setRating('learningOpportunitiesRating', 4)"></i>
+                      <i class="fa-regular fa-star" onmouseover="highlightStars('learningOpportunitiesRating', 5)" onmouseout="resetStars('learningOpportunitiesRating')" onclick="setRating('learningOpportunitiesRating', 5)"></i>
+                    </div>
+                    <input type="hidden" id="learningOpportunitiesRatingValue" value="0">
+                  
+                    <label for="benefitsRating">Benefits</label>
+                    <div id="benefitsRating" class="star-rating benefits-stars">
+                      <i class="fa-regular fa-star" onmouseover="highlightStars('benefitsRating', 1)" onmouseout="resetStars('benefitsRating')" onclick="setRating('benefitsRating', 1)"></i>
+                      <i class="fa-regular fa-star" onmouseover="highlightStars('benefitsRating', 2)" onmouseout="resetStars('benefitsRating')" onclick="setRating('benefitsRating', 2)"></i>
+                      <i class="fa-regular fa-star" onmouseover="highlightStars('benefitsRating', 3)" onmouseout="resetStars('benefitsRating')" onclick="setRating('benefitsRating', 3)"></i>
+                      <i class="fa-regular fa-star" onmouseover="highlightStars('benefitsRating', 4)" onmouseout="resetStars('benefitsRating')" onclick="setRating('benefitsRating', 4)"></i>
+                      <i class="fa-regular fa-star" onmouseover="highlightStars('benefitsRating', 5)" onmouseout="resetStars('benefitsRating')" onclick="setRating('benefitsRating', 5)"></i>
+                    </div>
+                    <input type="hidden" id="benefitsRatingValue" value="0">
+                  </div>
+                  <div class="d-flex justify-content-end mt-2">
+                    <button class="btn btn-secondary" onclick="resetAllRatings()">Reset</button>
+                  </div>
+
+              </div>
+             
+            </div>
+            <% } %>
+<!-- show comments -->
+<div class="comments">
+  <% if (companiesComments.comments && companiesComments.comments.length > 0) { %>
+    <% companiesComments.comments.forEach(function (comment) { %>
+      <div id="comment-<%= comment._id %>" class="comment user-comment d-flex flex-column align-items-start w-100">
+        <div class="d-flex align-items-start w-100">
+          <img src="<%= comment.authorPicture %>" alt="User Avatar" class="admin-avatar">
+          <div class="comment-content-group w-100">
+            <div class="bordered w-100">
+              <div class="d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center">
+                  <strong><%= comment.authorName %></strong>
+                  <% if (companiesComments.representativeIds.map(id => id.toString()).includes(comment.authorId.toString())) { %>
+                    <span style="color: lightcoral; margin-left: 5px;">(Representative)</span>
+                  <% } %>
+                  <% if (comment.rating) { %>
+                    <span class="star-rating selected" style="margin-left: 10px;">
+                      <i class="fa fa-star" aria-hidden="true">
+                        <span class="star-number"><%= comment.rating %></span>
+                      </i>
+                    </span>
+                  <% } %>
                 </div>
-                <div class="comments">
-                    <% if (company.comments && company.comments.length > 0) { %>
-                        <% company.comments.forEach(function (comment) { %>
-                            <div class="comment">
-                                <div class="comment-header">
-                                    <strong><%= comment.authorName %></strong>
-                                    <span><%= new Date(comment.createdAt).toLocaleString() %></span>
-                                </div>
-                                <div class="comment-content">
-                                    <p><%= comment.content %></p>
-                                </div>
-                            </div>
-                        <% }) %>
-                    <% } else { %>
-                        <p>No comments yet</p>
+                <% if (comment.detailedRatings) { %>
+                  <div class="detailed-ratings d-flex align-items-center">
+                    <% if (comment.detailedRatings.workEnvironment) { %>
+                      <span class="star-rating work-environment-stars">
+                        <i class="fa fa-star" aria-hidden="true">
+                          <span class="star-number"><%= comment.detailedRatings.workEnvironment %></span>
+                        </i>
+                      </span>
                     <% } %>
+                    <% if (comment.detailedRatings.trainingSupport) { %>
+                      <span class="star-rating training-support-stars">
+                        <i class="fa fa-star" aria-hidden="true">
+                          <span class="star-number"><%= comment.detailedRatings.trainingSupport %></span>
+                        </i>
+                      </span>
+                    <% } %>
+                    <% if (comment.detailedRatings.learningOpportunities) { %>
+                      <span class="star-rating learning-opportunities-stars">
+                        <i class="fa fa-star" aria-hidden="true">
+                          <span class="star-number"><%= comment.detailedRatings.learningOpportunities %></span>
+                        </i>
+                      </span>
+                    <% } %>
+                    <% if (comment.detailedRatings.benefits) { %>
+                      <span class="star-rating benefits-stars">
+                        <i class="fa fa-star" aria-hidden="true">
+                          <span class="star-number"><%= comment.detailedRatings.benefits %></span>
+                        </i>
+                      </span>
+                    <% } %>
+                  </div>
+                <% } %>
+
+
+                <% if (comment.authorId.toString() === account._id.toString()) { %>
+                <div class="edit-link-container">
+                  <a href="javascript:void(0);" class="edit-link" onclick="toggleEditForm('<%= comment._id %>')">
+                    <i class="fa fa-edit" aria-hidden="true"></i>
+                  </a>
                 </div>
+                <% } %>
+                <% if (account.role !== 'admin' && comment.authorId.toString() !== account._id.toString() && comment.content !== 'This comment has been removed due to violation of our policies') { %>
+                  <a href="javascript:void(0);" class="report-link" onclick="showReportModal('comment', '<%= company._id %>', '<%= comment._id %>')">
+                    <i class="fa fa-flag" aria-hidden="true"></i>
+                  </a>
+                <% } %>
+                <% if (account.role === 'admin') { %>
+                  <a href="javascript:void(0);" class="delete-link" onclick="showDeleteModal('comment', '<%= company._id %>', '<%= comment._id %>')">
+                    <i class="fa fa-trash" aria-hidden="true"></i>
+                  </a>
+                <% } %>
+              </div>
+              <div class="d-flex align-items-start" style="font-size:12px;font-style:italic">
+                <% if (comment.updatedAt) { %>
+                  <span id="comment-updatedAt-<%= comment._id %>" style="color:gray;"><%= comment.updatedAt %></span>
+                  <% } else { %>
+                  <span style="color:gray;"><%= comment.createdAt %></span>
+                <% } %>
+                <span class="masked-email" data-email="<%= comment.authorEmail %>"></span>
+              </div>
+              <hr class="separator">
+              <div class="comment-content mt-2 d-flex align-items-center">
+                <p id="comment-content-<%= comment._id %>" class="<%= comment.content === 'This comment has been removed due to violation of our policies' ? 'removed-comment' : '' %>"><%= comment.content %></p>
+              </div>
+              <div class="arrow-left"></div>
+              <!-- Form để chỉnh sửa comment, ban đầu ẩn -->
+              <div class="edit-form mt-2" id="editForm-<%= comment._id %>" style="display: none;">
+                <textarea class="form-control edit-textarea" id="editContent-<%= comment._id %>" rows="2"><%= comment.content %></textarea>
+                <div class="d-flex justify-content-end mt-2">
+                  <button class="btn btn-primary edit-button" onclick="editComment('<%= company._id %>', '<%= comment._id %>')">
+                    Save
+                  </button>
+                </div>
+              </div>
+            </div>
+            <!-- Nút Reply -->
+            <div class="d-flex justify-content-between mt-2 w-100">
+              <div class="reply-link-container">
+                <a href="javascript:void(0);" class="reply-link" onclick="toggleReplyForm('<%= comment._id %>')">Reply</a>
+              </div>
+            </div>
+
+            <!-- Form để trả lời comment, ban đầu ẩn -->
+            <div class="reply-form mt-2" id="replyForm-<%= comment._id %>" style="display: none;">
+              <textarea class="form-control reply-textarea" id="replyContent-<%= comment._id %>" rows="2" placeholder="Write a reply..."></textarea>
+              <div class="d-flex justify-content-end mt-2">
+                <button class="btn btn-primary reply-button" onclick="replyToComment('<%= company._id %>', '<%= comment._id %>')">
+                  <i class="fas fa-paper-plane"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- show replies -->
+            <div class="replies mt-3 w-100">
+              <% if (comment.replies && comment.replies.length > 0) { %>
+                <% comment.replies.forEach(function (reply) { %>
+                  <div id="comment-<%= reply._id %>" class="reply user-comment d-flex align-items-start w-100 mb-3">
+                    <div class="d-flex align-items-start w-100">
+                      <img src="<%= reply.authorPicture %>" alt="User Avatar" class="admin-avatar">
+                      <div class="bordered w-100">
+                        <div class="d-flex align-items-center justify-content-between w-100">
+                          <div class="d-flex align-items-center">
+                            <strong><%= reply.authorName %></strong>
+                            <% if (companiesComments.representativeIds.map(id => id.toString()).includes(reply.authorId.toString())) { %>
+                              <span style="color: lightcoral; margin-left: 5px;">(Representative)</span>
+                            <% } %>
+                          </div>
+                          <% if (reply.authorId.toString() === account._id.toString()) { %>
+                          <div class="edit-link-container">
+                            <a href="javascript:void(0);" class="edit-link" onclick="toggleEditForm('<%= reply._id %>')">
+                              <i class="fa fa-edit" aria-hidden="true"></i>
+                            </a>
+                          </div>
+                          <% } %>
+                          <% if (account.role !== 'admin' && reply.authorId.toString() !== account._id.toString() && reply.content !== 'This reply has been removed due to violation of our policies') { %>
+                            <a href="javascript:void(0);" class="report-link" onclick="showReportModal('reply', '<%= company._id %>', '<%= reply._id %>')">
+                              <i class="fa fa-flag" aria-hidden="true"></i>
+                            </a>
+                          <% } %>                          
+                          <% if (account.role === 'admin') { %>
+                            <a href="javascript:void(0);" class="delete-link" onclick="showDeleteModal('reply', '<%= company._id %>', '<%= reply._id %>')">
+                              <i class="fa fa-trash" aria-hidden="true"></i>
+                            </a>
+                          <% } %>
+                        </div>
+                        <div class="d-flex align-items-start" style="font-size:12px;font-style:italic">
+                          <% if (reply.updatedAt) { %>
+                            <span id="reply-updatedAt-<%= reply._id %>" style="color:gray;"><%= reply.updatedAt %></span>
+                          <% } else { %>
+                            <span style="color:gray;"><%= reply.createdAt %></span>
+                          <% } %>
+                          <span class="masked-email" data-email="<%= reply.authorEmail %>"></span>
+                        </div>
+                        <hr class="separator">
+                        <div class="comment-content mt-2 d-flex align-items-center">
+                          <p id="reply-content-<%= reply._id %>" class="<%= reply.content === 'This reply has been removed due to violation of our policies' ? 'removed-comment' : '' %>"><%= reply.content %></p>
+                        </div>
+                        <div class="arrow-left"></div>
+                
+                        <!-- Form để chỉnh sửa reply, ban đầu ẩn -->
+                        <div class="edit-form mt-2" id="editForm-<%= reply._id %>" style="display: none;">
+                          <textarea class="form-control edit-textarea" id="editContent-<%= reply._id %>" rows="2"><%= reply.content %></textarea>
+                          <div class="d-flex justify-content-end mt-2">
+                            <button class="btn btn-primary edit-button" onclick="editReply('<%= company._id %>', '<%= reply._id %>')">
+                              Save
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                <% }) %>
+              <% } %>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% }) %>
+  <% } else { %>
+    <div class="comment admin-comment d-flex align-items-start">
+      <img src="/images/default_avatar.png" alt="Admin Avatar" class="admin-avatar">
+      <div class="bordered">
+        <div>
+          <strong style="color:lightcoral;">Admin of InternChoice</strong>
+        </div>
+        <hr class="separator">
+        <div class="comment-content mt-2 d-flex align-items-center">
+          <p>There are no comments yet, share your tips for future interns!</p>
+        </div>
+        <div class="arrow-left"></div>
+      </div>
+    </div>
+  <% } %>
+</div>
+
             </div>
             <% } %>
         </div>
-
 
 <script src="https://cdn.tiny.cloud/1/rkluiijc3ceh2ffj46mafmr3qsdeijckhb4ja3bq6um2k256/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script>
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBs2CCj3DSth7s_9YHuG5EazDGskh5uKGk&libraries=places&callback=initMap" 
@@ -520,6 +804,455 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 });
 
+// jscomment
+function addComment(companyId) {
+  const content = document.getElementById('commentContent').value;
+  const rating = document.getElementById('rating').value;
+  const workEnvironmentRating = document.getElementById('workEnvironmentRatingValue').value;
+  const trainingSupportRating = document.getElementById('trainingSupportRatingValue').value;
+  const learningOpportunitiesRating = document.getElementById('learningOpportunitiesRatingValue').value;
+  const benefitsRating = document.getElementById('benefitsRatingValue').value;
+
+  if ((workEnvironmentRating > 0 || trainingSupportRating > 0 || learningOpportunitiesRating > 0 || benefitsRating > 0) &&
+      (workEnvironmentRating == 0 || trainingSupportRating == 0 || learningOpportunitiesRating == 0 || benefitsRating == 0)) {
+    showflashmessage('warning', 'Please rate all detailed criteria!');
+    return;
+  }
+
+  const detailedRatings = {
+    workEnvironment: workEnvironmentRating,
+    trainingSupport: trainingSupportRating,
+    learningOpportunities: learningOpportunitiesRating,
+    benefits: benefitsRating
+  };
+  console.log("details: ", detailedRatings);
+
+  fetch(`/home/business/${companyId}/comments`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ content, rating, detailedRatings }),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.status === 'success') {
+        showflashmessage(data.status, data.message);
+        // reset form
+        document.getElementById('commentContent').value = '';
+        document.getElementById('rating').value = '0';
+        document.getElementById('workEnvironmentRatingValue').value = '0';
+        document.getElementById('trainingSupportRatingValue').value = '0';
+        document.getElementById('learningOpportunitiesRatingValue').value = '0';
+        document.getElementById('benefitsRatingValue').value = '0';
+        resetStars('workEnvironmentRating');
+        resetStars('trainingSupportRating');
+        resetStars('learningOpportunitiesRating');
+        resetStars('benefitsRating');
+
+        if (data.commentId) {
+          localStorage.setItem('scrollToComment', `comment-${data.commentId}`);
+        }
+        window.location.reload();
+      } else {
+        showflashmessage(data.status, data.message);
+      }
+    })
+    .catch((error) => {
+      console.error('Error adding comment:', error);
+      showflashmessage(data.status, data.message);
+    });
+}
+
+function toggleReplyForm(commentId) {
+  const replyForm = document.getElementById(`replyForm-${commentId}`);
+  if (replyForm.style.display === 'none' || replyForm.style.display === '') {
+    replyForm.style.display = 'block';
+  } else {
+    replyForm.style.display = 'none';
+  }
+}
+
+function replyToComment(companyId, commentId) {
+  const content = document.getElementById(`replyContent-${commentId}`).value;
+
+  fetch(`/home/business/${companyId}/comments/${commentId}/reply`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ content }),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.status === 'success') {
+        showflashmessage(data.status, data.message);
+        localStorage.setItem('scrollToComment', `comment-${commentId}`);
+        window.location.reload(); 
+      } else {
+        showflashmessage(data.status, data.message);
+      }
+    })
+    .catch((error) => {
+      console.error('Error adding reply:', error);
+      showflashmessage(data.status, data.message);
+    });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const scrollToComment = localStorage.getItem('scrollToComment');
+  if (scrollToComment) {
+    const element = document.getElementById(scrollToComment);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+    localStorage.removeItem('scrollToComment');
+  }
+});
+
+function toggleEditForm(commentId) {
+  const editForm = document.getElementById(`editForm-${commentId}`);
+  if (editForm.style.display === 'none' || editForm.style.display === '') {
+    editForm.style.display = 'block';
+  } else {
+    editForm.style.display = 'none';
+  }
+}
+
+function editComment(companyId, commentId) {
+  const content = document.getElementById(`editContent-${commentId}`).value;
+
+  fetch(`/home/business/${companyId}/comments/${commentId}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ content }),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      console.log('Edit comment response:', data);
+      if (data.status === 'success') {
+        document.getElementById(`comment-content-${commentId}`).innerText = data.updatedContent;
+        document.getElementById(`comment-updatedAt-${commentId}`).innerText = data.updatedAt;
+        toggleEditForm(commentId);
+        showflashmessage(data.status, data.message);
+      } else {
+        showflashmessage(data.status, data.message);
+      }
+    })
+    .catch((error) => {
+      console.error('Error editing comment:', error);
+      showflashmessage('error', 'An error occurred while editing the comment.');
+    });
+}
+
+function editReply(companyId, replyId) {
+  const content = document.getElementById(`editContent-${replyId}`).value;
+
+  fetch(`/home/business/${companyId}/comments/replies/${replyId}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ content }),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      console.log('Edit reply response:', data);
+      if (data.status === 'success') {
+        document.getElementById(`reply-content-${replyId}`).innerText = data.updatedContent;
+        document.getElementById(`reply-updatedAt-${replyId}`).innerText = data.updatedAt;
+        toggleEditForm(replyId);
+        showflashmessage(data.status, data.message);
+      } else {
+        showflashmessage(data.status, data.message);
+      }
+    })
+    .catch((error) => {
+      console.error('Error editing reply:', error);
+      showflashmessage('error', 'An error occurred while editing the reply.');
+    });
+}
+
+let deleteType = '';
+let deleteCompanyId = '';
+let deleteItemId = '';
+let deleteComModal;
+function showDeleteModal(type, companyId, itemId) {
+  deleteType = type;
+  deleteCompanyId = companyId;
+  deleteItemId = itemId;
+  deleteComModal = new bootstrap.Modal(document.getElementById('deleteCommentConfirmationModal'));
+  deleteComModal.show();
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  const confirmDeleteButton = document.getElementById('confirmCommentDeleteButton');
+  if (confirmDeleteButton) {
+    confirmDeleteButton.addEventListener('click', function() {
+      if (deleteType === 'comment') {
+        removeComment(deleteCompanyId, deleteItemId);
+      } else if (deleteType === 'reply') {
+        removeReply(deleteCompanyId, deleteItemId);
+      }
+    });
+  }
+});
+
+function removeComment(companyId, commentId) {
+  fetch(`/home/business/${companyId}/comments/${commentId}/remove`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.status === 'success') {
+        const commentContentElement = document.getElementById(`comment-content-${commentId}`);
+        commentContentElement.innerText = 'This comment has been removed due to violation of our policies';
+        commentContentElement.classList.add('removed-comment');
+        showflashmessage(data.status, data.message);
+        deleteComModal.hide();
+      } else {
+        showflashmessage(data.status, data.message);
+      }
+    })
+    .catch((error) => {
+      console.error('Error removing comment:', error);
+      showflashmessage('error', 'An error occurred while removing the comment.');
+    });
+}
+
+function removeReply(companyId, replyId) {
+  fetch(`/home/business/${companyId}/comments/replies/${replyId}/remove`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.status === 'success') {
+        const replyContentElement = document.getElementById(`reply-content-${replyId}`);
+        replyContentElement.innerText = 'This reply has been removed due to violation of our policies';
+        replyContentElement.classList.add('removed-comment');
+        showflashmessage(data.status, data.message);
+        deleteComModal.hide();
+      } else {
+        showflashmessage(data.status, data.message);
+      }
+    })
+    .catch((error) => {
+      console.error('Error removing reply:', error);
+      showflashmessage('error', 'An error occurred while removing the reply.');
+    });
+}
+
+let reportType = '';
+let reportCompanyId = '';
+let reportItemId = '';
+let reportModal;
+
+function showReportModal(type, companyId, itemId) {
+  reportType = type;
+  reportCompanyId = companyId;
+  reportItemId = itemId;
+  reportModal = new bootstrap.Modal(document.getElementById('reportConfirmationModal'));
+  reportModal.show();
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  const confirmReportButton = document.getElementById('confirmReportButton');
+  if (confirmReportButton) {
+    confirmReportButton.addEventListener('click', function() {
+      if (reportType === 'comment') {
+        reportComment(reportCompanyId, reportItemId);
+      } else if (reportType === 'reply') {
+        reportReply(reportCompanyId, reportItemId);
+      }
+    });
+  }
+});
+
+function reportComment(companyId, commentId) {
+  console.log("report com");
+  fetch(`/home/business/${companyId}/comments/${commentId}/report`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.status === 'success') {
+        showflashmessage(data.status, data.message);
+        reportModal.hide();
+      } else {
+        showflashmessage(data.status, data.message);
+      }
+    })
+    .catch((error) => {
+      console.error('Error reporting comment:', error);
+      // showflashmessage('error', 'An error occurred while reporting the comment.');
+    });
+}
+
+function reportReply(companyId, replyId) {
+  console.log("report rep");
+  fetch(`/home/business/${companyId}/comments/replies/${replyId}/report`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.status === 'success') {
+        showflashmessage(data.status, data.message);
+        reportModal.hide();
+      } else {
+        showflashmessage(data.status, data.message);
+      }
+    })
+    .catch((error) => {
+      console.error('Error reporting reply:', error);
+      // showflashmessage('error', 'An error occurred while reporting the reply.');
+    });
+}
+
+function maskEmail(email) {
+    const [localPart, domain] = email.split('@');
+    const maskedLocalPart = localPart.slice(0, 2) + '*'.repeat(localPart.length - 4) + localPart.slice(-2);
+    return maskedLocalPart + '@' + domain;
+  }
+const emailElements = document.querySelectorAll('.masked-email');
+if (emailElements) {
+  document.addEventListener('DOMContentLoaded', function () {
+    emailElements.forEach(function (element) {
+      const email = element.getAttribute('data-email');
+      element.textContent = ' - ' + maskEmail(email);
+    });
+
+    const dateElements = document.querySelectorAll('.comment-date');
+    dateElements.forEach(function (element) {
+      const dateStr = element.getAttribute('data-date');
+      const date = new Date(dateStr);
+      element.textContent = date.toLocaleString();
+    });
+  });
+}
+
+function resetAllRatings() {
+  resetStarsDirectly('workEnvironmentRating');
+  resetStarsDirectly('trainingSupportRating');
+  resetStarsDirectly('learningOpportunitiesRating');
+  resetStarsDirectly('benefitsRating');
+  document.getElementById('workEnvironmentRatingValue').value = '0';
+  document.getElementById('trainingSupportRatingValue').value = '0';
+  document.getElementById('learningOpportunitiesRatingValue').value = '0';
+  document.getElementById('benefitsRatingValue').value = '0';
+}
+
+function resetStarsDirectly(ratingId) {
+  const stars = document.querySelectorAll(`#${ratingId} .fa-star`);
+  stars.forEach((star) => {
+    star.classList.remove('hovered');
+    star.classList.remove('selected');
+    star.classList.remove('fa-solid');
+    star.classList.add('fa-regular');
+  });
+}
+
+function highlightStars(ratingId, starNumber) {
+  const stars = document.querySelectorAll(`#${ratingId} .fa-star`);
+  stars.forEach((star, index) => {
+    if (index < starNumber) {
+      star.classList.add('hovered');
+      star.classList.remove('fa-regular');
+      star.classList.add('fa-solid');
+    } else {
+      star.classList.remove('hovered');
+      star.classList.remove('fa-solid');
+      star.classList.add('fa-regular');
+    }
+  });
+}
+
+function resetStars(ratingId) {
+  const stars = document.querySelectorAll(`#${ratingId} .fa-star`);
+  stars.forEach((star) => {
+    if (!star.classList.contains('selected')) {
+      star.classList.remove('hovered');
+      star.classList.remove('fa-solid');
+      star.classList.add('fa-regular');
+    }
+  });
+}
+
+function setRating(ratingId, starNumber) {
+  const stars = document.querySelectorAll(`#${ratingId} .fa-star`);
+  stars.forEach((star, index) => {
+    if (index < starNumber) {
+      star.classList.add('selected');
+      star.classList.remove('fa-regular');
+      star.classList.add('fa-solid');
+    } else {
+      star.classList.remove('selected');
+      star.classList.remove('fa-solid');
+      star.classList.add('fa-regular');
+    }
+  });
+  document.getElementById(`${ratingId}Value`).value = starNumber;
+}
+
+// hiện warning business bị lock
+document.addEventListener('DOMContentLoaded', function () {
+  var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+  var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+      return new bootstrap.Tooltip(tooltipTriggerEl)
+  })
+});
+
+/** 
+ * Fav list
+ */
+ async function saveFavoriteCompany(event, companyId) {
+  event.stopPropagation();
+  try {
+    const response = await fetch('/home/toggle-favorite', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ companyId }),
+    });
+
+    const result = await response.json();
+
+    if (result.status === 'success') {
+      showflashmessage(result.status, result.message);
+      // update icon
+      const heartIcon = document.getElementById(`heart-${companyId}`);
+      console.log('Heart icon:', heartIcon);
+      if (result.action === 'added') {
+        heartIcon.classList.remove('fa-regular');
+        heartIcon.classList.add('fa');
+        heartIcon.classList.add('clicked');
+      } else if (result.action === 'removed') {
+        heartIcon.classList.remove('fa');
+        heartIcon.classList.add('fa-regular');
+        heartIcon.classList.remove('clicked');
+      }
+    } else {
+      showflashmessage(result.status, result.message);
+    }
+  } catch (error) {
+    console.error('Error saving favorite company:', error);
+  }
+}
+
 function showflashmessage(type, message) {
     const validTypes = ['success', 'error', 'info', 'warning'];
       if (!validTypes.includes(type)) {
@@ -579,7 +1312,188 @@ function showflashmessage(type, message) {
       border: none;
       cursor: pointer;
     }
-  </style>
 
-  <% include('../partials/footer') %> 
+    .tooltip-inner {
+      background-color: #fff;
+      color: #000;
+      font-size: 14px;
+      padding: 10px;
+      border-radius: 5px;
+    }
+
+    .tooltip-arrow {
+      border-top-color: #fff;
+    }
+
+    .admin-comment {
+      display: flex;
+      align-items: flex-start;
+      margin-bottom: 10px;
+      position: relative;
+    }
+
+    .admin-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      margin-right: 20px;
+    }
+
+    .bordered {
+      border: 1px solid #ccc;
+      padding: 10px;
+      position: relative;
+      background-color: #f9f9f9;
+      flex-grow: 1;
+      width: 100%;
+    }
+
+    .separator {
+      border: none;
+      border-top: 1px solid #ccc;
+      margin: 10px 0;
+    }
+
+    .arrow-left {
+      width: 0;
+      height: 0;
+      border-top: 10px solid transparent;
+      border-bottom: 10px solid transparent;
+      border-right: 10px solid #ccc;
+      position: absolute;
+      top: 10px;
+      left: -10px; /* độ cao mũi tên khung <|  */
+    }
+
+    .comment-group {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      margin-bottom: 20px;
+      width: 100%;
+      overflow: hidden;
+    }
+
+    .comment-content-group {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      margin-left: 10px;
+      width: calc(100% - 10px);
+    }
+
+    .reply-link-container,
+    .edit-link-container {
+      margin-top: 3px;
+    }
+
+    .reply-form {
+      width: 100%;
+    }
+
+    .reply-form .reply-textarea {
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .reply-form .d-flex {
+      width: 100%;
+    }
+
+    .replies {
+      width: 100%;
+    }
+
+    .reply.user-comment .bordered {
+      width: 100%;
+    }
+
+    .reply-button {
+      background-color: #4CAF50; 
+      border-color: #4CAF50;
+    }
+
+    .reply-button:hover {
+      background-color: #45a049;
+      border-color: #45a049;
+    }
+
+    .reply-link,
+    .edit-link,
+    .delete-link {
+      color: #4CAF50; 
+      text-decoration: none;
+    }
+
+    .reply-link:hover,
+    .edit-link:hover,
+    .delete-link:hover {
+      color: #45a049; 
+      text-decoration: underline;
+    }
+
+    .reply.user-comment {
+      margin-bottom: 15px;
+    }
+
+    body {
+      overflow-y: auto;
+      overflow-x: hidden; 
+    }
+
+    html {
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    .container-fluid {
+      overflow: hidden; 
+    }
+
+    .fill_content {
+      overflow: hidden;
+    }
+
+    .removed-comment {
+      color: red;
+    }
+
+    .star-rating .fa-star {
+      position: relative;
+      display: inline-block;
+      margin-right: 5px;
+      font-size: 1.5em;
+    }
+
+    .star-rating .fa-star .star-number {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 0.5em;
+      color: white; 
+    }
+
+    .star-rating.selected .fa-star {
+      color: gold;
+    }
+
+    .star-rating.work-environment-stars .fa-star {
+      color: #5500ff;
+    }
+
+    .star-rating.training-support-stars .fa-star {
+      color: #00ccff;
+    }
+
+    .star-rating.learning-opportunities-stars .fa-star {
+      color: #66ff66;
+    }
+
+    .star-rating.benefits-stars .fa-star {
+      color: #ff66cc;
+    }
+</style>
+
+<%- include('../partials/footer') %>
 

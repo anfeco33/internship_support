@@ -1,4 +1,4 @@
-<h2 class="title_admin_page">LIST OF COMPANIES</h2>
+<h2 class="title_admin_page">COMPANY ACCOUNTS</h2>
 <% var listcompany=data.listcompany %>
 
 <ul class="list-group list-group-flush" id="list_company">
@@ -10,7 +10,7 @@
                     <img src="<%=company.profilePicture%>" alt="err">
                 </div>
                 <div class="account_name">
-                    <%=company.fullName%> <strong>( <%=company.role%> )</strong>
+                    <%=company.fullName%> <strong>(<%=company.role%>)</strong>
                 </div>
 
                 <div class="history_login">
@@ -18,7 +18,6 @@
                         <%=company.lastLogin%>
                     </span>
                 </div>
-
 
                 <!-- <div class="control">
                     <i class="fa-solid fa-pen-to-square"></i>

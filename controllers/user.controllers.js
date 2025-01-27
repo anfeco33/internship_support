@@ -20,26 +20,27 @@ const { type } = require('os');
 const admin_feature_list = [
   { access: "Student", icon: "<i class='bx bx-grid-alt'></i>" },
   { access: "Company", icon: "<i class='fa-solid fa-bars-progress'></i>" },
-  { access: "Transaction", icon: "<i class='fa-solid fa-cart-plus'></i>" },
-  { access: "Statistical", icon: "<i class='fa-solid fa-signal'></i>" }
+  { access: "Bussiness Profiles", icon: "<i class='fa-solid fa-building'></i>" },
+  { access: "Statistics", icon: "<i class='fa-solid fa-signal'></i>" }
 ]
 
 const student_feature_list = [
   { access: "Home", icon: "<i class='fa-solid fa-house'></i>" },
-  { access: "My Internship Apps", icon: "<i class='fa-solid fa-square-check'></i>" }
-]
+  { access: "My Internship Apps", icon: "<i class='fa-solid fa-square-check'></i>" },
+  { access: "Dashboard", icon: "<i class='fa-solid fa-gauge'></i>" },
 
+]
 
 const company_feature_list = [
   // LƯU Ý: khi thay đổi trong này, cần tạo lại acc mới vì acc cũ chỉ lưu các access cũ
   // sửa luôn trong main.js
 
   { access: "Home", icon: "<i class='fa-solid fa-house'></i>" },
-  { access: "Internship Applications", icon: "<i class='fa-solid fa-pen-to-square'></i>" }
+  { access: "Internship Applications", icon: "<i class='fa-solid fa-pen-to-square'></i>" },
+  { access: "Dashboard", icon: "<i class='fa-solid fa-gauge'></i>" },
 ]
 
 class UserController {
-  // account có quyền hạn cao nhất các account sau đó được phân chia quyền hạn dựa trên admin
   createDefaultAccount() {
     console.log("ADMIN ACCOUNT: ")
     return new Promise(async (resolve, reject) => {
@@ -154,93 +155,6 @@ class UserController {
     }
   }
 
-
-  async signup(req, res, next) {
-    // TODO: thêm xử lý đăng nhập khi đăng ký bên ngoài 
-    // trường hợp không phải admin tạo
-    console.log("SIGN UP : ")
-    try {
-      const errors = validationResult(req);
-      // console.log(errors);
-
-      if (!errors.isEmpty()) {
-        var err_msg = "";
-        var list_err = errors.array();
-        list_err.forEach(err => {
-          err_msg += err.msg + " , ";
-        });
-
-        console.log(err_msg);
-
-        //CƠ CHẾ CỦA VALIDATOR KHÔNG CHO ĐI TIẾP
-        var state = { status: 'warning', message: err_msg };
-        res.json({ status: state.status, message: state.message , redirect: ""});
-      } else {
-        const { username , email, password , accountType } = req.body;
-        const currentTime = moment().format("HH:mm | DD/MM/YYYY");
-        let profilePicture = "";
-
-        if(accountType == "student"){
-          var access = student_feature_list;
-          profilePicture = '/images/student_default_avatar.png';
-        }
-        if(accountType == "company"){
-          var access = company_feature_list;
-          profilePicture = '/images/company_default_avatar.png';
-        }
-
-        console.log(username , email, password , accountType);
-        const find = await User.findOne({ email: email });
-        if (!find) {
-          const password_hash = await bcrypt.hash(password, parseInt(process.env.BCRYPT_SALT_ROUND));
-          // console.log(defaultpassword);
-          const newAccount = new User({
-            username: username,
-            // Trong thực tế, hãy sử dụng mã hóa mật khẩu bằng bcrypt hoặc một thư viện tương tự
-            password: password_hash,
-            email: email,
-            fullName: email.split("@")[0],
-            role: accountType,
-            access: access,
-            profilePicture: profilePicture,
-            lastLogin: currentTime,
-          });
-
-          // res.json({ added: true, status: "success", message: "Add staff successfully" });
-          await newAccount.save()
-            .then((savedAccount) => {
-              var goto = '/home'
-              // Lưu thành công
-              console.log('Account saved successfully:');
-              // Thực hiện các hành động tiếp theo ở đây
-
-              req.session.flash = {
-                type: "success",
-                intro: 'signup feature',
-                message: "Create account successfully, Login now !!!",
-              };
-              res.json({ status: "success", message: "Create account successfully, Login now !!!", redirect: goto});
-            }).catch((error) => {
-              // Xử lý lỗi nếu quá trình lưu không thành công
-              console.error('Error saving account:', error);
-              res.json({ status: "error", message: "Failed to add student", redirect: "" });
-            })
-        }
-        else {
-          // res.json({ added: true, status: "success", message: "Add staff successfully" });
-          res.json({ status: "warning", message: "Account already exists", redirect: "" });
-        }
-      }
-
-
-
-    } catch (error) {
-
-      next(error);
-    }
-  }
-
-
   async getliststudent() {
     try {
 
@@ -299,7 +213,7 @@ class UserController {
         res.redirect("/login")
       }
       else{
-        const company = await Company.findOne({ representativeId: accountID });
+        const company = await Company.findOne({ representativeIds: accountID });
         const businessId = company ? company._id : null;
 
         const sidebar = account.access;
@@ -344,49 +258,19 @@ class UserController {
     }
   }
 
-
-  //chỉ verify cho account có status là inactive
-  //nếu account đã kích hoạt nhảy page
-  async verifyAccount(req, res, next) {
-    console.log("Verify staff account: ")
-    try {
-      const token = req.query.token;
-      console.log(token)
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      console.log(decoded)
-      const accountId = decoded.accountId;
-      const currentTime = Math.floor(Date.now() / 1000);
-      if (decoded.exp < currentTime) {
-        throw new Error('Token has expired');
-      }
-      // Xác minh thành công, trả về userId
-      // res.json(accountId);
-      const find = await User.findById(accountId);
-      if (find) {
-        find.status = "intial"; // Cập nhật trường "status" thành "intial"
-        await find.save(); // Lưu thay đổi
-        res.redirect('/login')
-      }
-    } catch (error) {
-      next(error);
-    }
-  }
-
-
   async togglelockAccount(req, res, next) {
     console.log("Lock and Unlock account: ")
     try {
       const { accountID } = req.body;
       console.log(accountID)
       const find = await User.findById(accountID);
-      // // console.log(find)
       if (find) {
         if (find.lock == false) {
           find.lock = true;
-          var tmp = 'OPEN';
+          var tmp = 'LOCKED';
         } else {
           find.lock = false;
-          var tmp = 'CLOSE';
+          var tmp = 'UNLOCKED';
         }
         await find.save(); // Lưu thay đổi
         var state = { locked: true, status: "success", message: "Account lock status: " + tmp };
@@ -663,7 +547,7 @@ class UserController {
 
               return res.status(200).json({
                   status: 'newUser',
-                  message: 'OTP has been sent to your email! Please check your email to register.'
+                  message: 'OTP has been sent to your email! Please check your email to register!'
               });
           } catch (err) {
               user.otp = undefined;
@@ -677,8 +561,7 @@ class UserController {
                   message: 'There was an error while sending the email. Try again later!'
               });
           }
-      }
-
+      } 
       // Verify for admin
       if (user.role === 'admin') {
           return res.status(200).json({
@@ -686,36 +569,79 @@ class UserController {
               message: 'Admin account detected. Please enter your password.'
           });
       }
-
+      if (user) {
+        // Existing user
+        let featureList;
+        if (user.role === 'student') {
+          featureList = student_feature_list;
+        } if (user.role === 'company') {
+          featureList = company_feature_list;
+        } 
+        featureList.forEach((feature) => {
+           if (!user.access.some((item) => item.access === feature.access)) {
+             user.access.push(feature); // Thêm feature nếu chưa tồn tại
+           }
+         });
+     
+         const otp = user.createOTP();
+         await user.save({ validateBeforeSave: false });
+     
+         const message = `Your OTP code is: ${otp}\n\nThis code is valid for 10 minutes.`;
+     
+         try {
+             await mailer.sendMailForOTP({
+                 email: user.email,
+                 subject: 'Your Login OTP (valid for 10 min)',
+                 message: message
+             });
+     
+             return res.status(200).json({
+                 status: 'success',
+                 message: 'OTP has been sent to your email! Please check your email to login.'
+             });
+         } catch (err) {
+               user.otp = undefined;
+               user.otpExpires = undefined;
+               await user.save({ validateBeforeSave: false });
+       
+               console.error('Error during sending OTP:', err);
+       
+               return res.status(500).json({
+                   status: 'error',
+                   message: 'There was an error while sending the email. Try again later!'
+               });
+           }
+       }
+ 
       // Generate OTP for existing user
-      const otp = user.createOTP();
-      await user.save({ validateBeforeSave: false });
+      // const otp = user.createOTP();
+      // await user.save({ validateBeforeSave: false });
 
-      const message = `Your OTP code is: ${otp}\n\nThis code is valid for 10 minutes.`;
+      // const message = `Your OTP code is: ${otp}\n\nThis code is valid for 10 minutes.`;
 
-      try {
-          await mailer.sendMailForOTP({
-              email: user.email,
-              subject: 'Your Login OTP (valid for 10 min)',
-              message: message
-          });
+      // try {
+      //     await mailer.sendMailForOTP({
+      //         email: user.email,
+      //         subject: 'Your Login OTP (valid for 10 min)',
+      //         message: message
+      //     });
 
-          return res.status(200).json({
-              status: 'success',
-              message: 'OTP has been sent to your email! Please check your email to login.'
-          });
-      } catch (err) {
-          user.otp = undefined;
-          user.otpExpires = undefined;
-          await user.save({ validateBeforeSave: false });
+      //     return res.status(200).json({
+      //         status: 'success',
+      //         message: 'OTP has been sent to your email! Please check your email to login.'
+      //     });
+      // } catch (err) {
+      //     user.otp = undefined;
+      //     user.otpExpires = undefined;
+      //     await user.save({ validateBeforeSave: false });
 
-          console.error('Error during sending OTP:', err);
+      //     console.error('Error during sending OTP:', err);
 
-          return res.status(500).json({
-              status: 'error',
-              message: 'There was an error while sending the email. Try again later!'
-          });
-      }
+      //     return res.status(500).json({
+      //         status: 'error',
+      //         message: 'There was an error while sending the email. Try again later!'
+      //     });
+      // }
   }
 
   async verify_OTP(req, res, next) {
@@ -752,6 +678,19 @@ class UserController {
               user.otp = null;
               user.otpExpires = null;
 
+              // Cập nhật access nếu thiếu
+              let featureList = [];
+              if (user.role === 'student') {
+                featureList = student_feature_list;
+              } if (user.role === 'company') {
+                featureList = company_feature_list;
+              } 
+              featureList.forEach((feature) => {
+                if (!user.access.some((item) => item.access === feature.access)) {
+                  user.access.push(feature); // Thêm feature nếu chưa tồn tại
+                }
+              });
+
               // For new user registration
               if (!user.fullName && fullName) {
                   user.fullName = fullName;
@@ -761,7 +700,8 @@ class UserController {
                   // Create a new company if the user role is 'company'
                 if (user.role === 'company') {
                   await Company.create({
-                      representativeId: user._id, 
+                      // representativeIds: user._id, 
+                      representativeIds: [user._id],
                       name: '', 
                       isProfileUpdated: false,
                   });
@@ -830,6 +770,39 @@ class UserController {
           });
       }
   }
+
+  async toggleFavoriteCompany (req, res) {
+    try {
+          const userId = req.session.account;
+          const { companyId } = req.body;
+          console.log("TOGGLE FAVORITE COMPANYID: ", companyId);
+          
+          const user = await User.findById(userId);
+          if (!user) {
+              return res.status(404).json({ status: 'warning', message: 'User not found!' });
+          }
+
+          if (!Array.isArray(user.savedCompanies)) {
+            user.savedCompanies = [];
+          }
+  
+          const index = user.savedCompanies.indexOf(companyId);
+          if (index === -1) {
+              // công ty chưa có trong danh sách thì thêm vào
+              user.savedCompanies.push(companyId);
+              await user.save();
+              return res.status(200).json({ status: 'success', message: 'Company added to favorites!', action: 'added' });
+          } else {
+              // công ty đã có => xóa
+              user.savedCompanies.splice(index, 1);
+              await user.save();
+              return res.status(200).json({ status: 'success', message: 'Company removed from favorites!', action: 'removed' });
+          }
+      } catch (error) {
+          console.error('Error toggling favorite company:', error);
+          res.status(500).json({ status: 'error', message: 'Server error!' });
+      }
+    }
 
 
 }

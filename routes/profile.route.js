@@ -21,7 +21,7 @@ router.get('/', (req, res) => {
     let company = null;
 
     if (req.session.role === 'company') {
-      company = await Company.findOne({ representativeId: req.session.account });
+      company = await Company.findOne({ representativeIds: req.session.account });
     }
 
     req.partial_path = partial
@@ -42,27 +42,22 @@ router.get('/', (req, res) => {
     req.partial_path = partial
     req.layout_path = layout
     const curr_account = await userController.getAccount(req.params.id);
-    var callback_url='';
-    if(curr_account.role ==='student'){
-      callback_url = '/admin/student'
-    }
-    if(curr_account.role ==='company'){
-      callback_url = '/admin/company'
-    }
+    let company = await Company.findOne({ representativeIds: req.params.id });
+
     req.page_data = {
       account_details:  curr_account,
-      callback_url: callback_url,
+      company: company,
     }
     // console.log(req.page_data.account_details)
     await userController.getpage(req, res, next);
 
   })
-  .post('/resend_email', authentication, isAdmin,  async function (req, res, next) {
-    const {email , accountId} = req.body;
-    await sendEmail.sendConfirmationEmail(email, accountId);
-    res.json({ send: true, status: "success", message: "Email has been sent to: " +email});
-  })
-  .post('/lock_account' , authentication , isAdmin , userController.togglelockAccount);
+  // .post('/resend_email', authentication, isAdmin,  async function (req, res, next) {
+  //   const {email , accountId} = req.body;
+  //   await sendEmail.sendConfirmationEmail(email, accountId);
+  //   res.json({ send: true, status: "success", message: "Email has been sent to: " +email});
+  // })
+  // .post('/lock_account' , authentication , isAdmin , userController.togglelockAccount);
 
 
 

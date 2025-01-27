@@ -2,11 +2,14 @@
 <% const businessId = data.businessId ? data.businessId.toString() : ''; %>
 <body>
   <div class="container">
-    <h1 class="internship_list_title">
-        Applicants for the 
-        <span class="internship_title">"<%= data.internshipTitle %>"</span>
-        position
-    </h1>
+    <div class="custom-alert" role="alert">
+      <h1 class="internship_list_title">
+          Applicants for the 
+          <span class="internship_title">"<%= data.internshipTitle %>"</span>
+          position
+      </h1>
+    </div>
+
     <table class="table table-striped">
       <thead>
         <tr>

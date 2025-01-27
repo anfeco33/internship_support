@@ -14,7 +14,12 @@
                 <li class="<%=(control.access).replace(/\s/g, '')%>">
                     <a href="#">
                         <%- control.icon%>
-                        <span class="links_name"><%= control.access%></span>
+                        <span class="links_name"><%= control.access%>
+                            <% if (control.access === "Internship Applications") { %>
+                                <i class="fa fa-chevron-right"></i>
+                            <% } %>
+                        </span>
+                        
                     </a>
                     <span class="tooltip"><%= control.access%></span>
                     <% if (control.access === "Internship Applications") { %>

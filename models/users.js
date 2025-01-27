@@ -15,16 +15,8 @@ const userSchema = new Schema({
           icon: { type: String, required: true }
         },
     ],
-    //cart: [{ type: Schema.Types.ObjectId, ref: 'Course' }], // Sửa lại thành mảng các ObjectId liên kết với mô hình "courseSchema"
-    // subscribed: [{ type: Schema.Types.ObjectId, ref: 'Course' }],
-    // exercise: { type: [String]},
-    // note: { type: [String]},
-    
-    // mới
-    // profileUpdated: { type: Boolean, default: false }, 
-    // verified: { type: Boolean, default: false }, 
-    // savedCompanies: [{ type: Schema.Types.ObjectId, ref: 'Company' }], // doanh nghiệp yêu thích (dành cho sinh viên)
-    applicationStatus: { type: String, enum: ['pending', 'approved', 'rejected'], default: 'pending' }, // Trạng thái ứng tuyển
+    company: { type: Schema.Types.ObjectId, ref: 'Company', default: null },
+    savedCompanies: [{ type: Schema.Types.ObjectId, ref: 'Company' }], // doanh nghiệp yêu thích (dành cho sinh viên)
     otp: { type: String }, 
     otpExpires: { type: Date },
 
@@ -33,8 +25,8 @@ const userSchema = new Schema({
     createdAt: { type: String, default: new Date().toUTCString()},
     lock: { type: Boolean, default: false},
     passwordChangedAt: { type: Date},
-    // password_reset_token: { type: String},
-    // password_reset_expires: { type: Date},
+    isViewedByCompany: { type: Boolean, default: true }, // thông báo lock của company, false là chưa xem
+    // organization: { type: String, required: false }, // tổ chức/trường dh của sv
 });
 
 userSchema.methods.createResetPasswordToken = function() {

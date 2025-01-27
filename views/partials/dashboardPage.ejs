@@ -1,0 +1,507 @@
+<% const businessId = data.businessId ? data.businessId.toString() : ''; %>
+<% const topCompaniesByIndustry = data.topCompaniesByIndustry; %>
+<% const internships = data.internships; %>
+
+<header>
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="/home">
+                <img src="../../images/logo.png" alt="err" id="header-logo">
+            </a>
+            <div class="seach_bar d-flex justify-content-center align-items-center mb-3">
+                <div class="seach_content  input-group mx-3">
+                    <input type="text" class="form-control" name="search" id="searchInput" placeholder="Find companies, for example: FPT" data-bs-toggle="collapse" data-bs-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+                    <div class="input-group-append  d-flex justify-content-center align-items-center" >
+                        <span id="clear_icon">
+                            <i class="fa fa-times"></i>
+                        </span>
+                        <span id="seach_icon" class="input-group-text" 
+                        style="height: 100%; border-radius:0px 5px 5px 0px; padding: 8.5px;">                       
+                            <i class="fa fa-search" style="border-radius: 0px;"></i>
+                        </span>
+            
+                    </div>
+                    <div class="collapse custom-collapse" id="collapseExample">
+                        <div class="card card-body search_result">
+                            <ul id="search_result_row">
+                                <!-- search result -->
+                            </ul>    
+                        </div>
+                    </div>
+                </div>
+            
+                <div class="bell_icon mx-3">
+                  <i class="bi bi-bell-fill"></i>
+                  <% if (account.role === 'company') { %>
+                    <span id="applicationCount" class="badge">0</span>
+                  <% } else if (account.role === 'student') { %>
+                    <span id="studentFeedbackCount" class="badge">0</span>
+                  <% } %>
+                </div>
+
+                <% if (account.role === 'student') { %>
+                  <div id="studentFeedbackDropdown" class="applications-dropdown">
+                    <ul id="studentFeedbackList" class="list-group">
+                      <!-- Feedback items sẽ được hiển thị ở đây -->
+                    </ul>
+                  </div>
+                <% } %>
+
+                <!-- nếu role company thì hiện nút update profile -->
+                <% if (account.role === 'company') { %>
+                  <!-- Applications Dropdown -->
+                  <div id="applicationsDropdown" class="applications-dropdown">
+                    <ul id="applicationsList" class="list-group">
+                      <!-- Applications will be listed here -->
+                    </ul>
+                  </div>  
+                    <div class="update_profile_icon mx-3" alt="update profile">
+                        <button class="btn btn-primary btn-sm" onclick="editByBussinessId('<%= data.businessId %>')">
+                            <i class="bi bi-pencil-square"></i>
+                        </button>
+                    </div>
+                    <div class="my_business_icon mx-3" alt="my business">
+                        <a href="/home/business/<%= data.businessId %>" class="btn btn-secondary btn-sm my-business-btn">
+                          <i class="fa fa-briefcase" style="margin-right: 10px;"></i>MY BUSINESS
+                        </a>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+    </nav>
+</header>
+
+<div class="custom-alert" role="alert" style="margin-top: 80px;">
+    <h2 class="title-type" style="font-size: 36px;">DASHBOARD</h2>
+</div>
+<div class="chart-container">
+    <button id="prevBtn" class="nav-btn">←</button>
+    <div class="chart-wrapper">
+      <% const industries = Object.keys(topCompaniesByIndustry); %>
+      <% industries.forEach((industry, index) => { %>
+        <div class="industry-chart">
+          <h3><%= industry %></h3>
+          <canvas id="chart-<%= index %>"></canvas>
+        </div>
+      <% }) %>
+    </div>
+    <button id="nextBtn" class="nav-btn">→</button>
+</div>
+
+<div class="custom-alert" role="alert" style="margin-top: 10px;">
+    <h2 class="title-type">All Internship Opportunities</h2>
+</div>
+
+<div class="internship-container">
+    <button id="prevInternBtn" class="nav-btn">←</button>
+    <div class="internship-wrapper">
+      <div class="internship-posts">
+        <% internships.forEach(internship => { %>
+          <div class="internship-post">
+            <div class="post-header">
+                <h3><%= internship.title %></h3>
+                <button class="view-details-btn" onclick="location.href='/home/business/<%= internship.company._id.toString() %>'">
+                    <i class="fa-solid fa-arrow-right"></i></button>
+            </div>
+            <p><%= new Date(internship.createdAt).toLocaleString('vi-VN') %></p>
+            <p>Company: <%= internship.company ? internship.company.name : 'N/A' %></p>
+            <div class="description-container">
+                <div class="description"><%- internship.description %></div>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    </div>
+    <button id="nextInternBtn" class="nav-btn">→</button>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+const businessId = '<%= data.businessId %>';
+const userRole = '<%= account.role %>';
+
+const topCompaniesByIndustry = <%- JSON.stringify(topCompaniesByIndustry) %>;
+  const industries = Object.keys(topCompaniesByIndustry);
+
+  industries.forEach((industry, index) => {
+  const industryData = topCompaniesByIndustry[industry];
+
+  // Các tiêu chí và key mapping
+  const criteria = ['Work Environment', 'Training Support', 'Learning Opportunities', 'Benefits'];
+  const criteriaMapping = {
+    'Work Environment': 'workEnvironment',
+    'Training Support': 'trainingSupport',
+    'Learning Opportunities': 'learningOpportunities',
+    'Benefits': 'benefits'
+  };
+
+  // Chuẩn bị dữ liệu
+  const scores = criteria.map(crit =>
+    Math.max(...(industryData[criteriaMapping[crit]] || []).map(item => item.score)) || 0
+  );
+
+  const companyNames = criteria.map(crit =>
+    industryData[criteriaMapping[crit]]?.map(item => item.name).join(', ') || 'N/A'
+  );
+
+  const ctx = document.getElementById(`chart-${index}`).getContext('2d');
+
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: criteria, // Dữ liệu nhãn (sẽ bị ẩn trên trục X)
+      datasets: [{
+        label: 'Score',
+        data: scores,
+        backgroundColor: ['rgba(255, 99, 132, 0.6)', 'rgba(54, 162, 235, 0.6)', 'rgba(255, 206, 86, 0.6)', 'rgba(75, 192, 192, 0.6)'],
+        borderColor: ['rgba(255, 99, 132, 1)', 'rgba(54, 162, 235, 1)', 'rgba(255, 206, 86, 1)', 'rgba(75, 192, 192, 1)'],
+        borderWidth: 1,
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {
+          display: true,
+          position: 'top',
+          labels: {
+            generateLabels: (chart) => {
+              // Tạo legend hiển thị từng tiêu chí với màu tương ứng
+              return criteria.map((crit, i) => ({
+                text: crit, // Tên tiêu chí
+                fillStyle: chart.data.datasets[0].backgroundColor[i], // Màu nền
+                strokeStyle: chart.data.datasets[0].borderColor[i], // Màu viền
+                lineWidth: 1,
+                fontColor: document.body.classList.contains('dark') ? '#fff' : '#000'
+              }));
+            },
+            font: {
+              size: 12,
+              weight: 'bold'
+            }
+          }
+        },
+        tooltip: {
+          callbacks: {
+            title: (tooltipItems) => criteria[tooltipItems[0].dataIndex],
+            label: (tooltipItem) => {
+              const critIndex = tooltipItem.dataIndex;
+              const score = tooltipItem.raw;
+              const companies = industryData[criteriaMapping[criteria[critIndex]]] || [];
+              const companyList = companies.map(item => item.name).join(', ') || 'N/A';
+              return `Companies: ${companyList} (Score: ${score})`;
+            }
+          }
+        },
+        datalabels: {
+          display: true,
+          align: 'end',
+          anchor: 'end',
+          formatter: (value, ctx) => companyNames[ctx.dataIndex],
+          color: document.body.classList.contains('dark') ? '#fff' : '#444',
+          font: {
+            size: 12,
+            weight: 'bold'
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: { display: false },
+          ticks: { display: false } // Ẩn nhãn trục X
+        },
+        y: {
+          beginAtZero: true,
+          max: 5,
+          grid: {
+            color: '#ddd'
+          },
+          ticks: {
+            color: document.body.classList.contains('dark') ? '#fff' : '#000'
+          }
+        }
+      }
+    }
+  });
+});
+
+    function updateChartColors(isDarkMode) {
+    const gridColor = isDarkMode ? '#fff' : '#ddd';
+    const textColor = isDarkMode ? '#fff' : '#000';
+
+    industries.forEach((industry, index) => {
+      const chart = Chart.getChart(`chart-${index}`);
+      chart.options.scales.x.ticks.color = textColor;
+      chart.options.scales.y.ticks.color = textColor;
+      chart.options.scales.y.grid.color = gridColor;
+      chart.options.plugins.legend.labels.color = textColor;
+      chart.update();
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const getmode = localStorage.getItem('mode');
+    if (getmode && getmode === "dark") {
+      console.log('mode: ',getmode);
+      document.body.classList.add('dark');
+      updateChartColors(true);
+    } else {
+      updateChartColors(false);
+    }
+  });
+
+  // Điều hướng biểu đồ
+  const chartWrapper = document.querySelector('.chart-wrapper');
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+
+  prevBtn.addEventListener('click', () => {
+    chartWrapper.scrollBy({ left: -450, behavior: 'smooth' });
+  });
+
+  nextBtn.addEventListener('click', () => {
+    chartWrapper.scrollBy({ left: 450, behavior: 'smooth' });
+  });
+
+   // Điều hướng bài đăng intern
+   const internshipWrapper = document.querySelector('.internship-wrapper');
+  const prevInternBtn = document.getElementById('prevInternBtn');
+  const nextInternBtn = document.getElementById('nextInternBtn');
+  const internshipPosts = document.querySelectorAll('.internship-post');
+  const postsPerPage = 3;
+  let currentPage = 0;
+
+  function updateInternshipDisplay() {
+    internshipPosts.forEach((post, index) => {
+      post.style.display = (index >= currentPage * postsPerPage && index < (currentPage + 1) * postsPerPage) ? 'block' : 'none';
+    });
+  }
+
+  prevInternBtn.addEventListener('click', () => {
+    if (currentPage > 0) {
+      currentPage--;
+      updateInternshipDisplay();
+    }
+  });
+
+  nextInternBtn.addEventListener('click', () => {
+    if ((currentPage + 1) * postsPerPage < internshipPosts.length) {
+      currentPage++;
+      updateInternshipDisplay();
+    }
+  });
+
+  updateInternshipDisplay();
+
+</script>
+
+<style>
+.chart-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.chart-wrapper {
+    display: flex;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    width: 90%;
+}
+
+.industry-chart {
+    width: 450px;
+    text-align: center;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 15px;
+    background-color: #f9f9f9;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-right: 20px;
+}
+
+body.dark .industry-chart {
+    background-color: #333;
+    border-color: #555;
+    color: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.industry-chart h3 {
+    font-size: 20px;
+    margin-bottom: 15px;
+    color: #333;
+}
+
+body.dark .industry-chart h3 {
+    color: #fff;
+}
+
+canvas {
+    margin-top: 10px;
+}
+
+body.dark canvas {
+    background-color: #222;
+}
+
+.chartjs-legend {
+    text-align: right;
+    padding: 10px;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+body.dark .chartjs-legend {
+    color: #fff;
+}
+
+.nav-btn {
+    background-color: #1cf94c58;
+    color: #fff;
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+    font-size: 18px;
+    border-radius: 5px;
+    margin: 0 10px;
+}
+
+.nav-btn:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+body.dark .nav-btn {
+    background-color: #8672f9b3;
+    color: #fff;
+}
+
+body.dark .nav-btn:disabled {
+    background-color: #333;
+}
+
+/* Custom scrollbar styles */
+.chart-wrapper::-webkit-scrollbar {
+    height: 12px;
+}
+
+.chart-wrapper::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.chart-wrapper::-webkit-scrollbar-thumb {
+    background: #1cf94c58;
+    border-radius: 6px;
+}
+
+.chart-wrapper::-webkit-scrollbar-thumb:hover {
+    background: #fff;
+}
+
+body.dark .chart-wrapper::-webkit-scrollbar-track {
+    background: #333;
+}
+
+body.dark .chart-wrapper::-webkit-scrollbar-thumb {
+    background: #555;
+}
+
+body.dark .chart-wrapper::-webkit-scrollbar-thumb:hover {
+    background: #888;
+}
+
+.internship-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+
+.internship-wrapper {
+    display: flex;
+    overflow: hidden;
+    width: 90%;
+}
+
+.internship-posts {
+    display: flex;
+    flex-wrap: nowrap;
+}
+
+.internship-post {
+    flex: 1 1 45%;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 15px;
+    background-color: #f9f9f9;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-right: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    display: none;
+    width: 370px;
+    /* min-height: 300px; */
+}
+
+body.dark .internship-post {
+    background-color: #333;
+    border-color: #555;
+    color: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.internship-post h3 {
+    font-size: 20px;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+body.dark .internship-post h3 {
+    color: #fff;
+}
+
+.description-container {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.internship-post .description {
+    color: #666;
+    flex-grow: 1;
+    border: 1px solid #ddd;
+    padding: 5px;
+    border-radius: 4px; 
+    background-color: #f9f9f9;
+}
+
+body.dark .internship-post .description {
+    color: #ccc;
+    border-color: #555;
+    background-color: #333; /
+}
+
+.post-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.view-details-btn {
+    padding: 8px 12px;
+    background-color: #8672f9b3;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+}
+
+</style>
+<%- include('../partials/footer') %>

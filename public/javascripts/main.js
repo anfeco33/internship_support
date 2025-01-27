@@ -194,19 +194,26 @@ mode.addEventListener("click", () => {
   } else {
     localStorage.setItem("mode", "");
   }
+  if (typeof updateChartColors === 'function') {
+    updateChartColors(body.classList.contains('dark'));
+  }
 })
-
 
 let getmode = localStorage.getItem('mode');
 if (getmode && getmode === "dark") {
   body.classList.toggle('dark');
+  if (typeof updateChartColors === 'function') {
+    updateChartColors(true);  
+  }
+} else {
+  if (typeof updateChartColors === 'function') {
+    updateChartColors(false);
+  }
 }
-
 
 if (offcanvasElement) {
   const bsOffcanvas = new bootstrap.Offcanvas(offcanvasElement);
 }
-
 
 closeBtn.addEventListener("click", () => {
   sidebar.classList.toggle("open");
@@ -256,12 +263,14 @@ function menuBtnChange() {
     closeBtn.classList.replace("bx-menu-alt-right", "bx-menu");//replacing the icon class
   }
 }
-
-//Admin page redirect
+/**
+ * admin account
+ */
 const student_manager = document.querySelector(".Student"),
   company_manager = document.querySelector(".Company"),
+  business_manager = document.querySelector(".BussinessProfiles"),
   transaction = document.querySelector(".Transaction"),
-  statistical = document.querySelector(".Statistical");
+  statistical = document.querySelector(".Statistics");
 
 if (body) {
   if (student_manager) {
@@ -274,6 +283,12 @@ if (body) {
     company_manager.addEventListener('click', function () {
       console.log('company manager page');
       window.location.href = "/admin/company"
+    });
+  }
+  if (business_manager) {
+    business_manager.addEventListener('click', function () {
+      console.log('business manager page');
+      window.location.href = "/admin/business-profiles"
     });
   }
   if (transaction) {
@@ -291,11 +306,14 @@ if (body) {
 
 
 }
-
-//Student and company page redirect
+/**
+ * for student and company account
+ */
 const student_homepage = document.querySelector(".Home"),
   myintern_page = document.querySelector(".MyInternshipApps"),
-  applied_page = document.querySelector(".InternshipApplications");
+  applied_page = document.querySelector(".InternshipApplications"),
+  dashboard = document.querySelector(".Dashboard");
+
 
 if (body) {
   if (student_homepage) {
@@ -343,7 +361,7 @@ if (body) {
             subNavVisible = false;
           } else {
             const businessId = internshipSubNav.getAttribute('data-business-id');
-            console.log('Business ID:', businessId); // Log businessId để kiểm tra
+            console.log('Business ID:', businessId);
 
             // Lấy danh sách internships từ server
             fetch(`/home/internships/${businessId}`)
@@ -403,6 +421,12 @@ if (body) {
     return text;
   }
 
+  if(dashboard){
+    dashboard.addEventListener('click', function () {
+      console.log('Dashboard page');
+      window.location.href = "/home/dashboard"
+    });
+  }
 
 
 
@@ -607,21 +631,22 @@ function changePassword(event) {
       else { showflashmessage('error', data.message); }
     })
     .catch(function (error) {
-      // Xử lý lỗi (nếu có)
       console.error("Error:", error);
     });
 
 }
 
-
-
-
 function getprofilebyId(id) {
   window.location.href = "/profile/" + id;
 }
 
-function gotocart() {
-  window.location.href = "/home/cart";
+function viewRepresentatives(id) {
+  window.location.href = "/home/business/" + id + "/representatives";
+}
+
+function viewRepresentatives_byAdmin(event, id) {
+  event.stopPropagation();
+  window.location.href = "/home/business/" + id + "/representatives";
 }
 
 function getBusinessById(id) {
@@ -634,29 +659,19 @@ function editByBussinessId(id) {
   window.location.href = "/home/business-edit/edit/" + id;
 }
 
-function getcoursebyId_admin(id) {
-  console.log(id)
-  window.location.href = "/admin/course/" + id;
+function getBusinessById_admin(event, id) {
+  event.stopPropagation();
+  window.location.href = "/admin/business-profile-details/" + id;
 }
 
-function getlecturebyId(id) {
+function getBusinessPageById_admin(id) {
   console.log(id)
-  window.location.href = "/home/lecture/" + id;
+  window.location.href = "/home/business/" + id;
 }
 
-function callback(url) {
-  window.location.href = url;
-}
-
-function viewhistorypurchase(id) {
-  console.log(id)
-  window.location.href = "/admin/customer/" + id;
-}
-
-function gotodetailsorder(id) {
-  console.log(id)
-  window.location.href = "/admin/order/" + id;
-}
+// function callback(url) {
+//   window.location.href = url;
+// }
 
 var global_id = "";
 var end_point = "";
@@ -666,86 +681,29 @@ const delete_btn = document.querySelector("#confirm_delete")
 
 if (delete_btn) {
   delete_btn.addEventListener("click", () => { deletecoursebyId( end_point, global_id) })
-
 }
 
+// function resendVerifyEmail(email, accountid) {
+//   console.log(email)
+//   fetch("/resend_email", {
+//     method: "POST",
+//     headers: {
+//       "Content-Type": "application/json" // Đặt kiểu dữ liệu là JSON
+//     },
+//     body: JSON.stringify({ email: email, accountId: accountid }) // Chuyển đổi dữ liệu thành chuỗi JSON
+//   })
+//     .then(response => response.json())
+//     .then(data => {
+//       if (data.status === "success") {
+//         showflashmessage('success', data.message);
 
-function deletecourse(role, course_name, id) {
-  // Điền id vào trường có id là "id"
-  $(".id_course").text(course_name);
-  $("#deleteModal").modal('show');
-  global_id = id;
-  if(role == "admin"){
-    end_point = "/admin/course/";
-  }
-  if(role =="company"){
-    end_point = "/home/business/";
-  }
+//       }
 
-}
-
-
-function show_info_payment(card_owner, payment_id) {
-  // Điền id vào trường có id là "id"
-  $(".payment_owner").text(card_owner);
-  $(".payment_id").text(payment_id);
-  $("#show_info_payment").modal('show');
-  // global_id = id;
-  console.log(card_owner, payment_id)
-}
-
-
-
-function deletecoursebyId(target , id) {
-  console.log(id)
-
-
-  fetch(target + id, {
-    method: 'DELETE',
-  })
-    .then(response => response.json())
-    .then(data => {
-      if (data.delete) {
-        if(target == '/admin/course/'){
-          window.location.href = data.redirect;
-        }else{
-          window.location.href = '/home/course';
-        }
-      }
-      else {
-        showflashmessage('error', data.message);
-      }
-
-    })
-    .catch(error => {
-      console.error('Error:', error);
-    });
-
-}
-
-function resendVerifyEmail(email, accountid) {
-  console.log(email)
-  fetch("/resend_email", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json" // Đặt kiểu dữ liệu là JSON
-    },
-    body: JSON.stringify({ email: email, accountId: accountid }) // Chuyển đổi dữ liệu thành chuỗi JSON
-  })
-    .then(response => response.json())
-    .then(data => {
-      // showflashmessage(data.status, data.message)
-      if (data.status === "success") {
-        showflashmessage('success', data.message);
-
-      }
-
-    })
-    .catch(function (error) {
-      // Xử lý lỗi (nếu có)
-      console.error("Error:", error);
-    });
-}
+//     })
+//     .catch(function (error) {
+//       console.error("Error:", error);
+//     });
+// }
 
 function lock_unlock_Account(accountid) {
   console.log(accountid)
@@ -758,29 +716,27 @@ function lock_unlock_Account(accountid) {
   })
     .then(response => response.json())
     .then(data => {
-      // showflashmessage(data.status, data.message)
       if (data.status === "success") {
         window.location.reload();
       }
 
     })
     .catch(function (error) {
-      // Xử lý lỗi (nếu có)
       console.error("Error:", error);
     });
 }
 
 
-function updateProgress(percent) {
-  const progressBarFill = document.querySelector('.progress-bar');
-  progressBarFill.style.width = `${percent}%`;
+// function updateProgress(percent) {
+//   const progressBarFill = document.querySelector('.progress-bar');
+//   progressBarFill.style.width = `${percent}%`;
 
-  if (percent >= 100) {
-    progressBarFill.innerText = 'Uploaded!';
-  } else {
-    progressBarFill.innerText = `${percent}%`;
-  }
-}
+//   if (percent >= 100) {
+//     progressBarFill.innerText = 'Uploaded!';
+//   } else {
+//     progressBarFill.innerText = `${percent}%`;
+//   }
+// }
 
 
 // function closeModal(id) {
@@ -820,103 +776,41 @@ function updateProgress(percent) {
 // }
 
 
-function buyNow(courseId) {
-  window.location.href = '/payment/' + courseId;
-}
-
-function checkout() {
-  window.location.href = '/payment/';
-}
-
-// 5 star rating
-function change(id) {
-  var cname = document.getElementById(id).className;
-  var ab = document.getElementById(id+"_hidden").value;
-  document.getElementById("starrating").value = ab;
-  document.getElementById(cname+"rating").innerHTML = ab;
-
-  for(var i=ab; i>=1; i--)
-  {
-      document.getElementById(cname+i).src="../../images/star.png";
-  }
-  var id=parseInt(ab)+1;
-  for(var j=id; j<=5; j++)
-  {
-      document.getElementById(cname+j).src="../../images/whitestar.png";
-  }
-  // console.log(rating);
-} 
-
-const rating = document.getElementById('rating-form');
-
-// add rating
-if(rating){
-
-  rating.addEventListener('submit', function(e) {
-    e.preventDefault();
-  
-    const rating = document.getElementById('starrating').value;
-    const comment = document.getElementById('comment').value;
-    const courseId = document.getElementById('courseId').value;
-  
-    if (!rating || !comment) {
-        showflashmessage('error', 'Please provide both rating and comment.');
-        return;
-    }
-  
-    fetch(`/home/rating`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ rating, comment, courseId })
-    })
-    .then(response => response.json())
-    .then(data => {
-        showflashmessage("success", "Rating submitted successfully.");
-        document.getElementById('comment').value = '';
-        setTimeout(() => {
-          location.reload();
-        }, 500);
-    })
-    .catch(error => {
-        showflashmessage('error', error.message || 'An error occurred while submitting your rating.');
-    });
-  });
-  
-}
-
-//delete review
-function rmComment(id) {
-  console.log("comment id: ", id)
-
-  fetch("/home/rating", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({rmComment : id})
-  })
-    .then(response => response.json())
-    .then(data => {
-      // showflashmessage(data.status, data.message)
-      if (data.status === "success") {
-        window.location.reload();
-        showflashmessage('success', data.message);
-      }
-      else { showflashmessage('error', data.message); }
-    })
-    .catch(function (error) {
-      console.error("Error:", error);
-    });
-}
-
 /** filter */
 const filter = document.getElementById('filterForm');
 
-// add rating
-if(filter){
+// if(filter){
 
+//   filter.addEventListener('submit', function (e) {
+//     e.preventDefault();
+
+//     const params = {};
+//     const industry = document.getElementById('filterIndustry').value.trim();
+//     const size = document.getElementById('filterSize').value.trim();
+//     const isVerified = document.getElementById('filterIsVerified').value.trim();
+
+//     if (industry) params.industry = industry;
+//     if (size) params.size = size;
+//     if (isVerified) params.isVerified = isVerified;
+
+//     const queryString = new URLSearchParams(params).toString();
+//     const url = queryString ? `/home/business?${queryString}#allCompanies` : '/home/business#allCompanies';
+
+//     console.log('Redirecting to:', url);
+//     window.location.href = url;
+//   });
+
+//   document.getElementById('showAllBtn').addEventListener('click', function () {
+//     window.location.href = '/home/business#allCompanies';
+//   });
+
+//   // Scroll to the "All List of Company" section if the URL contains the hash
+//   if (window.location.hash === '#allCompanies') {
+//     document.getElementById('allCompanies').scrollIntoView();
+//   }
+// }
+
+if (filter) {
   filter.addEventListener('submit', function (e) {
     e.preventDefault();
 
@@ -928,6 +822,12 @@ if(filter){
     if (industry) params.industry = industry;
     if (size) params.size = size;
     if (isVerified) params.isVerified = isVerified;
+
+    // phân trang nếu có tham số
+    const page = new URLSearchParams(window.location.search).get('page') || 1;
+    const limit = new URLSearchParams(window.location.search).get('limit') || 3;
+    params.page = page;
+    params.limit = limit;
 
     const queryString = new URLSearchParams(params).toString();
     const url = queryString ? `/home/business?${queryString}#allCompanies` : '/home/business#allCompanies';
@@ -945,7 +845,68 @@ if(filter){
     document.getElementById('allCompanies').scrollIntoView();
   }
 }
+/**
+ * Pagination
+ */
+pagi = document.querySelector('.pagination');
+if (pagi) {
+  document.querySelectorAll('.pagination a.page-link').forEach(link => {
+    link.addEventListener('click', function (e) {
+      e.preventDefault();
 
+      const urlParams = new URLSearchParams(window.location.search);
+      const page = this.getAttribute('href').split('page=')[1].split('&')[0];
+      const limit = urlParams.get('limit') || 3;
+
+      urlParams.set('page', page);
+      urlParams.set('limit', limit);
+
+      const queryString = urlParams.toString();
+      const url = queryString ? `/home/business?${queryString}#allCompanies` : '/business#allCompanies';
+
+      console.log('Redirecting to:', url);
+      window.location.href = url;
+    });
+  });
+}
+
+/** 
+ * Fav list
+ */
+async function saveFavoriteCompany(event, companyId) {
+  event.stopPropagation();
+  try {
+    const response = await fetch('/home/toggle-favorite', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ companyId }),
+    });
+
+    const result = await response.json();
+
+    if (result.status === 'success') {
+      showflashmessage(result.status, result.message);
+      // update icon
+      const heartIcon = document.getElementById(`heart-${companyId}`);
+      console.log('Heart icon:', heartIcon);
+      if (result.action === 'added') {
+        heartIcon.classList.remove('fa-regular');
+        heartIcon.classList.add('fa');
+        heartIcon.classList.add('clicked');
+      } else if (result.action === 'removed') {
+        heartIcon.classList.remove('fa');
+        heartIcon.classList.add('fa-regular');
+        heartIcon.classList.remove('clicked');
+      }
+    } else {
+      showflashmessage(result.status, result.message);
+    }
+  } catch (error) {
+    console.error('Error saving favorite company:', error);
+  }
+}
 /**
  * Bell notification dropdown
  */
@@ -980,14 +941,39 @@ document.addEventListener('DOMContentLoaded', function () {
 
           // Luôn cập nhật số lượng thông báo
           if (!isDropdownVisible) {
-            applicationCount.textContent = unreadCount; // Cập nhật số lượng thông báo
+            applicationCount.textContent = unreadCount;
           }
 
           if (updateDropdown) {
-            console.log('Applications:', applications);
-            console.log('Unread Count:', unreadCount);
-
             applicationsList.innerHTML = ''; // Làm trống danh sách cũ
+
+            // thông báo liên quan trạng thái lock/unlock business profile
+            if (data.notificationMessage) {
+              console.log('Notification lock:', data.notificationMessage);
+              const notificationItem = document.createElement('li');
+              notificationItem.className = 'list-group-item list-group-item-warning';
+              notificationItem.innerHTML = `
+                <div>
+                  <strong>Notification:</strong> ${data.notificationMessage}
+                </div>
+                <div class="text-muted" style="font-size: 0.8em;">
+                  ${new Date().toLocaleString()}
+                </div>
+              `;
+              notificationItem.style.cursor = 'pointer';
+              // notificationItem.addEventListener('mouseover', () => {
+              //   notificationItem.style.backgroundColor = '#f0f0f0';
+              // });
+              // notificationItem.addEventListener('mouseout', () => {
+              //   notificationItem.style.backgroundColor = '';
+              // });
+              notificationItem.addEventListener('click', () => {
+                window.location.href = `/home/business/${businessId}`;
+              });
+              applicationsList.appendChild(notificationItem);
+              // data.company.isViewedByCompany = true;
+            }
+
             if (applications.length > 0) {
               applications.forEach(application => {
                 const listItem = document.createElement('li');
@@ -1036,7 +1022,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     dropdown.classList.toggle('show'); // Toggle visibility
     isDropdownVisible = dropdown.classList.contains('show');
-    console.log('Dropdown visible:', isDropdownVisible);
 
     if (isDropdownVisible) {
       console.log('Fetching applications for dropdown...');
@@ -1073,6 +1058,10 @@ document.addEventListener('DOMContentLoaded', function () {
     fetchApplications(false); // Không cập nhật dropdown
   }
 });
+
+/**
+ * response application processing
+ */
 
 function confirmStatus(applicationId) {
   const status = document.getElementById(`status-${applicationId}`).value;
@@ -1177,7 +1166,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     Status: <strong>${feedback.status || 'Pending'}</strong>
                   </div>
                   <div class="text-muted" style="font-size: 0.8em;">
-                    ${new Date(feedback.appliedAt).toLocaleString()}
+                    ${new Date(feedback.responseAt).toLocaleString()}
                   </div>
                 `;
                 listItem.addEventListener('click', function() {
@@ -1222,7 +1211,25 @@ document.addEventListener('DOMContentLoaded', function () {
       fetchStudentNotifications(true); // Cập nhật danh sách phản hồi
 
       // Đặt lại số lượng thông báo
-      feedbackCount.textContent = '0';
+      // feedbackCount.textContent = '0';
+      fetch(`/home/student/applications/viewed`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+        .then(response => response.json())
+        .then(data => {
+          if (data.status === 'success') {
+            console.log('STUDENT Applications marked as viewed');
+            feedbackCount.textContent = '0';
+          } else {
+            console.error('Error marking applications as viewed:', data.message);
+          }
+        })
+        .catch(error => {
+          console.error('Error marking applications as viewed:', error);
+        });
     }
   }
 
@@ -1235,6 +1242,150 @@ document.addEventListener('DOMContentLoaded', function () {
     fetchStudentNotifications(false); // Không cập nhật dropdown
   }
 });
+
+/**
+ * add repres
+ */
+const addRepresentativeForm = document.getElementById('addRepresentativeForm');
+
+if(addRepresentativeForm){
+  document.addEventListener('DOMContentLoaded', function () {  
+    addRepresentativeForm.addEventListener('submit', async function (event) {
+      event.preventDefault();
+  
+      const email = document.getElementById('representativeEmail').value;
+  
+      try {
+        const response = await fetch(`/home/business/${businessId}/add-representative`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ email }),
+        });
+  
+        const result = await response.json();
+        if (result.status === 'success') {
+          showflashmessage(result.status, result.message);
+          window.location.reload(); // Reload lại trang để cập nhật
+        } else {
+          showflashmessage(result.status, result.message);
+        }
+      } catch (error) {
+        console.error('Error adding representative:', error);
+        showflashmessage(result.status, result.message);
+      }
+    });
+  });  
+}
+
+/**
+ * delete repres
+ */
+let representativeIdToRemove = null;
+
+function setRemoveRepresentative(repId, repName) {
+  representativeIdToRemove = repId;
+  document.getElementById('representativeName').textContent = repName; // Hiển thị tên trên modal
+}
+
+async function removeRepresentative() {
+  if (!representativeIdToRemove) return;
+
+  try {
+    const response = await fetch(`/home/business/${companyId}/representatives/${representativeIdToRemove}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    const result = await response.json();
+    if (result.status === 'success') {
+      showflashmessage(result.status, result.message);
+      window.location.reload();
+    } else {
+      showflashmessage(result.status, result.message);
+    }
+  } catch (error) {
+    console.error('Error removing representative:', error);
+    showflashmessage('error', 'An error occurred while removing the representative!');
+  }
+}
+
+/**
+ * verify profile
+ */
+function toggleVerification(companyId, isVerified) {
+  fetch(`/admin/business/${companyId}/verify`, {
+      method: 'POST',
+      headers: {
+          'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ isVerified }) // Gửi status
+  })
+  .then(response => response.json())
+  .then(data => {
+      if (data.status === 'success') {
+          location.reload();
+      } else {
+          showflashmessage('error', 'Failed to update verification status!');
+      }
+  })
+  .catch(error => {
+      showflashmessage('error', 'An error occurred while updating verification status' + error.message);
+      console.error('Error:', error);
+  });
+}
+
+/**
+ * gỡ hồ sơ doanh nghiệp
+ */
+async function toggleLockProfile(companyId, lock) {
+  try {
+    const response = await fetch(`/admin/business/${companyId}/lock`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ isLocked: lock }),
+    });
+
+    const result = await response.json();
+    if (result.status === 'success') {
+      showflashmessage('success', response.message);
+      location.reload();
+    } else {
+      showflashmessage('error', `Failed to ${lock ? 'remove' : 'unlock'} company profile: ${result.message}`);
+    }
+  } catch (error) {
+    console.error('Error locking profile:', error);
+    showflashmessage('error', 'An error occurred while locking the profile!');
+  }
+}
+
+/**
+ * zoom image (admin)
+ */
+function showImageModal(imageSrc) {
+  const modalImage = document.getElementById('modalImage');
+  modalImage.src = imageSrc;
+
+  // Wait for the image to load to get its dimensions
+  modalImage.onload = function() {
+      const modalDialog = document.querySelector('#imageModal .modal-dialog');
+      modalDialog.style.width = 'auto';
+      modalDialog.style.maxWidth = '90%';
+  };
+
+  const imageModal = new bootstrap.Modal(document.getElementById('imageModal'));
+  imageModal.show();
+}
+
+/**
+ * show sending modal
+ */
+
 
 /**
  * Scroll top button

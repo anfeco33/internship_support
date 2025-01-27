@@ -23,10 +23,8 @@ const router = (app) => {
   app.use("/admin", authentication, isAdmin, adminRoute);
   app.use('/home', authentication, userRoute);
   app.use('/home', userRoute);
-  // app.get('/verify', userControllers.verifyAccount);
   app.use('/' , authentication , profileRoute);
   app.use('/' , authentication , fileRoute);
-  // app.use('/', authentication, paymentRoute);
 
 };
 

@@ -1,11 +1,14 @@
-document.getElementById('updateBusinessBtn').addEventListener('click', function () {
-    // Nếu companyId tồn tại thì PUT, không POST
-    const companyId = window.companyId; // từ backend truyền
-    const method = companyId ? 'PUT' : 'POST';
-    const url = companyId ? `/home/business-edit/edit/${companyId}` : '/home/business/update';
+const updateApplicationStatus = document.getElementById('updateBusinessBtn');
+if (updateApplicationStatus) {
+    updateApplicationStatus.addEventListener('click', function () {
+        // Nếu companyId tồn tại thì PUT, không POST
+        const companyId = window.companyId; // từ backend truyền
+        const method = companyId ? 'PUT' : 'POST';
+        const url = companyId ? `/home/business-edit/edit/${companyId}` : '/home/business/update';
 
-    handleBusinessProfile(url, method);
-});
+        handleBusinessProfile(url, method);
+    });
+}
 
 function handleBusinessProfile(url, method) {
     const name = document.getElementById('inputBusinessName').value.trim();
@@ -97,41 +100,44 @@ document.getElementById('inputImages').addEventListener('change', function () {
     });
 });
 
-// Hiển thị video xem trước
-document.getElementById('setVideoBtn').addEventListener('click', function () {
-    const videoLink = document.getElementById('inputPromotionVideo').value.trim();
-
-    if (!videoLink) {
-        videoLink = [];
-        return;
-    }
-
-    const isValidYouTubeLink = videoLink.includes('youtube.com/embed/');
-    if (!isValidYouTubeLink) {
-        showflashmessage('warning', 'You must provide a valid YouTube video "embed" link!');
-    }
-
+const setVideoBtn = document.getElementById('setVideoBtn');
+if (setVideoBtn) {
     // Hiển thị video xem trước
-    const previewContainer = document.getElementById('promotionVideoPreview');
-    previewContainer.innerHTML = `
-        <div class="card mt-2 video-card">
-            <div class="embed-responsive embed-responsive-16by9">
-                <iframe class="embed-responsive-item" src="${videoLink}" allowfullscreen></iframe>
+    setVideoBtn.addEventListener('click', function () {
+        const videoLink = document.getElementById('inputPromotionVideo').value.trim();
+
+        if (!videoLink) {
+            videoLink = [];
+            return;
+        }
+
+        const isValidYouTubeLink = videoLink.includes('youtube.com/embed/');
+        if (!isValidYouTubeLink) {
+            showflashmessage('warning', 'You must provide a valid YouTube video "embed" link!');
+        }
+
+        // Hiển thị video xem trước
+        const previewContainer = document.getElementById('promotionVideoPreview');
+        previewContainer.innerHTML = `
+            <div class="card mt-2 video-card">
+                <div class="embed-responsive embed-responsive-16by9">
+                    <iframe class="embed-responsive-item" src="${videoLink}" allowfullscreen></iframe>
+                </div>
             </div>
-        </div>
-    `;
-});
-
-document.getElementById('inputDocuments').addEventListener('change', function () {
-    const documentPreview = document.getElementById('documentPreview');
-    documentPreview.innerHTML = ''; // Clear previous preview
-
-    Array.from(this.files).forEach(file => {
-        const fileName = document.createElement('p');
-        fileName.textContent = file.name;
-        documentPreview.appendChild(fileName);
+        `;
     });
-});
+
+    document.getElementById('setVideoBtn').addEventListener('change', function () {
+        const documentPreview = document.getElementById('documentPreview');
+        documentPreview.innerHTML = ''; // Clear previous preview
+
+        Array.from(this.files).forEach(file => {
+            const fileName = document.createElement('p');
+            fileName.textContent = file.name;
+            documentPreview.appendChild(fileName);
+        });
+    });
+}
 
 let map, marker;
 

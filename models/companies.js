@@ -5,7 +5,8 @@ const Schema = mongoose.Schema;
 // Mô hình dữ liệu cho công ty khác user company
 const companySchema = new Schema({
     updatedAt: { type: Date, default: new Date().toUTCString()}, 
-    representativeId: { type: Schema.Types.ObjectId, ref: 'User', required: true }, // ID người đại diện
+    // representativeId: { type: Schema.Types.ObjectId, ref: 'User', required: true }, // ID người đại diện
+    representativeIds: [{ type: Schema.Types.ObjectId, ref: 'User', required: true }],
     name: { type: String, default: '' },
     isProfileUpdated: { type: Boolean, default: false }, // Đánh dấu đã cập nhật hồ sơ
     industry: { type: String, default: '' },
@@ -39,8 +40,8 @@ const companySchema = new Schema({
         benefits: { type: Number, default: 0 } // Phúc lợi
     },
     isVerified: { type: Boolean, default: false }, // Công ty đã được xác minh chưa
-    isLocked: { type: Boolean, default: false }, // profile công ty không được hiển thị lên website
-
+    isLocked: { type: Boolean, default: false }, // profile công ty không hiển thị lên website
+    comments: [{ type: Schema.Types.ObjectId, ref: 'Comment' }],
 });
 
 const Company = mongoose.model('Company', companySchema);

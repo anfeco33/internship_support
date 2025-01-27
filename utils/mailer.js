@@ -35,7 +35,7 @@ exports.sendMail = async (to, subject , url) => {
             name: to,
             intro: `Welcome to ${mailConfig.APPNAME}! We\'re very excited to have you on board.`,
             action: {
-                instructions: 'To get started with Phone Store, please click here:',
+                instructions: 'To get started with InternChoice, please click here:',
                 button: {
                     color: '#22BC66', // Optional action button color
                     text: 'Confirm your account',
@@ -97,3 +97,32 @@ exports.sendMailForOTP = async (option) => {
 
     await transporter.sendMail(emailOptions)
 }
+
+exports.sendReportMail = async (from, to, subject, html) => {
+    try {
+        const smtpConfig = {
+            service: 'Gmail',
+            auth: {
+                user: process.env.MAIL_USERNAME,
+                pass: process.env.MAIL_PASSWORD,
+            },
+        };
+
+        const transporter = nodeMailer.createTransport(smtpConfig);
+
+        const emailOptions = {
+            from: from, // User who reported
+            to: to, // Admin's email
+            subject: subject, // Email subject
+            html: html, // Email content as HTML
+        };
+
+        const info = await transporter.sendMail(emailOptions);
+
+        console.log(`Report email sent successfully: ${info.messageId}`);
+        return info;
+    } catch (error) {
+        console.error(`Error sending report email: ${error.message}`);
+        throw error;
+    }
+};

@@ -43,7 +43,7 @@
                 <% if (account.role === 'student') { %>
                   <div id="studentFeedbackDropdown" class="applications-dropdown">
                     <ul id="studentFeedbackList" class="list-group">
-                      <!-- Feedback items sẽ được hiển thị ở đây -->
+                      <!-- Feedback items hiển thị ở đây -->
                     </ul>
                   </div>
                 <% } %>
@@ -63,7 +63,7 @@
                     </div>
                     <div class="my_business_icon mx-3" alt="my business">
                         <a href="/home/business/<%= data.businessId %>" class="btn btn-secondary btn-sm my-business-btn">
-                            MY BUSINESS
+                          <i class="fa fa-briefcase" style="margin-right: 10px;"></i>MY BUSINESS
                         </a>
                     </div>
                 <% } %>
@@ -74,7 +74,7 @@
 
 <%- include('../partials/slide_board') %>
 <div class="container mt-5">
-    <div class="alert alert-warning" role="alert">
+    <div class="custom-alert" role="alert">
         <h2 class="title-type">THE TOP COMPANIES PROVIDING THE BEST INTERNSHIP SUPPORT</h2>
     </div>
         <!--  hiện thành card có width == height (nhỏ hơn 150px) trên cùng 1 dòng-->
@@ -99,9 +99,7 @@
                 <div class="normal-business-card <%= rankClass %>" onclick="getBusinessById('<%= company._id.toString() %>')">
                     <img src="<%= company.images.length > 0 ? company.images[0] : '/images/default_companyImage_details.jpg' %>" class="card-img-top-top" alt="<%= company.name %>">
                     <div class="card-body-top">
-                        <div class="card-header">
-                            <span class="badge <%= badgeClass %>">Top <%= index + 1 %></span>
-                        </div>
+                        
                         <h5 class="card-title">
                             <%= company.name %>
                             <% if (company.isVerified) { %>
@@ -109,11 +107,35 @@
                             <% } else { %>
                             <img src="/images/unverified_icon.png" alt="Unverified" style="width: 30px; height: 30px;" id="unverifiedIcon">
                             <% } %>
+                            <div class="card-header">
+                              <span class="badge <%= badgeClass %>">
+                                <% if (index === 0) { %>
+                                  <img src="/images/1st.png" alt="1st">
+                                <% } else if (index === 1) { %>
+                                  <img src="/images/2nd.png" alt="2nd">
+                                <% } else if (index === 2) { %>
+                                  <img src="/images/3rd.png" alt="3rd">
+                                <% } %>
+                                </span>
+                            </div>
                         </h5>
                         <p class="card-text" id="industry">Industry: <%= company.industry %></p>
                         <p class="card-text" id="rating">Rating: <%= company.averageRating.toFixed(1) %>/5</p>
-                        <p class="card-text" id="address" style="font-size: 10px;">Address: <%= company.address %></p>
-                        <p class="heart-icon" id="iconheart" ><i class="fa fa-heart" id="heart" style="font-size:30px;color:red;cursor:pointer;"></i></p>
+                        
+                        <div class="mt-2 d-flex justify-content-between align-items-center">
+                          <p class="card-text" id="address" style="font-size: 10px;">Address: <%= company.address %></p>
+                          <% if (account.role === 'student') { %>
+                            <% if (account.savedCompanies.includes(company._id.toString())) { %>
+                              <p class="heart-icon iconheart">
+                                <i class="fa fa-heart heart" id="heart-<%= company._id.toString() %>" onclick="saveFavoriteCompany(event, '<%= company._id.toString() %>')" style="font-size:30px;color:red;cursor:pointer;"></i>
+                              </p>
+                            <% } else { %>
+                              <p class="heart-icon iconheart">
+                                <i class="fa-regular fa-heart heart" id="heart-<%= company._id.toString() %>" onclick="saveFavoriteCompany(event, '<%= company._id.toString() %>')" style="font-size:30px;color:red;cursor:pointer;"></i>
+                              </p>
+                            <% } %>
+                          <% } %>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -182,22 +204,20 @@
       </div>
     </form>
     <div class="row">
-        <div class="alert alert-warning" role="alert">
+        <div class="custom-alert" role="alert">
             <h3 class="title-type" id="allCompanies">BELOW ARE COMPANIES ACTIVELY SEEKING TO RECRUIT INTERNS</h3>
         </div>
         <% if (data.listOfBusiness) { %>
           <% var list = data.listOfBusiness %>
           <% if (list.length > 0) { %>
               <% list.forEach((business) => { %>
-                  <div class="col-12 mb-4"> <!-- Thay đổi col-md-4 thành col-12 -->
+                  <div class="col-12 mb-4">
                       <div class="business-card" onclick="getBusinessById('<%= business._id.toString() %>')">
-                          <!-- Hình ảnh nằm bên trái -->
                           <img 
                               src="<%= business.images.length > 0 ? business.images[0] : '/images/default_companyImage_details.jpg' %>" 
                               class="card-img-top" 
                               alt="<%= business.name %>"
                           >
-                          <!-- Nội dung nằm bên phải -->
                           <div class="card-body">
                               <h5 class="card-title">
                                   <%= business.name %>
@@ -216,7 +236,17 @@
                               <p class="card-text" id="industry">Industry: <%= business.industry %></p>
                               <p class="card-text" id="rating">Rating: <%= business.averageRating.toFixed(1) %>/5</p>
                               <p class="card-text" id="address" style="font-size: 10px;">Address: <%= business.address %></p>
-                              <p class="heart-icon" id="iconheart" ><i class="fa fa-heart" style="font-size:30px;color:red;cursor:pointer;"></i></p>
+                              <% if (account.role === 'student') { %>
+                                <% if (account.savedCompanies.includes(business._id.toString())) { %>
+                                  <p class="heart-icon iconheart">
+                                    <i class="fa fa-heart heart" id="heart-<%= business._id.toString() %>" onclick="saveFavoriteCompany(event, '<%= business._id.toString() %>')" style="font-size:30px;color:red;cursor:pointer;"></i>
+                                  </p>
+                                <% } else { %>
+                                  <p class="heart-icon iconheart">
+                                    <i class="fa-regular fa-heart heart" id="heart-<%= business._id.toString() %>" onclick="saveFavoriteCompany(event, '<%= business._id.toString() %>')" style="font-size:30px;color:red;cursor:pointer;"></i>
+                                  </p>
+                                <% } %>
+                              <% } %>
                           </div>
                       </div>
                   </div>
@@ -227,7 +257,32 @@
               </h2>
           <% } %>
       <% } %>
-      
+    </div>
+
+    <div class="pagination-container">
+      <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center">
+          <% if (data.currentPage > 1) { %>
+            <li class="page-item">
+              <a class="page-link" href="/business?page=<%= data.currentPage - 1 %>&limit=<%= data.limit %>" aria-label="Previous">
+                <span aria-hidden="true">&laquo;</span>
+              </a>
+            </li>
+          <% } %>
+          <% for (var i = 1; i <= data.totalPages; i++) { %>
+            <li class="page-item <%= data.currentPage === i ? 'active' : '' %>">
+              <a class="page-link" href="/business?page=<%= i %>&limit=<%= data.limit %>"><%= i %></a>
+            </li>
+          <% } %>
+          <% if (data.currentPage < data.totalPages) { %>
+            <li class="page-item">
+              <a class="page-link" href="/business?page=<%= data.currentPage + 1 %>&limit=<%= data.limit %>" aria-label="Next">
+                <span aria-hidden="true">&raquo;</span>
+              </a>
+            </li>
+          <% } %>
+        </ul>
+      </nav>
     </div>
   </div>
 

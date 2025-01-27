@@ -11,7 +11,9 @@ require('dotenv').config({ path: envPath });
 
 const student_feature_list = [
   { access: "Home", icon: "<i class='fa-solid fa-house'></i>" },
-  { access: "My Internship Apps", icon: "<i class='fa-solid fa-square-check'></i>" }
+  { access: "My Internship Apps", icon: "<i class='fa-solid fa-square-check'></i>" },
+  { access: "Dashboard", icon: "<i class='fa-solid fa-gauge'></i>" },
+
 ]
 
 const company_feature_list = [
@@ -19,7 +21,9 @@ const company_feature_list = [
   // sửa luôn trong main.js
 
   { access: "Home", icon: "<i class='fa-solid fa-house'></i>" },
-  { access: "Internship Applications", icon: "<i class='fa-solid fa-pen-to-square'></i>" }
+  { access: "Internship Applications", icon: "<i class='fa-solid fa-pen-to-square'></i>" },
+  { access: "Dashboard", icon: "<i class='fa-solid fa-gauge'></i>" },
+
 ]
 
 async function ensureProfileUpdated(req, res, next) {
@@ -32,7 +36,7 @@ async function ensureProfileUpdated(req, res, next) {
   }
 
   if (req.session.role === 'company') {
-      const company = await Company.findOne({ representativeId: req.session.account });
+      const company = await Company.findOne({ representativeIds: req.session.account });
 
       if (company && !company.isProfileUpdated) { 
         // Nếu hồ sơ công ty chưa được cập nhật và người dùng là người đại diện công ty 
@@ -114,6 +118,7 @@ async (req, accessToken, refreshToken, profile, done) => {
   const domain = email.split('@')[1];
   console.log("Domain:", domain);
   const isStudent = domain.endsWith(".edu.vn");
+  const featureList = isStudent ? student_feature_list : company_feature_list;
   console.log("Is student:", isStudent);
   let access = isStudent ? student_feature_list : company_feature_list;
   console.log("Access :", access);
@@ -138,6 +143,16 @@ async (req, accessToken, refreshToken, profile, done) => {
       // let user = await User.findOne({ googleId: profile.id });
       let user = await User.findOne({ email: profile.emails[0].value });
       if (user) {
+          // update access_feature list mới bổ sung
+          featureList.forEach((feature) => {
+            if (!user.access.some((item) => item.access === feature.access)) {
+              user.access.push(feature);
+            }
+          });
+
+          user.lastLogin = moment().format("HH:mm | DD/MM/YYYY");
+          await user.save();
+
           // Nếu người dùng đã tồn tại, trả về người dùng
           await req.login(user, function(err) {
             if (err) { return next(err); 
@@ -159,7 +174,7 @@ async (req, accessToken, refreshToken, profile, done) => {
 
           if (user.role === 'company') {
             await Company.create({
-                representativeId: user._id, // Gán người đại diện là user mới tạo
+                representativeIds: [user._id], // Gán người đại diện là user mới tạo]
                 name: '', // Để trống hoặc mặc định
                 isProfileUpdated: false, 
             });
@@ -168,16 +183,7 @@ async (req, accessToken, refreshToken, profile, done) => {
           await req.login(user, function(err) {
             if (err) { return done(err); 
           }
-            // req.session.account = user._id.toString();
-            // console.log("req.session.account signup: ", req.session.account);
-            // req.session.role = user.role;
-            // req.session.access = user.access;
-            // req.session.loggedIn = true;
-
-            // req.session.save((err) => {
-            //   if (err) console.error("Error saving session:", err);
-            // });
-             done(null, user);
+          done(null, user);
         });
       }
   } catch (error) {

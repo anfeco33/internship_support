@@ -1,57 +1,155 @@
-
-// const Business = require('../models/business');
-const Section = require('../models/section');
-const Lecture = require('../models/lecture');
-const Review = require('../models/reviews');
-const Comment = require('../models/lecturecomments');
-const Exercise = require('../models/exercises');
-const Note = require('../models/note');
+const Comment = require('../models/comments');
 const User = require('../models/users');
 const Company = require('../models/companies')
 const Internship = require('../models/internships');
 const Application = require('../models/applications');
-const Progress = require('../models/progress');
+
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const path = require('path');
 const mailer = require('../utils/mailer')
-const moment = require('moment');
 
 var { authentication, isAdmin } = require('../middleware/authentication');
-const sendEmail = require('./sendEmail');
 const { validate } = require('./validator');
 
 const { validationResult } = require('express-validator');
 const fs = require('fs');
 
 class BusinessController {
-  async get_list_business(filter = {}) {
+  async getBusinessProfilesForAdmin(req, res, next) {
     try {
-      filter.isProfileUpdated = true;
-      const businesses = await Company.find(filter)
-      .select('name images averageRating address isVerified industry size');
-
+      const businesses = await Company.find({}).select('name industry size updatedAt isVerified');
+      console.log("business list: ", businesses);
       return businesses;
+    } catch (error) {
+      console.error('Error fetching business profiles:', error);
+      throw error;
+    }
+  }
+
+  async toggleCompanyVerification(req, res) {
+    try {
+      const { companyId } = req.params; 
+      const { isVerified } = req.body;
+  
+      const company = await Company.findById(companyId);
+      if (!company) {
+        return res.status(404).json({ status: 'error', message: 'Company not found' });
+      }
+  
+      // Cập nhật verify
+      company.isVerified = isVerified;
+      await company.save();
+  
+      res.status(200).json({
+        status: 'success',
+        message: `Company's profile has been ${isVerified ? 'verified' : 'unverified'} successfully.`,
+      });
+    } catch (error) {
+      console.error('Error updating company verification status:', error);
+      res.status(500).json({ status: 'error', message: 'Internal Server Error' });
+    }
+  }
+  
+  async lockCompanyProfile(req, res) {
+    try {
+      const { companyId } = req.params;
+      const { isLocked } = req.body;
+  
+      // Tìm công ty
+      const company = await Company.findById(companyId);
+      if (!company) {
+        return res.status(404).json({ status: 'error', message: 'Company not found' });
+      }
+  
+      company.isLocked = isLocked;
+      await company.save();
+  
+      // Cập nhật thông báo `isViewedByCompany` cho từng đại diện
+      const representatives = await User.find({ _id: { $in: company.representativeIds } }).select('isViewedByCompany');
+      console.log("representatives lock com: ", representatives);
+      // Đặt lại `isViewedByCompany` thành `false` cho tất cả các đại diện của công ty
+      await Promise.all(
+        representatives.map(async (user) => {
+          if (user.isViewedByCompany) {
+            user.isViewedByCompany = false; 
+            await user.save();
+          }
+        })
+      );
+  
+      const message = isLocked
+        ? `Company profile has been locked successfully.`
+        : `Company profile has been unlocked successfully.`;
+  
+      res.status(200).json({
+        status: 'success',
+        message,
+      });
+    } catch (error) {
+      console.error('Error toggling company lock status:', error);
+      res.status(500).json({ status: 'error', message: 'Internal Server Error' });
+    }
+  }
+
+  // async get_list_business(filter = {}) {
+  //   try {
+  //     // show công ty có hồ sơ cập nhật, không khóa
+  //     filter.isProfileUpdated = true;
+  //     filter.isLocked = false;
+  
+  //     const businesses = await Company.find(filter)
+  //       .select('name images averageRating address isVerified industry size');
+  
+  //     return businesses;
+  //   } catch (error) {
+  //     console.error('Error fetching business list:', error);
+  //   }
+  // }
+  async get_list_business(filter = {}, page = 1, limit = 3) {
+    try {
+      // show công ty có hồ sơ cập nhật, không khóa
+      filter.isProfileUpdated = true;
+      filter.isLocked = false;
+  
+      const skip = (page - 1) * limit;
+      const totalCompanies = await Company.countDocuments(filter);
+      const businesses = await Company.find(filter)
+        .select('name images averageRating address isVerified industry size')
+        .skip(skip)
+        .limit(limit);
+  
+      return {
+        businesses,
+        totalCompanies,
+        totalPages: Math.ceil(totalCompanies / limit),
+        currentPage: page
+      };
     } catch (error) {
       console.error('Error fetching business list:', error);
     }
   }
-
+  
   async get_top_supportive_companies() {
     try {
-      const topCompanies = await Company.find({ isProfileUpdated: true, isVerified: true })
+      const topCompanies = await Company.find({
+        isProfileUpdated: true,
+        isVerified: true,
+        isLocked: false, // Chỉ lấy những công ty không bị khóa
+      })
         .sort({ averageRating: -1 }) // Sort by average rating in descending order
-        .limit(3) // Limit to top 3 companies
+        .limit(3)
         .select('name images averageRating address isVerified industry size');
+  
       return topCompanies;
     } catch (error) {
       console.error('Error fetching top supportive companies:', error);
     }
   }
-
+  
   async get_my_business(req, res, next) {
     try {
-      const company = await Company.findOne({ representativeId: req.session.account });
+      const company = await Company.findOne({ representativeIds: req.session.account });
 
       console.log("get my business : " + company._id.toString());
       const companyId = company._id.toString();
@@ -70,57 +168,6 @@ class BusinessController {
       next(error);
     }
   }
-
-  // async  get_subcribe_course(req, res, next) {
-  //   try {
-  //     const studentID = req.session.account; // Lấy studentID từ session hoặc nguồn dữ liệu khác
-    
-  //     const student = await User.findById(studentID); // Lấy thông tin người dùng từ bảng User
-  //     console.log(student)
-  //     const courses = await Course.find({ _id: { $in: student.subscribed } }).populate('companyID', 'profilePicture fullName'); // Lấy thông tin các khóa học đã đăng ký từ bảng Course và liên kết với thông tin người dùng từ bảng User
-  //     console.log(courses)
-    
-  //     return courses;
-  //   } catch (error) {
-  //     next(error);
-  //   }
-  // }
-  
-
-  // async delete_course(req, res, next) {
-  //   console.log("Delete course : ")
-  //   try {
-  //     const product = await Course.findById(req.params.courseId);
-  //     if (product) {
-  //       if(!product.inOrders){
-  //         await product.deleteOne();
-  //         const imagePath = path.join(__dirname, '../uploads/courses', path.basename(product.courseImage));
-  //         console.log(imagePath);
-  //         fs.unlink(imagePath, (err) => {
-  //           if (err) {
-  //             console.error('Có lỗi xảy ra khi xóa file:', err);
-  //             return;
-  //           }
-  //           console.log('File đã được xóa thành công.');
-  //         });
-  //         req.session.flash = {
-  //           type: "success",
-  //           intro: 'Delete product',
-  //           message: "Delete course successfully",
-  //         };
-  //         res.json({ delete: true, status: "success", message: 'Course has been deleted', redirect: "/admin/course" });
-  //       }
-  //       else{
-  //         res.json({ delete : false, status: "warning", message: 'Product is in order'});
-  //       }
-
-  //     } else {
-  //       res.status(404)({ delete: false, status: "success", message: 'Product Not Foud' });
-  //     }
-  //   } catch (err) {
-  //     next(err);
-  //   }
-  // }
 
   // search business
   async getbusinessbyTermRegex(req, res, next) {
@@ -169,637 +216,125 @@ class BusinessController {
     }
   }
 
-  async getSectionsAndLectures(courseID) {
+  async addRepresentative(req, res) {
     try {
-      const sections = await Section.find({ courseID });
-
-      const formattedSections = [];
-
-      for (const section of sections) {
-        const lectures = await Lecture.find({ sectionID: section._id });
-
-        const formattedLectures = lectures.map(lecture => ({
-          lectureID: lecture._id,
-          lectureTitle: lecture.lectureTitle,
-          lectureLink: lecture.lectureLink,
-          lectureDescription: lecture.lectureDescription
-        }));
-
-        formattedSections.push({
-          sectionID: section._id,
-          sectionNumber: section.sectionNumber,
-          sectionTitle: section.sectionTitle,
-          sectionSlugID: 'videos-' + (section.sectionNumber.toLowerCase().replace(/ /g, '')).replace(/\s+/g, '-') ,
-          lectures: formattedLectures
-        });
-      }
-      return formattedSections;
-    } catch (error) {
-      console.log(error);
-      return null; // Hoặc giá trị mặc định khác tùy thuộc vào yêu cầu của bạn
-    }
-  }
-
-
-  async getFirstlecture(courseID) {
-    try {
-      const sections = await Section.find({ courseID });
-
-      if (sections.length === 0) {
-        return null; // Không có phần (section) nào được tìm thấy
-      }
-
-      const firstSection = sections[0];
-      const lectures = await Lecture.find({ sectionID: firstSection._id });
-
-      if (lectures.length === 0) {
-        return null; // Không có bài giảng (lecture) nào được tìm thấy trong phần đầu tiên
-      }
-
-      const firstLecture = lectures[0];
-
-      const formattedSection = {
-        sectionNumber: firstSection.sectionNumber,
-        sectionTitle: firstSection.sectionTitle,
-        lectureID: firstLecture._id,
-        lectureTitle: firstLecture.lectureTitle,
-        lectureLink: firstLecture.lectureLink,
-        lectureDescription: firstLecture.lectureDescription
-
-      };
-      console.log(formattedSection);
-
-      return formattedSection;
-    } catch (error) {
-      console.log(error);
-      return null; // Hoặc giá trị mặc định khác tùy thuộc vào yêu cầu của bạn
-    }
-  }
-
-  async add_to_cart(req, res, next) {
-    try {
-      const userID = req.session.account; // ID của người dùng từ req.session.account
-      const { courseId, del_courseId } = req.body;
-      console.log(courseId, del_courseId)
-      if (courseId) {
-        // Kiểm tra xem khóa học đã tồn tại trong giỏ hàng của người dùng hay chưa
-        const user = await User.findOne({
-          _id: userID,
-          cart: { $in: [courseId] }
-        });
-
-        if (user) {
-          // Khóa học đã tồn tại trong giỏ hàng
-          return res.json({ status: "success", message: "Khóa học đã tồn tại trong giỏ hàng" });
-        }
-
-        // Cập nhật cart của người dùng
-        const updatedUser = await User.findOneAndUpdate(
-          { _id: userID }, // Tìm người dùng dựa trên ID
-          { $push: { cart: courseId } }, // Thêm courseId vào cart
-          { new: true } // Trả về người dùng đã được cập nhật
-        );
-
-        console.log(updatedUser); // In thông tin người dùng đã được cập nhật
-
-        // Thực hiện các xử lý khác sau khi thêm vào giỏ hàng thành công
-
-        // Gửi phản hồi thành công về client
-        return res.json({ status: "success", message: "Thêm vào giỏ hàng thành công" });
-      }
-
-      else if (del_courseId) {
-        // Xóa khóa học khỏi giỏ hàng
-        const user = await User.findOneAndUpdate(
-          { _id: userID }, // Tìm người dùng dựa trên ID
-          { $pull: { cart: del_courseId } }, // Xóa del_courseId khỏi cart
-          { new: true } // Trả về người dùng đã được cập nhật
-        );
-
-        console.log(user); // In thông tin người dùng đã được cập nhật
-
-        // Thực hiện các xử lý khác sau khi xóa khỏi giỏ hàng thành công
-        req.session.flash = {
-          type: 'success',
-          intro: 'del cart',
-          message: 'Delete successful',
-        };
-        // Gửi phản hồi thành công về client
-        return res.json({ status: "success", message: "Xóa khỏi giỏ hàng thành công" });
-      } else {
-        // Nếu không có courseId hoặc del_courseId được cung cấp
-        return res.json({ status: "error", message: "Không có khóa học hoặc ID khóa học để xử lý" });
-      }
-    } catch (error) {
-      // Xử lý lỗi (nếu có)
-      console.error("Error:", error);
-      // Gửi phản hồi lỗi về client
-      res.status(500).json({ status: "error", message: "Đã xảy ra lỗi khi xử lý giỏ hàng" });
-    }
-  }
-  async get_list_cart(req, res, next) {
-    try {
-      const userId = req.session.account; // Lấy userId từ session hoặc nguồn dữ liệu khác
-
-      // Lấy thông tin người dùng và populate mảng cart với các đối tượng course
-      const user = await User.findById(userId).populate('cart', 'courseName coursePrice courseCategory');
-
-      if (!user) {
-        // Người dùng không tồn tại
-        return res.json({ status: 'error', message: 'User does not exist' });
-      }
-
-      const cartItems = user.cart; // Mảng cart của người dùng
-      const cartCourses = []; // Mảng chứa thông tin course từ cart
-
-      // Lặp qua từng item trong cart và lấy thông tin course tương ứng
-      for (const cartItem of cartItems) {
-        const course = await Course.findById(cartItem._id).populate('companyID', 'fullName');
-        if (course) {
-          const formattedCourse = {
-            courseId: course._id.toString(),
-            courseName: course.courseName,
-            coursePrice: course.coursePrice,
-            courseCategory: course.courseCategory,
-            courseImage: course.courseImage,
-            companyFullName: course.companyID.fullName,
-            courseImage: course.courseImage
-          };
-          cartCourses.push(formattedCourse);
-        }
-      }
-
-      // Gửi phản hồi với danh sách các course trong cart
-      return cartCourses;
-    } catch (error) {
-      // Xử lý lỗi (nếu có)
-      console.error('Error:', error);
-      // Gửi phản hồi lỗi về client
-      res.status(500).json({ status: 'error', message: 'Đã xảy ra lỗi khi lấy danh sách cart' });
-    }
-  }
-  
-  // Take note
-  async addNewNote(req, res) {
-    try {
-      const userID = req.session.account;
-      const { lectureID, noteTimeStamp, noteDescription } = req.body;
+      const { companyId } = req.params;
+      const { email } = req.body;
       
-      const newNote = new Note({
-          lectureID,
-          userID,
-          noteTimeStamp,
-          noteDescription
-      });
-
-      const savedNote = await newNote.save();
-
-      const noteWithDetails = await Note.findById(savedNote._id)
-          .populate({
-              path: 'lectureID',
-              select: 'lectureTitle lectureLink lectureDescription sectionID',
-              populate: {
-                  path: 'sectionID',
-                  select: 'sectionNumber sectionTitle'
-              }
+      if (!validate.validateEmail(req.body.email)) {
+          return res.status(400).json({
+              status: 'warning',
+              message: 'Invalid email. Please enter a valid email address!'
           });
+      }
 
-        // Check if the note and its details were fetched successfully
-        if (!noteWithDetails) {
-            throw new Error("Note saved but related details could not be fetched.");
+      const user = await User.findOne({ email });
+      if (!user) {
+        return res.status(404).json({ status: 'warning', message: 'User not found with this email! Please enter a valid email' });
+      }
+      //curr company
+      const company = await Company.findById(companyId);
+      if (!company) {
+        return res.status(404).json({ status: 'warning', message: 'Company not found' });
+      }
+        // user đã là đại diện curr com
+      if (company.representativeIds.includes(user._id)) {
+        return res.status(400).json({ status: 'warning', message: 'User is already in this company!' });
+      }
+
+       // user đã thuộc một công ty khác
+      const currentCompany = await Company.findOne({ representativeIds: user._id });
+
+      if (currentCompany) {
+        // Nếu hs công ty hiện tại của người dùng chưa cập nhật => xóa hồ sơ company này
+        if (!currentCompany.isProfileUpdated) {
+          await Company.findByIdAndDelete(currentCompany._id); 
+        } else {
+          return res.status(400).json({
+            status: 'warning',
+            message: 'User is already a representative for another company!',
+          });
         }
-          
-        const response = {
-          success: true,
-          message: "Note added successfully",
-          note: {
-              id: noteWithDetails.id,
-              noteTimeStamp: noteWithDetails.noteTimeStamp,
-              noteDescription: noteWithDetails.noteDescription,
-              lectureDetails: {
-                  lectureTitle: noteWithDetails.lectureID.lectureTitle,
-                  lectureLink: noteWithDetails.lectureID.lectureLink,
-                  lectureDescription: noteWithDetails.lectureID.lectureDescription
-              },
-              sectionDetails: {
-                  sectionNumber: noteWithDetails.lectureID.sectionID.sectionNumber,
-                  sectionTitle: noteWithDetails.lectureID.sectionID.sectionTitle
-              }
-          }
-      };
+      }
 
-      // Send the detailed response
-      res.status(201).json(response);
+      // Thêm người dùng vào danh sách đại diện của công ty hiện tại
+      company.representativeIds.push(user._id);
+      await company.save();
+
+      // add id công ty vào company của userschema
+      user.company = company._id;
+      await user.save();
+  
+      res.status(200).json({ status: 'success', message: 'Representative added successfully!' });
     } catch (error) {
-        console.error("Error adding note:", error);
-        res.status(500).json({ success: false, message: "Failed to add note" });
+      console.error('Error adding representative:', error);
+      res.status(500).json({ status: 'error', message: 'Internal Server Error' });
     }
   }
 
-  async getNotesByUserAndCourseID(req) {
+  async viewRepresentatives(req, res) {
     try {
-      const userId = req.session.account;
-      const courseId = req.params.courseId;
-
-      console.log("USER:" + userId);
-      console.log("COURSE ID:" + courseId);
-
-      const getSectionsByCourseId = async (courseId) => {
-        const sections = await Section.find({ courseID: courseId }).select('_id').exec();
-        return sections.map(section => section._id);
-      };
-
-      const sectionIds = await getSectionsByCourseId(courseId);
-
-      console.log(sectionIds);
-
-      const getLectureIdsBySectionIds = async (sectionIds) => {
-        const lectures = await Lecture.find({ sectionID: { $in: sectionIds } }).select('_id').exec();
-        return lectures.map(lecture => lecture._id);
-      };
-
-      const lectureIds = await getLectureIdsBySectionIds(sectionIds);
-
-      console.log(lectureIds);
-
-      const notes = await Note.find({ userID: userId, lectureID: { $in: lectureIds } })
-        .populate({
-            path: 'lectureID',
-            populate: {
-              path: 'sectionID',
-              select: 'sectionNumber sectionTitle'
-            },
-            select: 'lectureTitle lectureLink lectureDescription'
-        })
-        .exec();
-
-      if (!notes) {
-        console.log("There're no notes");
+      const { companyId } = req.params;
+  
+      const company = await Company.findById(companyId).populate({
+        path: 'representativeIds',
+        select: 'fullName email profilePicture',
+      });
+  
+      if (!company) {
+        console.log(`Company with ID ${companyId} not found.`);
         return null;
       }
+  
+      return company;
+    } catch (error) {
+      console.error('Error fetching representatives:', error);
+      throw error;
+    }
+  }
 
-      const formattedNotes = notes.map(note => {
-        if (!note.lectureID) {
-          return {
-            noteTimeStamp: note.noteTimeStamp,
-            noteDescription: note.noteDescription,
-            lectureTitle: 'Lecture Not Found',
-            lectureLink: 'Lecture Not Found',
-            lectureDescription: 'Lecture Not Found',
-            sectionTitle: 'Section Not Found',
-            lectureID: null
-          };
-        }
+  async removeRepresentative(req, res) {
+    try {
+      const { companyId, representativeId } = req.params;
+  
+      const company = await Company.findById(companyId);
+      if (!company) {
+        return res.status(404).json({ status: 'warning', message: 'Company not found.' });
+      }
+  
+      // người dùng là đại diện đầu tiên?
+      if (company.representativeIds[0].toString() === representativeId) {
+        return res.status(400).json({ status: 'warning', message: 'Cannot remove the main representative!' });
+      }
+  
+      // người dùng thuộc danh sách đại diện
+      if (!company.representativeIds.includes(representativeId)) {
+        return res.status(404).json({ status: 'warning', message: 'Representative not found in this company.' });
+      }
+  
+      // Xóa người dùng khỏi danh sách đại diện
+      company.representativeIds = company.representativeIds.filter(id => id.toString() !== representativeId);
+      await company.save();
+  
+      // Cập nhật trường `company` của user bị xóa (xóa liên kết với công ty)
+      const user = await User.findById(representativeId);
+      if (user) {
+        user.company = null;
+        await user.save();
+      }
 
-        const lectureTitle = note.lectureID.lectureTitle;
-        const lectureLink = note.lectureID.lectureLink;
-        const lectureDescription = note.lectureID.lectureDescription;
-        const sectionTitle = note.lectureID.sectionID ? note.lectureID.sectionID.sectionTitle : 'Section Not Found';
-
-        return {
-          noteTimeStamp: note.noteTimeStamp,
-          noteDescription: note.noteDescription,
-          lectureTitle: lectureTitle,
-          lectureLink: lectureLink,
-          lectureDescription: lectureDescription,
-          sectionTitle: sectionTitle,
-          lectureID: note.lectureID._id
-        };
+      //tạo lại company cho user
+      await Company.create({
+        representativeIds: [user._id],
+        name: '', 
+        isProfileUpdated: false, 
       });
-
-      return formattedNotes;
-    } catch (error) {
-      console.error('Error:', error);
-      return null;
-    }
-  }
-
-  async addRatingAndComment(req, res, courseID) {
-    const { rmComment } = req.body;
-    const userID = req.session.account;
-    const { rating, comment } = req.body;
-    let review = await Review.findOne({ courseId: courseID, userId: userID });
-    try {
-      if (courseID) {
-        if (review) {
-          console.log("existingReview")
-          // Người dùng đã đánh giá, cập nhật bình luận và đánh giá hiện tại
-          review.rating = rating;
-          review.comment = comment;
-          await review.save();
-        } else {
-          // tạo mới đánh giá và bình luận
-            let review = new Review({ 
-                userId: userID,
-                courseId: courseID,
-                rating: req.body.rating,
-                comment: req.body.comment
-            })
-            review.save()
-          }
-
-        req.session.flash = {
-          type: 'success',
-          message: 'Rating and comment added successfully',
-        };
-
-        await Course.findByIdAndUpdate(courseID, {
-          $push: { reviews: review._id }
-        }, { new: true });
-
-        res.json({ status: "success", message: "Rating and comment added successfully" })
-
-      } else if (rmComment) {
-        try {
-          const userID = req.session.account;
-          const existingReview = await Review.findOneAndDelete({ userId: userID, _id: rmComment });
-          console.log("exist", existingReview)
-          if (existingReview) {
-
-            // rm trong course
-            const user = await Course.findOneAndUpdate(
-              { _id: userID },
-              { $pull: { reviews: rmComment } }, 
-              { new: true }
-            );
-    
-            req.session.flash = {
-              type: 'success',
-              intro: 'del comment',
-              message: 'Delete successful',
-            };
-            // Gửi phản hồi thành công về client
-            return res.json({ status: "success", message: "Rating and comment removed successfully" });
-          } else {
-            res.json({ status: "warning", message: "Rating and comment not found" });
-          }
-        } catch(err) {
-          req.session.flash = {
-            type: 'error',
-            intro: 'comment failed',
-            message: err.message,
-          };
-            res.json({ success: false, message: err.message })
-        }
-        
-      } else {
-        // Nếu không có courseId hoặc del_courseId được cung cấp
-        return res.json({ status: "error", message: "Không có khóa học hoặc ID khóa học để xử lý" });
-      }
-      } catch(err) {
-        req.session.flash = {
-          type: 'error',
-          intro: 'comment failed',
-          message: err.message,
-        };
-          res.json({ status: "warning", message: err.message })
-      }
-  }
-
-  async getCoursesWithExercises(req, res, next) {
-    try {
-      const companyId = req.session.account; 
-      const courses = await Course.find({
-        companyID: companyId,
-        exercises: { $exists: true, $ne: [] }  // Ensure there are exercises associated with the course
-      })
-      .populate({
-        path: 'exercises',
-        select: 'googleFormLink'  // Assuming the relationship and fields are correctly set up
-      })
-      .exec();
   
-      return courses;
+      res.status(200).json({ status: 'success', message: 'Representative removed successfully!' });
     } catch (error) {
-      console.error("Error fetching courses with exercises:", error);
-      next(error);
+      console.error('Error removing representative:', error);
+      res.status(500).json({ status: 'error', message: 'Internal Server Error' });
     }
-  }
-
-  async manageExercise(req, res, next) {
-    try {
-      const { courseId, exerciseIndex, googleFormLink, selectCourse } = req.body;
-      const companyID = req.session.account;
-      console.log("rm exercise: ", courseId, companyID, exerciseIndex)
-  
-      // thêm mới or cập nhật bài tập
-      if (googleFormLink) {
-        // Kiểm tra nếu exerciseIndex được cung cấp, thì thực hiện cập nhật
-        if (exerciseIndex !== undefined) {
-          const existingEx = await Exercise.find({ companyId: companyID, courseId: courseId });
-          if (!existingEx) {
-            req.session.flash = {
-              type: 'warning',
-              message: 'Exercise not found',
-            };
-            return res.status(404).json({ success: false, message: 'Exercise not found' });
-          }
-          try {
-            existingEx[exerciseIndex].googleFormLink = googleFormLink;
-            await existingEx[exerciseIndex].save();
-            req.session.flash = {
-              type: 'success',
-              message: 'Link updated successful'
-            };
-            return res.json({ status: "success", message: "Link updated successfully" });
-          } catch (error) {
-            console.error('Error saving exercise:', error);
-            return res.json({ status: "error", message: "Error saving exercise" });
-          }
-        } else {
-          // Tạo mới bài tập
-          if (!googleFormLink || !selectCourse) {
-            return res.status(400).json({ message: "Missing required fields" });
-          }
-          const newExercise = new Exercise({
-            courseId: selectCourse,
-            companyId: companyID,
-            googleFormLink: googleFormLink
-          });
-  
-          const savedEx = await newExercise.save();
-  
-          await Course.findByIdAndUpdate(selectCourse, {
-            $push: { exercises: newExercise._id }
-          }, { new: true });
-  
-          req.session.flash = {
-            type: 'success',
-            message: 'Exercise added successfully!'
-          };
-          res.status(200).json({ added: true, status: "success", message: "Exercise added successfully", exercise: savedEx });
-        }
-      }
-      
-      // Nếu không cung cấp googleFormLink, ta xem như đang thực hiện xóa bài tập
-      else if (exerciseIndex !== undefined) {
-        // Xóa bài tập tại vị trí index
-        try {
-          const existingEx = await Exercise.find({ companyId: companyID, courseId: courseId });
-          if (!existingEx) {
-            req.session.flash = {
-              type: 'warning',
-              message: 'Exercise not found',
-            };
-            return res.status(404).json({ success: false, message: 'Exercise not found' });
-          }
-
-          try {
-            // rm trong course
-            console.log("del ex1: ", existingEx[exerciseIndex]._id)
-            await Course.findOneAndUpdate(
-              { _id: courseId },
-              { $pull: { exercises: existingEx[exerciseIndex]._id } }, 
-              { new: true }
-            );
-            await existingEx[exerciseIndex].deleteOne();
-            req.session.flash = {
-              type: 'success',
-              message: 'Link removed successful'
-            };
-            return res.json({ status: "success", message: "Link removed successfully" });
-          } catch (error) {
-            console.error('Error saving exercise:', error);
-            return res.json({ status: "error", message: "Error removing exercise" });
-          }
-        } catch(err) {
-          req.session.flash = {
-            type: 'error',
-            intro: 'rm exercise failed',
-            message: err.message,
-          };
-           return res.json({ success: false, message: err.message })
-        }
-      } else {
-        return res.status(400).json({ message: "Missing required fields" });
-      }
-    } catch (error) {
-      console.error('Error managing exercise:', error);
-      return res.status(500).json({ success: false, message: 'Internal server error', error: error.toString() });
-    }
-  }
-
-  async updateProgress(req) {
-    const { lectureID, courseID, progress } = req.body;
-    const userID = req.session.account;
-
-    console.log("CHECKING PROGRESS: -");
-    console.log("lectureID: ", lectureID);
-    console.log("courseID: ", courseID);
-    console.log("progress: ", progress);
-    console.log("userID: ", userID);
-
-    try {
-      let progressRecord = await Progress.findOne({ userID, lectureID });
-      if (progressRecord) {
-        progressRecord.progress = progress;
-        progressRecord.completed = progress >= 70;
-      } else {
-        progressRecord = new Progress({ userID, lectureID, courseID, progress, completed: progress >= 70 });
-      }
-      await progressRecord.save();
-      return { success: true, progress: progressRecord };
-    } catch (error) {
-      return { success: false, error: error.message };
-    }
-  }
-
-  async getCourseProgress(req) {
-    const courseId = req.params.courseId;
-    const userId = req.session.account;
-
-    try {
-      const sections = await Section.find({ courseID: courseId }).select('_id');
-      if (!sections || sections.length === 0) {
-        console.log("NO SECTIONS");
-        return { success: true, completedLectureIds: [], totalLectures: 0 };
-      }
-
-      const lectures = await Lecture.find({ sectionID: { $in: sections.map(section => section._id) } }).select('_id');
-      if (!lectures || lectures.length === 0) {
-        console.log("NO LECTURES");
-          return { success: true, completedLectureIds: [], totalLectures: 0 };
-      }
-
-      const lectureIds = lectures.map(lecture => lecture._id);
-      const completedLectures = await Progress.find({ userID: userId, lectureID: { $in: lectureIds }, completed: true }).select('lectureID');
-      const completedLectureIds = completedLectures.map(progress => progress.lectureID);
-      const totalLectures = lectureIds.length;
-
-      console.log("TOTAL LECTURES:", totalLectures);
-      console.log("COMPLETED LECTURES:", completedLectureIds.length);
-
-      return { success: true, completedLectureIds, totalLectures };
-    } catch (error) {
-      console.log(error.message);
-      return { success: false, error: error.message };
-    }
-  }
-
-  async getCompletedCourses(req) {
-    const userId = req.session.account;
-
-    try {
-        const enrolledCourses = await this.get_subcribe_course(req);
-        if (!enrolledCourses || enrolledCourses.length === 0) {
-          return { success: true, completedCourses: [] };
-        }
-
-        const completedCourses = [];
-
-        for (let course of enrolledCourses) {
-          const sections = await Section.find({ courseID: course._id }).select('_id');
-          if (!sections || sections.length === 0) continue;
-
-          const lectures = await Lecture.find({ sectionID: { $in: sections.map(section => section._id) } }).select('_id');
-          if (!lectures || lectures.length === 0) continue;
-
-          const lectureIds = lectures.map(lecture => lecture._id);
-          const completedLectures = await Progress.find({ userID: userId, lectureID: { $in: lectureIds }, completed: true }).select('lectureID');
-
-          if (completedLectures.length === lectureIds.length) {
-              completedCourses.push(course);
-          }
-        }
-
-        return { success: true, completedCourses: completedCourses };
-    } catch (error) {
-      console.error("Error fetching completed courses:", error.message);
-      return { success: false, error: error.message };
-    }
-  }
-
-  async addCommentsForALecture(req, res, lectureID) {
-    console.log("ADD new comment : ");
-    console.log(lectureID);
-    const userID = req.session.account;
-    try {
-          // tạo mới bình luận
-            let comm = new Comment({ 
-                userId: userID,
-                lectureID: lectureID,
-                comment: req.body.comment
-            })
-            comm.save()
-
-        req.session.flash = {
-          type: 'success',
-          message: 'You have successfully added a comment!',
-        };
-
-        await Lecture.findByIdAndUpdate(lectureID, {
-          $push: { comments: comm._id }
-        }, { new: true });
-
-        res.json({ status: "success", message: "You have successfully added a comment!" })
-      } catch(err) {
-        req.session.flash = {
-          type: 'error',
-          intro: 'comment failed',
-          message: err.message,
-        };
-          res.json({ status: "warning", message: err.message })
-      }
   }
 
   async updateProfile(req, res, next) {
@@ -817,7 +352,7 @@ class BusinessController {
             promotionVideo,
         } = JSON.parse(req.body.businessProfile);
 
-        const representativeId = req.session.account;
+        const representativeIds = req.session.account;
 
         const [lat, lng] = location ? location.split(',').map(Number) : [10.762622, 106.660172];
         const geoLocation = {
@@ -837,7 +372,7 @@ class BusinessController {
 
         // Cập nhật thông tin công ty
         const company = await Company.findOneAndUpdate(
-            { representativeId },
+            { representativeIds },
             {
                 name,
                 industry,
@@ -891,12 +426,16 @@ class BusinessController {
         const geoLocation = { type: 'Point', coordinates: [lng, lat] };
 
         const uploadedImages = req.files.images && req.files.images.length > 0
-        ? req.files.images.map(file => `/images/company_image_details/${file.filename}`)
-        : currentCompany.images || ['/images/default_companyImage_details.jpg'];
+          ? req.files.images.map(file => `/images/company_image_details/${file.filename}`)
+          : currentCompany.images || ['/images/default_companyImage_details.jpg'];
           
         const uploadedDocuments = req.files.documents && req.files.documents.length > 0
-        ? req.files.documents.map(file => `/documents/${file.filename}`)
-        : currentCompany.documents || [];
+            ? req.files.documents.map(file => `/documents/${file.filename}`)
+            : currentCompany.documents;
+
+        const updatedPromotionVideos = promotionVideo
+          ? [promotionVideo]
+          : currentCompany.promotionVideos;
 
         const updatedCompany = await Company.findByIdAndUpdate(
             companyId,
@@ -910,7 +449,7 @@ class BusinessController {
                 profile: profile || '',
                 contactEmail,
                 phoneNumber,
-                promotionVideos: promotionVideo ? [promotionVideo] : [],
+                promotionVideos: updatedPromotionVideos,
                 images: uploadedImages,
                 documents: uploadedDocuments,
                 isProfileUpdated: true,
@@ -1045,7 +584,11 @@ class BusinessController {
   async getApplicationsNoti(req, res) {
     try {
       const { companyId } = req.params;
-  
+      
+      const company = await Company.findById(companyId).select('isLocked representativeIds');
+      if (!company) {
+        return res.status(404).json({ status: 'error', message: 'Company not found' });
+      }
       const internships = await Internship.find({ company: companyId }).select('_id');
   
       // danh sách chưa đọc
@@ -1053,7 +596,25 @@ class BusinessController {
         internship: { $in: internships.map(i => i._id) },
         isViewed: false,
       });
+      
+      const user = await User.findById(req.session.account).select('isViewedByCompany company');
+      // người dùng có thuộc công ty mới nhận thông báo lock/unlock
+      if (!user || !company.representativeIds.includes(req.session.account)) {
+        return res.status(403).json({ status: 'error', message: 'Unauthorized access' });
+      }
+      let notificationMessage = null;
+      let unreadLockUnlockCount = 0;
+      if (!user.isViewedByCompany && company.isLocked) {
+        unreadLockUnlockCount = 1; // Chỉ tăng nếu user chưa xem thông báo lock
+        notificationMessage = `Your company profile has been removed from public view by the administrator.`;
+      } else if (!user.isViewedByCompany && !company.isLocked) {
+        unreadLockUnlockCount = 1; // Tăng nếu user chưa xem thông báo unlock
+        notificationMessage = `Your company profile has been restored and is now visible to the public.`;
+      }
   
+      // Tổng số thông báo chưa đọc (ứng dụng + lock/unlock)
+      const totalUnreadCount = unreadApplicationsCount + unreadLockUnlockCount;
+
       // Lấy 5 ng gần đây
       const recentApplications = await Application.find({
         internship: { $in: internships.map(i => i._id) },
@@ -1064,12 +625,14 @@ class BusinessController {
         })
         .sort({ appliedAt: -1 }) // Sắp xếp theo thời gian apply gần nhất
         .limit(5);
-  
+      
+      console.log("notificationMessage: ", notificationMessage);
       console.log("Recent Applications: ", recentApplications);
       res.status(200).json({
         status: 'success',
         applications: recentApplications,
-        unreadCount: unreadApplicationsCount, // Trả về số lượng thông báo chưa đọc
+        unreadCount: totalUnreadCount,
+        notificationMessage,
       });
     } catch (error) {
       console.error('Error fetching applications:', error);
@@ -1088,11 +651,38 @@ class BusinessController {
         { internship: { $in: internships.map(i => i._id) } },
         { $set: { isViewed: true } }
       );
+
+       // người dùng thuộc công ty mới lock/unlock
+      const company = await Company.findById(companyId).select('representativeIds');
+      if (!company || !company.representativeIds.includes(req.session.account)) {
+        return res.status(403).json({ status: 'error', message: 'Unauthorized access' });
+      }
+
+      // Đánh dấu thông báo đã xem
+      const user = await User.findById(req.session.account).select('isViewedByCompany');
+      if (!user.isViewedByCompany) {
+        user.isViewedByCompany = true;
+        await user.save();
+      }
   
       res.status(200).json({ status: 'success', message: 'Applications marked as viewed' });
     } catch (error) {
       console.error('Error marking applications as viewed:', error);
       res.status(500).json({ status: 'error', message: 'Internal Server Error' });
+    }
+  }
+
+  async markStudentsAsViewed(req, res) {
+    try {
+        const studentId = req.session.userId;
+        await Application.updateMany(
+            { applicationId: studentId, isViewedByStudent: false },
+            { $set: { isViewedByStudent: true } }
+        );
+        res.status(200).json({ status: 'success', message: 'Student Applications marked as viewed' });
+    } catch (error) {
+        console.error('Error marking applications as viewed:', error);
+        res.status(500).json({ status: 'error', message: 'Internal Server Error' });
     }
   }
 
@@ -1299,8 +889,10 @@ class BusinessController {
         internship: {
           title: app.internship?.title || 'Unknown',
           companyName: app.internship?.company?.name || 'Unknown',
+          companyId: app.internship?.company?._id || 'Unknown',
         },
         message: app.reasonOrMessage || 'Not Responded',
+        mymessage: app.greeting || 'Error',
         status: app.status || 'Pending',
       }));
 
@@ -1313,6 +905,572 @@ class BusinessController {
     }
   }
 
+  async addCommentAndRating(req, res) {
+    try {
+      const { companyId } = req.params;
+      const { content, rating, detailedRatings } = req.body;
+      const userId = req.session.account;
   
+      // là admin thì ko dc rate
+      const adminuser = await User.findById(userId).select('role');
+      if (adminuser.role === 'admin') {
+        return res.status(400).json({ status: 'warning', message: 'Admins cannot rate companies!' });
+      }
+  
+      const company = await Company.findById(companyId);
+      if (!company) {
+        return res.status(404).json({ status: 'warning', message: 'Company not found' });
+      }
+  
+      const user = await User.findById(userId).select('fullName email profilePicture role');
+      if (!user) {
+        return res.status(404).json({ status: 'warning', message: 'User not found' });
+      }
+  
+      // không thể rỗng cả 3
+      const hasDetailedRatings = detailedRatings && (
+        detailedRatings.workEnvironment > 0 ||
+        detailedRatings.trainingSupport > 0 ||
+        detailedRatings.learningOpportunities > 0 ||
+        detailedRatings.benefits > 0
+      );
+  
+      if (!content && !rating && !hasDetailedRatings) {
+        return res.status(400).json({ status: 'warning', message: 'Please provide a comment or rating or category rating!' });
+      }
+  
+      // không cho cho acc mình rate
+      if (company.representativeIds.includes(userId) && (rating || hasDetailedRatings)) {
+        return res.status(400).json({ status: 'warning', message: 'Cannot rate your own company!' });
+      }
+  
+      // không cho user thuộc role company rate
+      if (user.role === 'company' && rating) {
+        return res.status(400).json({ status: 'warning', message: 'Company representatives cannot rate companies!' });
+      }
+  
+      // Kiểm tra nếu một trường đã được đánh giá thì tất cả các trường khác cũng phải được đánh giá
+      if (hasDetailedRatings && (
+        detailedRatings.workEnvironment == 0 ||
+        detailedRatings.trainingSupport == 0 ||
+        detailedRatings.learningOpportunities == 0 ||
+        detailedRatings.benefits == 0
+      )) {
+        return res.status(400).json({ status: 'warning', message: 'Please rate all detailed criteria.' });
+      }
+      console.log('Detailed ratings:', detailedRatings);
+      // Chuyển đổi các giá trị đánh giá chi tiết thành số
+      const detailedRatingsNumeric = {
+        workEnvironment: Number(detailedRatings.workEnvironment),
+        trainingSupport: Number(detailedRatings.trainingSupport),
+        learningOpportunities: Number(detailedRatings.learningOpportunities),
+        benefits: Number(detailedRatings.benefits)
+      };
+      console.log('Detailed ratings numeric:', detailedRatingsNumeric);
+      const newComment = new Comment({
+        authorId: userId,
+        authorName: user.fullName,
+        authorEmail: user.email,
+        authorPicture: user.profilePicture,
+        companyId: companyId,
+        content: content || '',
+        createdAt: new Date().toLocaleString('vi-VN'),
+        rating: rating ? Number(rating) : null,
+        detailedRatings: detailedRatingsNumeric
+      });
+      await newComment.save();
+  
+      // Thêm comment vào danh sách của công ty
+      company.comments.push(newComment._id);
+  
+      // Tính điểm trung bình từng tiêu chí
+      const allRatings = await Comment.find({ companyId }).select('rating detailedRatings');
+      if (allRatings.length > 0) {
+        const totalRatings = allRatings.reduce((acc, comment) => {
+          acc.total += comment.rating || 0;
+          acc.workEnvironment += comment.detailedRatings.workEnvironment || 0;
+          acc.trainingSupport += comment.detailedRatings.trainingSupport || 0;
+          acc.learningOpportunities += comment.detailedRatings.learningOpportunities || 0;
+          acc.benefits += comment.detailedRatings.benefits || 0;
+          return acc;
+        }, {
+          total: 0,
+          workEnvironment: 0,
+          trainingSupport: 0,
+          learningOpportunities: 0,
+          benefits: 0
+        });
+  
+        const averageRating = totalRatings.total / allRatings.length;
+        const averageWorkEnvironment = totalRatings.workEnvironment / allRatings.length;
+        const averageTrainingSupport = totalRatings.trainingSupport / allRatings.length;
+        const averageLearningOpportunities = totalRatings.learningOpportunities / allRatings.length;
+        const averageBenefits = totalRatings.benefits / allRatings.length;
+  
+        company.averageRating = averageRating.toFixed(2);
+        company.ratings = {
+          workEnvironment: averageWorkEnvironment.toFixed(2),
+          trainingSupport: averageTrainingSupport.toFixed(2),
+          learningOpportunities: averageLearningOpportunities.toFixed(2),
+          benefits: averageBenefits.toFixed(2)
+        };
+        console.log('Average ratings, length > 0:', company.ratings);
+      } else {
+        company.averageRating = 0;
+        company.ratings = {
+          workEnvironment: 0,
+          trainingSupport: 0,
+          learningOpportunities: 0,
+          benefits: 0
+        };
+        console.log('Average ratings, length = 0:', company.ratings);
+      }
+  
+      await company.save();
+  
+      res.status(201).json({ status: 'success', message: 'Comment added successfully!', commentId: newComment._id });
+    } catch (error) {
+      console.error('Error adding comment and rating:', error);
+      res.status(500).json({ status: 'error', message: 'Internal Server Error' });
+    }
+  }
+
+  async replyToComment(req, res) {
+    try {
+      const { companyId, commentId } = req.params;
+      const { content } = req.body;
+      const userId = req.session.account;
+  
+      // Xác minh bình luận
+      const parentComment = await Comment.findById(commentId);
+      if (!parentComment) {
+        return res.status(404).json({ status: 'warning', message: 'Comment not found' });
+      }
+  
+      // Xác minh công ty
+      const company = await Company.findById(companyId);
+      if (!company) {
+        return res.status(404).json({ status: 'warning', message: 'Company not found' });
+      }
+  
+      const user = await User.findById(userId).select('fullName email profilePicture');
+      if (!user) {
+        return res.status(404).json({ status: 'warning', message: 'User not found' });
+      }
+  
+      if (!content) {
+        return res.status(400).json({ status: 'warning', message: 'Reply content cannot be empty!' });
+      }
+  
+      const newReply = new Comment({
+        authorId: userId,
+        authorName: user.fullName,
+        authorEmail: user.email,
+        authorPicture: user.profilePicture,
+        companyId: companyId,
+        createdAt: new Date().toLocaleString('vi-VN'),
+        content,
+      });
+      await newReply.save();
+  
+      // Thêm reply vào danh sách replies của parent comment
+      parentComment.replies.push(newReply._id);
+      await parentComment.save();
+  
+      res.status(201).json({ status: 'success', message: 'Reply added successfully!' });
+    } catch (error) {
+      console.error('Error replying to comment:', error);
+      res.status(500).json({ status: 'error', message: 'Internal Server Error' });
+    }
+  }
+
+  async editComment(req, res) {
+    try {
+      const { companyId, commentId } = req.params;
+      const { content } = req.body;
+      const userId = req.session.account;
+  
+      if (!content) {
+        return res.status(400).json({ status: 'warning', message: 'Comment content cannot be empty!' });
+      }
+  
+      const company = await Company.findById(companyId);
+      if (!company) {
+        return res.status(404).json({ status: 'warning', message: 'Company not found' });
+      }
+  
+      const comment = await Comment.findById(commentId);
+      if (!comment) {
+        return res.status(404).json({ status: 'warning', message: 'Comment not found!' });
+      }
+  
+      // user is author of comment
+      if (comment.authorId.toString() !== userId.toString()) {
+        return res.status(403).json({ status: 'error', message: 'You are not authorized to edit this comment!' });
+      }
+  
+      comment.content = content;
+      comment.createdAt = new Date();
+      comment.updatedAt = `Updated at ${new Date().toLocaleString('vi-VN')}`;
+      await comment.save();
+  
+      res.status(200).json({ status: 'success', message: 'Comment updated successfully!', updatedContent: comment.content, updatedAt: comment.updatedAt });
+    } catch (error) {
+      console.error('Error editing comment:', error);
+      res.status(500).json({ status: 'error', message: 'Internal Server Error' });
+    }
+  }
+
+  async editReply(req, res) {
+    try {
+      const { companyId, replyId } = req.params;
+      const { content } = req.body;
+      const userId = req.session.account;
+  
+      if (!content) {
+        return res.status(400).json({ status: 'warning', message: 'Reply content cannot be empty!' });
+      }
+  
+      const company = await Company.findById(companyId);
+      if (!company) {
+        return res.status(404).json({ status: 'warning', message: 'Company not found' });
+      }
+  
+      const reply = await Comment.findById(replyId);
+      if (!reply) {
+        return res.status(404).json({ status: 'warning', message: 'Reply not found!' });
+      }
+  
+      // user is author of reply
+      if (reply.authorId.toString() !== userId.toString()) {
+        return res.status(403).json({ status: 'error', message: 'You are not authorized to edit this reply!' });
+      }
+  
+      reply.content = content;
+      reply.createdAt = new Date();
+      reply.updatedAt = `Updated at ${new Date().toLocaleString('vi-VN')}`;
+      await reply.save();
+  
+      res.status(200).json({ status: 'success', message: 'Reply updated successfully!', updatedContent: reply.content, updatedAt: reply.updatedAt });
+    } catch (error) {
+      console.error('Error editing reply:', error);
+      res.status(500).json({ status: 'error', message: 'Internal Server Error' });
+    }
+  }
+
+  async removeComment(req, res) {
+    try {
+      const { companyId, commentId } = req.params;
+      const userId = req.session.account;
+  
+      const company = await Company.findById(companyId);
+      if (!company) {
+        return res.status(404).json({ status: 'warning', message: 'Company not found' });
+      }
+  
+      const comment = await Comment.findById(commentId);
+      if (!comment) {
+        return res.status(404).json({ status: 'warning', message: 'Comment not found!' });
+      }
+  
+      // Check admin authorization
+      const user = await User.findById(userId).select('role');
+      if (user.role !== 'admin') {
+        return res.status(403).json({ status: 'error', message: 'You are not authorized to remove this comment!' });
+      }
+  
+      // Update the comment content and reset ratings
+      comment.content = 'This comment has been removed due to violation of our policies';
+      comment.rating = null;
+      comment.detailedRatings = {
+        workEnvironment: null,
+        trainingSupport: null,
+        learningOpportunities: null,
+        benefits: null,
+      };
+      await comment.save();
+  
+      const allRatings = await Comment.find({ companyId }).select('rating detailedRatings');
+      if (allRatings.length > 0) {
+        const totalRatings = allRatings.reduce((acc, comment) => {
+          acc.total += comment.rating || 0;
+          acc.workEnvironment += comment.detailedRatings.workEnvironment || 0;
+          acc.trainingSupport += comment.detailedRatings.trainingSupport || 0;
+          acc.learningOpportunities += comment.detailedRatings.learningOpportunities || 0;
+          acc.benefits += comment.detailedRatings.benefits || 0;
+          return acc;
+        }, {
+          total: 0,
+          workEnvironment: 0,
+          trainingSupport: 0,
+          learningOpportunities: 0,
+          benefits: 0,
+        });
+  
+        const averageRating = totalRatings.total / allRatings.filter((c) => c.rating !== null).length;
+        const averageWorkEnvironment = totalRatings.workEnvironment / allRatings.filter((c) => c.detailedRatings.workEnvironment !== null).length;
+        const averageTrainingSupport = totalRatings.trainingSupport / allRatings.filter((c) => c.detailedRatings.trainingSupport !== null).length;
+        const averageLearningOpportunities = totalRatings.learningOpportunities / allRatings.filter((c) => c.detailedRatings.learningOpportunities !== null).length;
+        const averageBenefits = totalRatings.benefits / allRatings.filter((c) => c.detailedRatings.benefits !== null).length;
+  
+        company.averageRating = averageRating.toFixed(2);
+        company.ratings = {
+          workEnvironment: averageWorkEnvironment.toFixed(2),
+          trainingSupport: averageTrainingSupport.toFixed(2),
+          learningOpportunities: averageLearningOpportunities.toFixed(2),
+          benefits: averageBenefits.toFixed(2),
+        };
+      } else {
+        // Reset ratings if no valid comments are left
+        company.averageRating = 0;
+        company.ratings = {
+          workEnvironment: 0,
+          trainingSupport: 0,
+          learningOpportunities: 0,
+          benefits: 0,
+        };
+      }
+  
+      await company.save();
+  
+      res.status(200).json({ status: 'success', message: 'Comment removed successfully!' });
+    } catch (error) {
+      console.error('Error removing comment:', error);
+      res.status(500).json({ status: 'error', message: 'Internal Server Error' });
+    }
+  }
+  
+  async removeReply(req, res) {
+    try {
+      const { companyId, replyId } = req.params;
+      const userId = req.session.account;
+  
+      const company = await Company.findById(companyId);
+      if (!company) {
+        return res.status(404).json({ status: 'warning', message: 'Company not found' });
+      }
+  
+      const reply = await Comment.findById(replyId);
+      if (!reply) {
+        return res.status(404).json({ status: 'warning', message: 'Reply not found!' });
+      }
+  
+      // admin
+      const user = await User.findById(userId).select('role');
+      if (user.role !== 'admin') {
+        return res.status(403).json({ status: 'error', message: 'You are not authorized to remove this reply!' });
+      }
+  
+      // Update reply content and isRemoved status
+      reply.content = 'This reply has been removed due to violation of our policies';
+      reply.isRemoved = true;
+      await reply.save();
+  
+      res.status(200).json({ status: 'success', message: 'Reply removed successfully!' });
+    } catch (error) {
+      console.error('Error removing reply:', error);
+      res.status(500).json({ status: 'error', message: 'Internal Server Error' });
+    }
+  }
+
+  async reportComment(req, res) {
+    try {
+      const { companyId, commentId } = req.params;
+      const userId = req.session.account;
+  
+      const comment = await Comment.findById(commentId).select('authorName content');
+      if (!comment) {
+        return res.status(404).json({ status: 'warning', message: 'Comment not found!' });
+      }
+  
+      const company = await Company.findById(companyId);
+      if (!company) {
+        return res.status(404).json({ status: 'warning', message: 'Company not found!' });
+      }
+  
+      const user = await User.findById(userId).select('fullName email');
+      if (!user) {
+        return res.status(404).json({ status: 'warning', message: 'User not found!' });
+      }
+  
+      const adminEmail = 'wiyanchen33@gmail.com'; // Admin's email
+        const subject = 'Comment Report';
+        const emailBody = `
+            <p>User <strong>${user.fullName}</strong> (${user.email}) has reported a comment.</p>
+            <p><strong>Reported Comment Details:</strong></p>
+            <ul>
+                <li><strong>Comment Author:</strong> ${comment.authorName}</li>
+                <li><strong>Comment Content:</strong> <em>${comment.content}</em></li>
+                <li><strong>Company Profile:</strong> ${company.name}</li>
+            </ul>
+            <p>Please review the comment and take appropriate action.</p>
+        `;
+
+      await mailer.sendReportMail(user.email, adminEmail, subject, emailBody);
+  
+      res.status(200).json({ status: 'success', message: 'The comment has been reported to the administrator!' });
+    } catch (error) {
+      console.error('Error reporting comment:', error);
+      res.status(500).json({ status: 'error', message: 'Internal Server Error' });
+    }
+  }
+
+  async reportReply(req, res) {
+    try {
+      const { companyId, replyId } = req.params;
+      const userId = req.session.account;
+  
+      const reply = await Comment.findById(replyId).select('authorName content');
+      if (!reply) {
+        return res.status(404).json({ status: 'warning', message: 'Reply not found!' });
+      }
+  
+      const company = await Company.findById(companyId);
+      if (!company) {
+        return res.status(404).json({ status: 'warning', message: 'Company not found!' });
+      }
+  
+      const user = await User.findById(userId).select('fullName email');
+      if (!user) {
+        return res.status(404).json({ status: 'warning', message: 'User not found!' });
+      }
+  
+      const adminEmail = 'wiyanchen33@gmail.com';
+        const subject = 'Reply Report';
+        const emailBody = `
+            <p>User <strong>${user.fullName}</strong> (${user.email}) has reported a reply.</p>
+            <p><strong>Reported Reply Details:</strong></p>
+            <ul>
+                <li><strong>Reply Author:</strong> ${reply.authorName}</li>
+                <li><strong>Reply Content:</strong> <em>${reply.content}</em></li>
+                <li><strong>Company Profile:</strong> ${company.name}</li>
+            </ul>
+            <p>Please review the reply and take appropriate action.</p>
+        `;
+
+      await mailer.sendReportMail(user.email, adminEmail, subject, emailBody);
+
+      res.status(200).json({ status: 'success', message: 'The reply has been reported to the administrator!' });
+    } catch (error) {
+      console.error('Error reporting reply:', error);
+      res.status(500).json({ status: 'error', message: 'Internal Server Error' });
+    }
+  }
+  
+  async getStatisticalData (req, res) {
+    try {
+      const companies = await Company.find()
+        .select('name industry averageRating ratings')
+        .lean();
+  
+      // phân theo industry
+      const industryStats = {};
+      companies.forEach((company) => {
+        const { industry } = company;
+        if (!industryStats[industry]) {
+          industryStats[industry] = 0;
+        }
+        industryStats[industry]++;
+      });
+  
+      // Sắp theo điểm trung bình
+      const sortedCompanies = [...companies].sort((a, b) => b.averageRating - a.averageRating);
+      
+      // Lấy số lượng người dùng thuộc vai trò student và company
+      const studentCount = await User.countDocuments({ role: 'student' });
+      const companyCount = await User.countDocuments({ role: 'company' });
+
+      // count com mới
+      const startOfDay = new Date();
+      startOfDay.setHours(0, 0, 0, 0);
+      const endOfDay = new Date();
+      endOfDay.setHours(23, 59, 59, 999);
+
+      const newCommentsCount = await Comment.countDocuments({
+        createdAt: { $gte: startOfDay, $lte: endOfDay }
+      });
+
+      const businessProfileCount = await Company.countDocuments();
+
+      return {
+        companies: sortedCompanies,
+        industryStats,
+        studentCount,
+        companyCount,
+        newCommentsCount,
+        businessProfileCount,
+      };
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error);
+      res.status(500).send('Internal Server Error');
+    }
+  }
+
+  async getTopCompaniesByCriteria(req, res) {
+    try {
+      const companies = await Company.find().select('name industry ratings').lean();
+      const criteria = ['workEnvironment', 'trainingSupport', 'learningOpportunities', 'benefits'];
+      const topCompaniesByIndustry = {};
+  
+      companies.forEach((company) => {
+        const { industry, ratings, name } = company;
+  
+        if (!topCompaniesByIndustry[industry]) {
+          topCompaniesByIndustry[industry] = {};
+          criteria.forEach((criterion) => {
+            topCompaniesByIndustry[industry][criterion] = [];
+          });
+        }
+  
+        criteria.forEach((criterion) => {
+          const currentScore = ratings[criterion] || 0;
+  
+          // danh sách rỗng hoặc điểm cao hơn
+          const currentTop = topCompaniesByIndustry[industry][criterion];
+          if (currentTop.length === 0 || currentScore > currentTop[0].score) {
+            topCompaniesByIndustry[industry][criterion] = [{ name, score: currentScore }];
+          } 
+          // điểm = điểm cao nhất
+          else if (currentScore === currentTop[0].score) {
+            topCompaniesByIndustry[industry][criterion].push({ name, score: currentScore });
+          }
+        });
+      });
+  
+      console.log('Top Companies by Industry and Criteria:', topCompaniesByIndustry);
+      return topCompaniesByIndustry;
+    } catch (error) {
+      console.error('Error in getTopCompaniesByCriteria:', error);
+      throw error;
+    }
+  }  
+
+  async getInternshipsForDashboard(req, res) {
+    try {
+      const internships = await Internship.find().sort({ createdAt: -1 });
+  
+      return internships;
+    } catch (error) {
+      console.error('Error fetching internships:', error);
+      res.status(500).send('Internal Server Error');
+    }
+  }
+
+  async getFavoriteCompanies (req, res) {
+    try {
+        const user = await User.findById(req.session.account).populate('savedCompanies');
+        
+        if (!user) {
+            return res.status(404).json({ status: 'warning', message: 'User not found!' });
+        }
+
+        return res.status(200).json({ status: 'success', companies: user.savedCompanies });
+    } catch (error) {
+        console.error('Error fetching favorite companies:', error);
+        res.status(500).json({ status: 'error', message: 'Server error!' });
+    }
+  }
+
+
 }
 module.exports = new BusinessController();

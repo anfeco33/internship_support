@@ -2,14 +2,37 @@
     <div class="container mt-5">
         
         <div class="row">
-            <!-- nếu chưa update lần đầu thì luôn hiển thị "Please update your profile for the first time" -->
-            <% if (data.profileUpdated === false) { %>
-            <div class="alert alert-warning" role="alert">
-                <h2>PLEASE UPDATE YOUR PROFILE FOR THE FIRST TIME </h2>
+            <div class="alert alert-primary d-flex justify-content-between align-items-center" role="alert">
+                <h2>
+                    BUSINESS PROFILE 
+                    <% if (data.company.isVerified) { %>
+                        <img src="/images/verified_icon.png" alt="Verified" style="width: 50px;">
+                    <% } else { %>
+                        <img src="/images/unverified_icon.png" alt="Unverified" style="width: 50px;">
+                    <% } %>
+                </h2>
+                <div>
+                    <% if (data.company.isVerified) { %>
+                        <button class="btn btn-warning me-2" onclick="toggleVerification('<%= data.company._id %>', false)">
+                            <i class="fa fa-times-circle"></i> Unverify
+                        </button>
+                    <% } else { %>
+                        <button class="btn btn-success me-2" onclick="toggleVerification('<%= data.company._id %>', true)">
+                            <i class="fa fa-check-circle"></i> Verify
+                        </button>
+                    <% } %>
+                    <% if (data.company.isLocked) { %>
+                        <button class="btn btn-success" onclick="toggleLockProfile('<%= data.company._id %>', false)">
+                          <i class="fa fa-unlock"></i> Unlock Profile
+                        </button>
+                    <% } else { %>
+                        <button class="btn btn-danger" onclick="toggleLockProfile('<%= data.company._id %>', true)">
+                          <i class="fa fa-lock"></i> Remove Profile
+                        </button>
+                    <% } %>
+                </div>
             </div>
-            <% } else { %>
-                <h2 class="alert">BUSINESS PROFILE</h2>
-            <% } %>
+        </div>
             <!-- Tên công ty -->
             <div class="col-12 mb-3">
                 <div class="row">
@@ -19,7 +42,7 @@
                     <div class="col-sm-10">
                         <input type="text" class="form-control" id="inputBusinessName" name="name" placeholder="Business Name" 
                         value="<%= data.company.name %>"
-                        required>
+                        readonly>
                     </div>
                 </div>
             </div>
@@ -31,7 +54,7 @@
                         <span class="text-danger">*</span>
                     </label>
                     <div class="col-sm-10">
-                        <select class="form-select" id="inputIndustry" name="industry" required>
+                        <select class="form-select" id="inputIndustry" name="industry" disabled>
                             <option value="" disabled selected>Select Industry</option>
                             <option value="IT" <%= data.company.industry === 'IT' ? 'selected' : '' %>>IT</option>
                             <option value="Marketing" <%= data.company.industry === 'Marketing' ? 'selected' : '' %>>Marketing</option>
@@ -62,7 +85,7 @@
                 <div class="row">
                     <label for="inputSize" class="col-sm-2 col-form-label">Company Size</label>
                     <div class="col-sm-10">
-                        <select id="inputSize" name="size" class="form-select" required>
+                        <select id="inputSize" name="size" class="form-select" disabled>
                             <option value="Small" <%= data.company.size === 'Small' ? 'selected' : '' %>>Small</option>
                             <option value="Medium" <%= data.company.size === 'Medium' ? 'selected' : '' %>>Medium</option>
                             <option value="Large" <%= data.company.size === 'Large' ? 'selected' : '' %>>Large</option>
@@ -80,7 +103,7 @@
                     <div class="col-sm-10">
                         <input type="url" class="form-control" id="inputWebsite" name="website" 
                         value="<%= data.company.website %>"
-                        placeholder="https://example.com">
+                        placeholder="https://example.com" readonly>
                     </div>
                 </div>
             </div>
@@ -91,7 +114,7 @@
                     <label for="inputProfile" class="col-sm-2 col-form-label">Profile Description</label>
                     <div class="col-sm-10">
                         <textarea class="form-control" id="inputProfile" name="profile" rows="3" 
-                        placeholder="The company has not updated their profile yet" required>
+                        placeholder="The company has not updated their profile yet" readonly>
                         <%= data.company.profile %>
                         </textarea>
                     </div>
@@ -107,7 +130,7 @@
                     <div class="col-sm-10">
                         <input type="email" class="form-control" id="inputContactEmail" name="contactEmail" 
                         value="<%= data.company.contactEmail %>"
-                        placeholder="Contact Email" required>
+                        placeholder="Contact Email" readonly>
                     </div>
                 </div>
             </div>
@@ -121,7 +144,7 @@
                     <div class="col-sm-10">
                         <input type="tel" class="form-control" id="inputPhoneNumber" name="phoneNumber"
                         value="<%= data.company.phoneNumber %>"
-                        placeholder="Phone Number" required>
+                        placeholder="Phone Number" readonly>
                     </div>
                 </div>
             </div>
@@ -135,7 +158,7 @@
                         <input type="text" class="form-control" id="inputAddress" name="address" 
                         placeholder="Address" 
                         value="<%= data.company.address %>"
-                        required>
+                        readonly>
                     </div>
                 </div>
             </div>
@@ -146,7 +169,7 @@
                     <div class="col-sm-10">
                         <input type="text" class="form-control" id="inputLocation" name="location" placeholder="Move the marker below to your business location"
                         value="<%= data.company.location.coordinates[1] %>, <%= data.company.location.coordinates[0] %>"
-                        required>
+                        readonly>
                         <div id="map" class="mt-3" style="height: 300px; width: 100%;"></div>
                     </div>
                 </div>
@@ -155,16 +178,16 @@
             <!-- Danh sách hình ảnh -->
             <div class="col-12 mb-3">
                 <div class="row">
-                    <label for="inputImages" class="col-sm-2 col-form-label">Your Company Images</label>
+                    <label for="inputImages" class="col-sm-2 col-form-label">Company Images</label>
                     <div class="col-sm-10">
                         <!-- Input để upload ảnh -->
-                        <input type="file" id="inputImages" name="images" class="form-control" accept="image/*" multiple>
+                        <input type="file" id="inputImages" name="images" class="form-control" accept="image/*" multiple disabled>
                         
                         <!-- Khu vực preview các ảnh đã lưu -->
                         <div id="imagePreview" class="mt-3 d-flex flex-wrap">
                             <% if (data.company.images && data.company.images.length > 0) { %>
                                 <% data.company.images.forEach(function(image) { %>
-                                    <img src="<%= image %>" class="img-thumbnail me-2" style="width: 100px; height: 100px;">
+                                    <img src="<%= image %>" class="img-thumbnail me-2" style="width: 100px; height: 100px;" onclick="showImageModal('<%= image %>')">
                                 <% }); %>
                             <% } else { %>
                                 <p class="text-muted">No images uploaded to display.</p>
@@ -177,9 +200,7 @@
 
             <!-- Video quảng cáo -->
             <div class="form-group">
-                <label for="inputPromotionVideo"><strong>Your YouTube Promotion Video Embed Link</strong></label>
-                <input type="text" class="form-control" id="inputPromotionVideo" placeholder="https://www.youtube.com/embed/VIDEO_ID">
-                <button class="btn btn-primary mt-2" id="setVideoBtn">Watch Preview</button>
+                <label for="inputPromotionVideo"><strong>YouTube Promotion Video Embed Link</strong></label>
             </div>
             
             <div id="promotionVideoPreview" class="mt-3">
@@ -195,32 +216,24 @@
             <div class="form-group">
                 <label for="inputDocuments" class="col-sm-2 col-form-label"><strong>Business Documents
                     <span class="text-danger">*</span></strong></label>
-                <span class="text-danger">(Including: Business License, Business Registration Certificate, Tax Identification Number,
-                    Certificate of Good Standing, Articles of Incorporation, Operating Agreement, 
-                    Proof of Address, Insurance Certificate, Professional License) 
-                </span>
 
                 <div class="col-sm-15">
                     <input type="file" class="form-control" id="inputDocuments" name="documents" 
-                    multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
-                    <div id="documentPreview" class="mt-3">Warning: You need to re-upload all documents again if you want to update them.</div>
-                    <% if (data.company.documents && data.company.documents.length > 0) { %>
-                        <ul class="list-group">
-                            <% data.company.documents.forEach(function(document) { %>
-                                <li class="list-group-item">
-                                    <a href="<%= document %>" target="_blank"><%= document.split('/').pop() %></a>
-                                </li>
-                            <% }); %>
-                        </ul>
-                    <% } else { %>
-                        <p class="text-muted">No documents uploaded to display.</p>
-                    <% } %>
+                    multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" disabled>
+                    <div id="documentPreview" class="mt-3">
+                        <% if (data.company.documents && data.company.documents.length > 0) { %>
+                            <ul class="list-group">
+                                <% data.company.documents.forEach(function(document) { %>
+                                    <li class="list-group-item">
+                                        <a href="<%= document %>" target="_blank"><%= document.split('/').pop() %></a>
+                                    </li>
+                                <% }); %>
+                            </ul>
+                        <% } else { %>
+                            <p class="text-muted">No documents uploaded to display.</p>
+                        <% } %>
+                    </div>
                 </div>
-            </div>
-
-            <!-- Nút Lưu -->
-            <div class="d-grid gap-2 col-6 mx-auto" style="margin-bottom: 20px;">
-                <button id="updateBusinessBtn" type="button" class="btn btn-success">Save</button>
             </div>
         </div>
     </div>

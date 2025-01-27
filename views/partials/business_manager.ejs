@@ -1,0 +1,80 @@
+<div class="custom-alert" role="alert">
+    <h2 class="title_admin_page">BUSINESS PROFILES</h2>
+</div>
+<% if (data.businesses) { %>
+    <% var businesses = data.businesses %>
+    <table id="business_list_admin" class="table">
+        <thead>
+            <tr>
+                <th scope="col">Name</th>
+                <th scope="col">Industry</th>
+                <th scope="col">Size</th>
+                <th scope="col">Updated Time
+                <th scope="col">Verified</th>
+                <th scope="col"></th>
+                <th scope="col"></th>
+            </tr>
+        </thead>
+        <tbody>
+            <% if (businesses.length > 0) { %>
+                <% businesses.forEach((business) => { %>
+                    <tr onclick="getBusinessPageById_admin('<%=business._id.toString() %>')">
+                    <!-- <tr> -->
+                        <td>
+                            <div>
+                                <%= business.name %>
+                            </div>
+                        </td>
+                        <td>
+                            <div>
+                                <%= business.industry %>
+                            </div>
+                        </td>
+                        <td>
+                            <div>
+                                <%= business.size %>
+                            </div>
+                        </td>
+                        <td>
+                            <div>
+                                <%= new Date(business.updatedAt).toLocaleString() %>
+                            </div>
+                        </td>
+                        <td>
+                            <div>
+                                <%= business.isVerified ? 'Verified' : 'Unverified' %>
+                            </div>
+                        </td>
+                        <td>
+                            <div>
+                                <button class="btn btn-info btn-sm" onclick="viewRepresentatives_byAdmin(event, '<%= business._id.toString() %>')">
+                                    <i class="fa fa-users" style="margin-right: 5px;"></i> View Representatives
+                                </button>
+                            </div>
+                        </td>
+                        <td>
+                            <div>
+                                <button class="btn btn-info btn-sm" onclick="getBusinessById_admin(event, '<%=business._id.toString() %>')">
+                                    <i class="fa-solid fa-circle-info" style="margin-right: 5px;"></i> View Details
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+    
+                <% }); %>
+    
+
+            <% } %>
+            <% if(businesses.length==0) { %>
+                <tr>
+                    <td colspan="5"
+                        style="text-align:center;font-weight: bold;font-size: 20px;">
+                        No businesses found.
+                    </td>
+                </tr>
+            <% }; %>
+        </tbody>
+    </table>
+<% }%>
+
+

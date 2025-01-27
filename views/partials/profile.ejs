@@ -26,12 +26,16 @@
                                 <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Success:">
                                     <use xlink:href="#check-circle-fill" />
                                 </svg>
-                                <div>                                   
+                                <div>           
+                                    <% if (data.company.name) { %>                        
                                     Account representative of
-                                    <strong>
-                                        <%= data.company.name%>
+                                    <strong>                        
+                                            <%= data.company.name%>
                                     </strong>
-                                </div>
+                                    <% } else { %>
+                                        You haven't registered your company yet
+                                    <% } %>    
+                                </div>            
                             </div>
                         <% } %>
                         <a class="list-group-item list-group-item-action active" data-bs-toggle="tab"
@@ -41,8 +45,8 @@
                             href="#password">Password</a>
                         <% } %>
                         
-                        <!-- <a class="list-group-item list-group-item-action" data-bs-toggle="tab"
-                            href="#completed-courses">Achievements</a> -->
+                        <a class="list-group-item list-group-item-action" data-bs-toggle="tab"
+                            href="#fav-com-list">Favorite Companies</a>
                     </div>
                 </div>
                 <!-- //TODO: sửa lại thành form -->
@@ -72,19 +76,12 @@
 
                                 </form>
 
-
                                 <form method="POST">
                                     <div class="form-group mb-3">
-                                        <label class="form-label">Email <strong>(You can not change)</strong></label>
+                                        <label class="form-label">Email <strong>(Non-editable)</strong></label>
                                         <input type="text" class="form-control mb-1" value="<%= account.email%>"
                                             placeholder="username" disabled>
                                     </div>
-                                    <!-- <div class="form-group mb-3">
-                                        <label class="form-label">Email <strong>(can not change)</strong></label>
-                                        <input type="text" class="form-control mb-1" value="<%# account.email%>"
-                                            placeholder="Email" disabled>
-
-                                    </div> -->
                                     <div class="form-group mb-3">
                                         <!-- <label class="form-label">Fullname</label>-->
                                         <label class="form-label">
@@ -100,22 +97,21 @@
                                             placeholder="Fullname" name="fullname">
                                     </div>
                                     <div class="form-group mb-3">
-                                        <label class="form-label">Time created <strong>(can not change)</strong></label>
+                                        <label class="form-label">Date of joining <strong>(Non-editable)</strong></label>
                                         <input type="text" class="form-control" value="<%= account.createdAt%>"
-                                            placeholder="Time created" disabled>
+                                            placeholder="Time" disabled>
                                     </div>
                                     <div class="form-group mb-3">
-                                        <label class="form-label">Last login <strong>(can not change)</strong></label>
+                                        <label class="form-label">Last login <strong>(Non-editable)</strong></label>
                                         <input type="text" class="form-control" value="<%= account.lastLogin%>"
                                             placeholder="Last login" disabled>
                                     </div>
-                                    <button type="submit" class="btn btn-primary" id="change_fullname"
-                                        onclick="changeFullname(event)">Save changes</button>&nbsp;
+                                    <div class="d-flex justify-content-end">
+                                        <button type="submit" class="btn btn-primary btn-lg" id="change_fullname"
+                                            onclick="changeFullname(event)">Save</button>
+                                    </div>
                                 </form>
-
-
                                 <hr class="border-light m-0">
-
                             </div>
 
                         </div>
@@ -139,43 +135,33 @@
                                             name="renewpass">
                                     </div>
                                     <button type="submit" class="btn btn-primary" id="change_password"
-                                        onclick="changePassword(event)">Save changes</button>&nbsp;
+                                        onclick="changePassword(event)">Save</button>&nbsp;
                                 </form>
 
                             </div>
                         </div>
 
-                        <!-- COMPLETED COURSES -->
-                        <div class="tab-pane fade" id="completed-courses">
+                        <!-- FAVORITE LIST -->
+                        <div class="tab-pane fade" id="fav-com-list">
                             <div class="card-body pb-2">
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="card">
+                                            <div class="card-header">
+                                                <h4 class="form-label">Your Favorite Companies</h4>
+                                            </div>
+                                            <div class="card-body pb-2" style="max-height: 400px; overflow-y: auto;">
+                                                <div class="row" id="favoriteCompanies">
+                                                    <!-- show list -->
+                                                </div>
+                                            </div>
 
-                                <!--  -->
-
-                            </div>
-                            <div class="modal fade" id="certificateModal" tabindex="-1"
-                                aria-labelledby="certificateModalLabel" aria-hidden="true">
-                                <div class="modal-dialog modal-lg">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title" id="certificateModalLabel">Certificate of Completion
-                                            </h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                                aria-label="Close"></button>
-                                        </div>
-                                        <div class="modal-body" id="certificateContent">
-                                            <!-- Contents -->
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary"
-                                                data-bs-dismiss="modal">Close</button>
-                                            <button type="button" class="btn btn-primary"
-                                                id="downloadCertificate">Download PDF</button>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
 
-                            <!-- <script src="../../javascripts/certificate.js"></script> -->
+                            </div>
+                            
                         </div>
 
                     </div>
@@ -185,3 +171,72 @@
 
     </div>
     <% } %>
+<script>
+
+    async function loadFavoriteCompanies() {
+        try {
+        const response = await fetch('/home/favorites');
+        const result = await response.json();
+
+        if (result.status === 'success') {
+            const favoriteContainer = document.getElementById('favoriteCompanies');
+            favoriteContainer.innerHTML = ''; // Xóa danh sách cũ
+
+            result.companies.forEach(company => {
+            const companyCard = `
+                <div class="col-12 mb-3">
+                    <div class="card-fav flex-row" onclick="navigateToCompany('${company._id}')">
+                        <img src="${company.images.length > 0 ? company.images[0] : '/images/default_companyImage_details.jpg'}" class="card-img-left" alt="${company.name}">
+                        <div class="card-body-fav">
+                            <h5 class="card-title-fav d-flex justify-content-between align-items-center">
+                                ${company.name}
+                                <i class="fa fa-heart heart" onclick="removeFavoriteCompany(event, '${company._id}')" style="font-size:24px;color:red;cursor:pointer;"></i>
+                            </h5>
+                            <p class="card-industry-text-fav">${company.industry}</p>
+                            <p class="card-address-text-fav">${company.address}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            favoriteContainer.insertAdjacentHTML('beforeend', companyCard);
+            });
+        } else {
+            showflashmessage(result.status, result.message);
+        }
+        } catch (error) {
+            showflashmessage('error', 'Error loading favorite companies');
+            console.error('Error loading favorite companies:', error);
+        }
+    }
+    async function removeFavoriteCompany(event, companyId) {
+        event.stopPropagation();
+        try {
+        const response = await fetch('/home/toggle-favorite', {
+            method: 'POST',
+            headers: {
+            'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ companyId }),
+        });
+
+        const result = await response.json();
+
+        if (result.status === 'success') {
+            showflashmessage(result.status, result.message);
+            loadFavoriteCompanies();
+        } else {
+            showflashmessage(result.status, result.message);
+        }
+        } catch (error) {
+            showflashmessage('error', 'Error removing favorite company');
+            console.error('Error removing favorite company:', error);
+        }
+    }
+    function navigateToCompany(companyId) {
+        window.location.href = `/home/business/${companyId}`;
+    }
+
+  document.addEventListener('DOMContentLoaded', loadFavoriteCompanies);
+
+</script>
+<%- include('../partials/flash-message') %>

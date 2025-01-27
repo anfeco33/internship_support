@@ -1152,8 +1152,26 @@ ul#list_company {
     object-fit: cover;
 }
 
+.rep-info {
+    display: flex;
+    align-items: center;
+}
 
-#course_manager,
+table#rep_list .rep_pic img {
+    object-fit: contain;
+    object-position: center;
+    width: 100px;
+    height: 60px;
+}
+
+table#rep_list tr,
+table#business_list_admin tr {
+    vertical-align: middle;
+}
+
+#rep_list,
+#business_list_admin,
+/* #course_manager, */
 #table_product,
 #table_order,
 #table_statistical,
@@ -1167,15 +1185,44 @@ ul#list_company {
     color: var(--text-dark-color)
 }
 
-#course_manager tr:hover,
+#rep_list, #business_list_admin {
+    font-size: 15px;
+}
+
+#rep_list tbody tr:nth-child(odd),
+#business_list_admin tbody tr:nth-child(odd) {
+    background-color: #f9f9f9;
+}
+  
+#rep_list tbody tr:nth-child(even),
+#business_list_admin tbody tr:nth-child(even) {
+    background-color: #ffffff; 
+}
+
+/* darkmode replist (view repre) vs businesslist (businessprofileadmin)*/
+body.dark #rep_list tbody tr:nth-child(odd),
+body.dark #business_list_admin tbody tr:nth-child(odd) {
+    background-color: #333333;
+}
+
+body.dark #rep_list tbody tr:nth-child(even),
+body.dark #business_list_admin tbody tr:nth-child(even) {
+    background-color: #444444; 
+}
+/* end darkmode */
+
+/* #course_manager tr:hover, */
+.table.table-striped tbody tr:nth-child(odd):hover,
+.table.table-striped tbody tr:nth-child(even):hover,
+#business_list_admin tr:hover,
 #table_product tr:hover,
 #table_order tr:hover,
 #table_statistical tr:hover,
 #table_customer tr:hover,
 #table_history_purchase tr:hover,
 #table_details_order tr:hover {
-    color: var(--navlink-sidebar-light);
-    background-color: var(--toggler-color-dark);
+    color: var(--icon-light-color);
+    background-color: #fff;
 }
 
 
@@ -1400,9 +1447,8 @@ section#product_page {
 
 /* TODO CART PAGE */
 
-
+/* 
 div#cart_page #course_pic {
-    /* border: 2px solid red; */
     object-fit: contain;
     object-position: center;
     width: 160px;
@@ -1414,44 +1460,37 @@ div#cart_page #course_cart_empty {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-
-}
-
-
-
+} */
 
 /* TODO COURSE MANAGER PAGE */
 table#course_manager .course_pic img {
     /* border: 2px solid red; */
     object-fit: contain;
     object-position: center;
-    width: 160px;
-    height: 120px;
+    width: 100px;
+    height: 60px;
 }
 
 table#course_manager tr{
     vertical-align: middle;
 }
 
-div.create_course{
+/* div.create_course{
     color: var(--text-dark-color);
 
-}
+} */
 
 
 
 /* TODO COURSE DETAIL PAGE */
 
-
-div.course_detail_page .video_trailer #trailer_link {
-    /* border: 2px solid rgb(0, 0, 2); */
+/* div.course_detail_page .video_trailer #trailer_link {
     min-width: 500px;
     min-height: 375px;
 
 }
 
 div.course_detail_page .course_info {
-    /* border: 2px solid blue; */
     padding: 10px;
 }
 
@@ -1460,9 +1499,8 @@ div.course_detail_page .course_info p {
 }
 
 div.course_detail_page .tab_section {
-    /* border: 2px solid blue; */
     padding: 10px;
-}
+} */
 
 /*--------------------------------------------------------------
 # Tabs Section
@@ -2177,16 +2215,15 @@ body.dark .background-container {
   # Scroll Top Button
   --------------------------------------------------------------*/
 .scroll-top {
-
     position: fixed;
     visibility: hidden;
     opacity: 0;
-    right: 20px;
+    right: 30px;
     bottom: -20px;
     z-index: 99999;
     background-color: var(--accent-color);
-    width: 44px;
-    height: 44px;
+    width: 60px;
+    height: 60px;
     border-radius: 50px;
     transition: all 0.4s;
 }
@@ -2206,6 +2243,10 @@ body.dark .background-container {
     visibility: visible;
     opacity: 1;
     bottom: 15px;
+}
+
+body.dark .scroll-top {
+    background-color: var(--icon-light-color);
 }
 
 /* TODO FOR ADMIN */
@@ -2236,10 +2277,13 @@ body.dark {
         color: var(--text-light-color);
     }
     .table.table-striped tbody tr:nth-child(odd) {
-        background-color: var(--icon-light-color);
+        background-color: #333;
     }
     .table.table-striped tbody tr:nth-child(even) {
-        background-color: var(--nav-color);
+        background-color: #444;
+    }
+    .table.table-striped tbody tr:hover {
+        background-color: var(--icon-light-color);
     }
     
     #list_student ul,
@@ -2465,7 +2509,10 @@ body.dark {
     }
 
     .course_detail_page,
-    #course_manager,
+    #rep_list,
+    #business_list_admin,
+    .table.table-striped,
+    /* #course_manager, */
     #table_product,
     #table_order,
     #table_statistical,
@@ -2735,12 +2782,6 @@ body.light .update_business {
     height: 400px;
 }
 
-.my-business-btn {
-    width: 150px;
-    height: 50px;
-    align-content: center;
-}
-
 /* === HEAD*/
 /* Áp dụng gradient xanh dương-xanh lá cho tiêu đề */
 .title-type {
@@ -2834,6 +2875,54 @@ body.light .update_business {
     color: #555; /* Màu chữ phụ */
     margin-bottom: 8px; /* Khoảng cách giữa các đoạn văn bản */
 }
+
+/* fav page */
+.card-fav {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: transform 0.2s;
+    display: flex;
+    flex-direction: row;
+}
+  
+.card-fav:hover {
+    transform: scale(1.05);
+}
+  
+.card-img-left {
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+    border-right: 1px solid #ddd;
+}
+  
+.card-body-fav {
+    padding: 15px;
+    flex: 1;
+}
+
+.card-industry-text-fav::before {
+    content: '🏢';
+    margin-right: 5px;
+}
+
+.card-address-text-fav::before {
+    content: '📌';
+    margin-right: 5px;
+}
+
+body.dark .card-body-fav {
+    background-color: #333;
+}
+
+body.dark .card-title-fav,
+body.dark .card-industry-text-fav,
+body.dark .card-address-text-fav {
+    color: var(--text-light-color);
+}
+
 #rating {
     display: flex;
     align-items: center;
@@ -2978,7 +3067,7 @@ body.light .update_business {
 }
 
 .card-header {
-    padding: 10px;
+    margin-left: 10px;
     background: linear-gradient(135deg,rgba(73, 190, 236, 0),#b8ffe100);
     text-align: center;
 }
@@ -3011,7 +3100,7 @@ body.light .update_business {
 }
 
 .badge-top1 {
-    background-color: rgb(255, 217, 0); /* Màu nền vàng */
+    background-color: rgb(231, 226, 202); /* Màu nền vàng */
     color: black; /* Màu chữ đen */
     font-size: 16px; /* Kích thước chữ */
     padding: 7px 14px; /* Khoảng cách bên trong badge */
@@ -3021,7 +3110,7 @@ body.light .update_business {
 }
 
 .badge-top2 {
-    background-color: rgb(213, 212, 212);
+    background-color: rgb(245, 245, 245);
     color: black;
     font-size: 13px; /* Tăng kích thước chữ */
     padding: 6px 12px; /* Tăng khoảng cách bên trong badge */
@@ -3089,15 +3178,96 @@ body.light .update_business {
 .heart-icon {
     text-align: right; /* Căn phải nội dung trong phần tử <p> */
     margin: 0; /* Xóa khoảng cách mặc định của <p> */
-  }
+}
   
-  #iconheart {
-    position: relative; /* Đặt vị trí cho phần tử nếu cần thêm tùy chỉnh */
-  }
-  #heart{
+.iconheart {
+    position: relative;
+}
+.heart {
     transition: transform 0.3s ease;
-  }
-  #heart.clicked {
+}
+.heart:hover {
+    transform: scale(1.2);
+}
+.heart.clicked {
     color: darkred;
-    transform: scale(1.2); /* Hiệu ứng phóng to khi được chọn */
-  }
+    transform: scale(1.3);
+}
+
+.pagination-container {
+    margin-top: 20px;
+}
+
+.create-business-btn,
+.add-representative-btn,
+.view-representatives-btn {
+    width: 250px;
+    margin-top: 10px;
+    height: 40px;
+    font-size: 16px;
+    align-content: center;
+}
+
+.add-representative-btn,
+.view-representatives-btn {
+    margin-left: 15px;
+}
+
+.styled-box {
+    border: 1px solid #ccc;
+    padding: 20px;
+    border-radius: 10px;
+    margin-top: 20px;
+    background-color: #f9f9f9;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+  
+.styled-button {
+    font-size: 16px;
+    border-radius: 5px;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+  
+.styled-button:hover {
+    transform: translateY(-2px);
+}
+  
+.btn-danger.styled-button {
+    background-color: #dc3545;
+    border-color: #dc3545;
+}
+  
+.btn-primary.styled-button {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+  
+.btn-info.styled-button {
+    background-color: #17a2b8;
+    border-color: #17a2b8;
+}
+
+.custom-alert {
+    background-color: #f8f9fa;
+    color: #212529; 
+    border: 1px solid #dae0e5;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 15px;
+}
+
+body.dark .custom-alert {
+    background-color: #343a40; 
+    color: #f8f9fa;
+    border: 1px solid #454d55;
+}
+
+.my-business-btn {
+    width: 150px;
+    height: 50px;
+    font-size: 16px;
+    align-content: center;
+}

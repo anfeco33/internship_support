@@ -1,0 +1,70 @@
+<% const businessId = data.businessId ? data.businessId.toString() : ''; %>
+<script>
+    const companyId = '<%= data.company._id.toString() %>';
+</script>
+<div class="custom-alert" role="alert">
+    <h2 class="title_admin_page title-type" style="font-size: 36px;">Representatives of <%= data.company.name %></h2>
+</div>
+<% if (data.representatives.length > 0) { %>
+    <table id="rep_list" class="table">
+        <thead>
+            <tr>
+                <th scope="col">#</th>
+    
+                <th scope="col">Full Name</th>
+    
+                <th scope="col">Email</th>
+                
+                <th scope="col"></th>            
+            </tr>
+        </thead>
+        <tbody>
+            <% if (data.representatives.length > 0) { %>
+                <% data.representatives.forEach((rep, index) => { %>
+                    <tr class="course_manager_row">
+                        <td>
+                            <div>
+                                <%= index + 1 %>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="rep-info">
+                                <div class="rep_pic">
+                                  <img src="<%= rep.profilePicture %>" alt="Profile Picture">
+                                </div>
+                                <div class="rep_name">
+                                  <%= rep.fullName %>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div>
+                                <%= rep.email%>
+                            </div>
+                        </td>
+                        <td>
+                            <% if (index !== 0) { %> <!-- không xóa bản thân -->
+                              <button class="btn btn-danger btn-sm" 
+                                data-bs-toggle="modal" 
+                                data-bs-target="#confirmRemoveRepModal" 
+                                onclick="setRemoveRepresentative('<%= rep._id %>', '<%= rep.fullName %>')">
+                                Remove
+                              </button>
+                            <% } %>
+                        </td>
+                    </tr>
+    
+                <% }); %>
+            <% } %>
+            <% if(data.representatives.length==0) { %>
+                <tr>
+                    <td colspan="5"
+                        style="text-align:center;font-weight: bold;font-size: 20px;">
+                        No representatives found.</p>
+                    </td>
+                </tr>
+            <% }; %>
+        </tbody>
+    </table>
+<% }%>
+

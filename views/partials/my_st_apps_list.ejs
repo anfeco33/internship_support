@@ -1,25 +1,29 @@
 <% var applications = data.applications %>
 <body>
   <div class="container">
-    <h1 class="internship_list_title">
-        List of Your Submitted Internship Applications
-    </h1>
+    <div class="custom-alert" role="alert">
+      <h1 class="internship_list_title">
+          List of Your Submitted Internship Applications
+      </h1>
+    </div>
     <table class="table table-striped">
       <thead>
         <tr>
           <th>Sent Time & Date</th>
           <th>Company</th>
           <th>Internship Title</th>
+          <th>History</th>
           <th>Message</th>
           <th>Status</th>
         </tr>
       </thead>
       <tbody>
             <% applications.forEach(application => { %>
-                <tr id="application-<%= application._id %>">
-                <td><%= new Date(application.appliedAt).toLocaleString() %></td>
+                <tr id="application-<%= application._id %>" data-company-id="<%= application.internship.companyId.toString() %>">
+                <td><%= new Date(application.appliedAt).toLocaleString('vi-VN') %></td>
                 <td><%= application.internship.companyName %></td>
                 <td><%= application.internship.title %></td>
+                <td><div class="greeting-message-list"><%- application.mymessage %></div></td>
                 <td><div class="greeting-message-list"><%- application.message %></div></td>
                 <td class="status-<%= application.status ? application.status.toLowerCase() : 'pending' %>">
                     <%= application.status ? application.status.charAt(0).toUpperCase() + application.status.slice(1) : 'Pending' %>
@@ -30,5 +34,16 @@
     </table>
   </div>
 </body>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const rows = document.querySelectorAll('tr[data-company-id]');
+    rows.forEach(row => {
+      row.addEventListener('click', function() {
+        const companyId = this.getAttribute('data-company-id');
+        window.location.href = `/home/business/${companyId}`;
+      });
+    });
+  });
+</script>
 
 <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet" />

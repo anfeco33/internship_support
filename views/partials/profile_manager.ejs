@@ -1,9 +1,4 @@
 <% var account = data.account_details %>
-<% var callback= data.callback_url %>
-<button type="button" class="btn btn-secondary" onclick="callback('<%=callback%>')">
-    BACK
-</button>
-
 <% if (account) { %>
     <div class="container-fluid light-style flex-grow-1 container-p-y profile_page">
         <div class="card">
@@ -16,71 +11,77 @@
                                 <%= account.fullName%>
                             </div>
                         </div>
-                        <div class="alert alert-success d-flex align-items-center" role="alert">
-                            <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Success:">
-                                <use xlink:href="#check-circle-fill" />
-                            </svg>
-                            <div>
-                                Authorized account: <strong>
-                                    <%= account.role%>
-                                </strong>
+                        <% if (account.role === 'company' && data.company) { %>
+                            <div class="alert alert-success d-flex align-items-center" role="alert">
+                                <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Success:">
+                                    <use xlink:href="#check-circle-fill" />
+                                </svg>
+                                <div>           
+                                    <% if (data.company.name) { %>                        
+                                    Account representative of
+                                    <strong>                        
+                                            <%= data.company.name%>
+                                    </strong>
+                                    <% } else { %>
+                                        User has not registered company.
+                                    <% } %>    
+                                </div>            
                             </div>
-                        </div>
+                        <% } else if (account.role === 'student') { %>
+                            <div class="alert alert-success d-flex" role="alert">
+                                <div style="display: flex; justify-content: center; align-items: center;">
+                                    <strong>STUDENT ACCOUNT</strong>
+                                </div>
+                            </div>
+                        <% } %>
                         <a class="list-group-item list-group-item-action active" data-toggle="list"
                             href="#account">Account</a>
 
 
                     </div>
                 </div>
-                <!-- //TODO: sửa lại thành form -->
                 <div class="col col-lg-8 col-12">
                     <div class="tab-content">
                         <div class="tab-pane fade active show" id="account">
 
                             <div class="card-body">
-
+                            <div class="d-flex justify-content-end">
                                 <button type="button" class="btn btn-<% if (account.lock){%>primary<%}else{%>danger<%}%>" id="lock_unlock_Account"
-                                onclick="lock_unlock_Account('<%=account._id.toString() %>')"><% if (account.lock){%>Unlock Account<%}else{%>Lock Acount<%}%></button>&nbsp;
+                                onclick="lock_unlock_Account('<%=account._id.toString() %>')">
+                                <% if (account.lock){%>
+                                    <i class="fa fa-unlock" style="margin-right: 10px;"></i>Unlock
+                                <%}else{%>
+                                    <i class="fa fa-lock" style="margin-right: 10px;"></i>Lock<%}%></button>
+                            </div>
 
                                 <form method="POST">
                                     <div class="form-group mb-3">
-                                        <label class="form-label">Username <strong>(can not change)</strong></label>
-                                        <input type="text" class="form-control mb-1" value="<%= account.username%>"
-                                            placeholder="username" disabled>
+                                        <label class="form-label">Email <strong>(Non-editable)</strong></label>
+                                        <input type="text" class="form-control mb-1" value="<%= account.email%>"
+                                            placeholder="email" disabled>
                                     </div>
-                                    <!-- <div class="form-group mb-3">
-                                        <label class="form-label">Email <strong>(can not change)</strong></label>
-                                        <input type="text" class="form-control mb-1" value="<%# account.email%>"
-                                            placeholder="Email" disabled>
-
-                                    </div> -->
                                     <div class="form-group mb-3">
-                                        <label class="form-label">Fullname <strong>(can not change)</strong></label>
+                                        <label class="form-label">Fullname <strong>(Non-editable)</strong></label>
                                         <input type="text" class="form-control" value="<%= account.fullName%>"
                                             placeholder="Fullname" name="fullname" disabled>
                                     </div>
                                     <div class="form-group mb-3">
-                                        <label class="form-label">Time created <strong>(can not change)</strong></label>
+                                        <label class="form-label">Date of joining <strong>(Non-editable)</strong></label>
                                         <input type="text" class="form-control" value="<%= account.createdAt%>"
-                                            placeholder="Time created" disabled>
+                                            placeholder="Time" disabled>
                                     </div>
                                     <div class="form-group mb-3">
-                                        <label class="form-label">Last login <strong>(can not change)</strong></label>
+                                        <label class="form-label">Last login <strong>(Non-editable)</strong></label>
                                         <input type="text" class="form-control" value="<%= account.lastLogin%>"
                                             placeholder="Last login" disabled>
                                     </div>
 
                                 </form>
 
-
                                 <hr class="border-light m-0">
 
                             </div>
-
                         </div>
-
-
-
                     </div>
                 </div>
             </div>

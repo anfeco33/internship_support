@@ -69,18 +69,11 @@ app.get('/', function (req, res) {
 
 userController.createDefaultAccount()
 .then(() => {
-  console.log('Create default account successful');
-  // Tiếp tục với logic của ứng dụng của bạn sau khi tạo tài khoản mặc định
+  console.log('Successfully created default account');
 })
 .catch(error => {
   console.error('Error:', error);
-  // Xử lý lỗi nếu cần thiết
 });
-
-
-// app.use('/home', authentication, staffRouter);
-
-// app.use('/admin', authentication, isAdmin, adminRouter);
 
 // Routes Init
 const route = require("./routes/main.route");

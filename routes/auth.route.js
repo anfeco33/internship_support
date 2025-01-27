@@ -16,7 +16,6 @@ router.get('/' , (req, res) => {
     res.redirect('/login')
 })
 
-//TODO: Chia authRoute và check đăng nhập trong dtb
 router.get('/login', function (req, res) {
     var flashMessage = req.session.flash;
     if(flashMessage)
@@ -47,7 +46,7 @@ router.get('/login', function (req, res) {
         req.session.save((err) => {
             if (err) {
             console.error("Error saving session:", err);
-            return res.redirect('/login'); // Xử lý lỗi lưu session
+            return res.redirect('/login');
             }
             // Redirect sau khi session được lưu
             const redirectUrl = req.user.role === 'admin' ? '/admin/company' : '/home';

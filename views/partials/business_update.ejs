@@ -5,7 +5,8 @@
             <!-- nếu chưa update lần đầu thì luôn hiển thị "Please update your profile for the first time" -->
             <% if (data.profileUpdated === false) { %>
             <div class="alert alert-warning" role="alert">
-                <h2>PLEASE UPDATE YOUR PROFILE FOR THE FIRST TIME! </h2>
+                <h2>PLEASE UPDATE YOUR PROFILE FOR THE FIRST TIME</h2>
+                <h5 class="text-danger">Or wait to be add as a business member by your company's admin</h5>
             </div>
             <% } else { %>
                 <h2 class="alert">BUSINESS PROFILE</h2>

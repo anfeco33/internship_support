@@ -1,150 +1,391 @@
-<h2 class="title_admin_page">STATISTICAL</h2>
-<div class="statistic_page" >
+<% const businessId = data.businessId ? data.businessId.toString() : ''; %>
+<% const companies = data.companies %>
+<% const industryStats = data.industryStats %>
+<header>
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="/home">
+                <img src="../../images/logo.png" alt="err" id="header-logo">
+            </a>
+            <div class="seach_bar d-flex justify-content-center align-items-center mb-3">
+                <div class="seach_content  input-group mx-3">
+                    <input type="text" class="form-control" name="search" id="searchInput" placeholder="Find companies, for example: FPT" data-bs-toggle="collapse" data-bs-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+                    <div class="input-group-append  d-flex justify-content-center align-items-center" >
+                        <span id="clear_icon">
+                            <i class="fa fa-times"></i>
+                        </span>
+                        <span id="seach_icon" class="input-group-text" 
+                        style="height: 100%; border-radius:0px 5px 5px 0px; padding: 8.5px;">                       
+                            <i class="fa fa-search" style="border-radius: 0px;"></i>
+                        </span>
+            
+                    </div>
+                    <div class="collapse custom-collapse" id="collapseExample">
+                        <div class="card card-body search_result">
+                            <ul id="search_result_row">
+                                <!-- search result -->
+                            </ul>    
+                        </div>
+                    </div>
+                </div>
 
-    <form  id="statisticsForm" action="/admin/statistical" method="post" style="display: flex; justify-content: space-between; align-items: center;">
+            </div>
+        </div>
+    </nav>
+</header>
 
-    <div style="display: flex; display: flex; justify-content: space-between; align-items: center;">
-        <label for="timeFixed">Select time: </label> 
-            <select class="statisticLeft" id="timeFixed" name="timeFixed">
-                <option value="" disabled selected>Choose option</option>
-                <option value="today">Today</option>
-                <option value="yesterday">Yesterday</option>
-                <option value="7days">In 7 days</option>
-                <option value="thisMonth">This month</option>
-            </select>
+<div class="cards" style="margin-top: 70px;">
+    <!-- Student Count -->
+    <div class="card">
+      <div class="icon-box">
+        <i class="fas fa-user-graduate"></i>
+      </div>
+      <div class="card-content">
+        <div class="number"><%= data.studentCount %></div>
+        <div class="card-name">Students</div>
+      </div>
+    </div>
+  
+    <!-- Company Count -->
+    <div class="card">
+      <div class="icon-box">
+        <i class="fas fa-building"></i>
+      </div>
+      <div class="card-content">
+        <div class="number"><%= data.companyCount %></div>
+        <div class="card-name">Companies</div>
+      </div>
+    </div>
+  
+    <!-- New Comments -->
+    <div class="card">
+      <div class="icon-box">
+        <i class="fas fa-comments"></i>
+      </div>
+      <div class="card-content">
+        <div class="number"><%= data.newCommentsCount %></div>
+        <div class="card-name">New Comments</div>
+      </div>
+    </div>
+  
+    <!-- Business Profile Count -->
+    <div class="card">
+      <div class="icon-box">
+        <i class="fas fa-briefcase"></i>
+      </div>
+      <div class="card-content">
+        <div class="number"><%= data.businessProfileCount %></div>
+        <div class="card-name">Business Profiles</div>
+      </div>
+    </div>
+</div>  
+
+<div class="charts-container">
+    <!-- bd cột xếp hạng doanh nghiệp theo điểm tb -->
+    <div class="chart-container rating-chart-container">
+        <h3 class="title-type">Top Companies by Average Rating</h3>
+        <canvas id="ratingChart"></canvas>
     </div>
 
-    <div class="statisticRight">
-        <label for="fromDay">From:</label>
-        <input type="date" id="fromDay" name="fromDay">
-        <label for="toDay">To:</label>
-        <input type="date" id="toDay" name="toDay">
+    <!-- bd tròn thống kê lĩnh vực -->
+    <div class="chart-container industry-chart-container">
+        <h3 class="title-type">Distribution of Companies by Industry</h3>
+        <canvas id="industryChart"></canvas>
     </div>
-
-    <div class="button mt-3">
-        <button type="submit" id="btnReport" class="btn btn-success">Report</button>
-        <button type="reset" id="btnReset" class="btn btn-light">Reset</button>
-    </div>
-    </form>
-
-
-    <% var orders = data.transactions %>
-    <% var start = data.start %>
-    <% var end = data.end %>
-
-
-    <div id="showReport">
-        <% if (orders && orders.length > 0) { %>
-        <h3>This is report from <%= start %> to <%= end %></h3>
-        <!-- Thêm các phần tử để hiển thị thông tin tổng hợp -->
-        
-        
-        <table class="table" id="table_statistical">
-            <thead>
-                <tr>
-                  <th scope="col">Total Transactions</th>
-                  <th scope="col">Total Courses</th>
-                  <th scope="col">Summary</th>
-                </tr>
-              </thead>
-
-              <tbody>
-                <tr style="font-weight:600; font-size:larger">
-                  <td scope="col" id="totalOrders">0</td>
-                  <td scope="col" id="totalProducts">0</td>
-                  <td scope="col" id="Summary">0</td>
-                </tr>
-              </tbody>
-        </table>
-        <table class="table" id="table_statistical">
-            <thead>
-              <tr>
-                <th scope="col">Student Name</th>
-                <th scope="col">Purcharsed Course</th>
-                <th scope="col">Transaction Date & Time</th>
-                <th scope="col">Total Price</th>
-              </tr>
-            </thead>
-            <tbody id="product_row">
-                <% orders.forEach((order) => { %>
-                    <tr>
-                        <td>
-                            <div>
-                                <%= order.userId.fullName %> 
-                            </div>
-                        </td>
-                        <td>
-                            <% order.courseIds.forEach((course) => { %>
-                                <div>
-                                    <%= course.courseName %> ( <%= course.coursePrice %> VND )
-                                </div>
-                            <% }); %>
-                        </td>
-                        <td>
-                            <div>
-                                <%= order.transactionDate %>
-                            </div>
-                        </td>
-                        <td>
-                            <div>
-                                <%=order.amountPaid%>
-                            </div>
-                        </td>
-                    </tr>
-                <% }); %>
-      <% } else { %>
-        <p>No transaction available</p>
-      <% } %>
-        </tbody>
-        </table>  
-    </div>
-    
-
-
-
+    <!-- bd tiêu chí đánh giá -->
+    <div class="chart-container criteria-chart-container">
+        <h3 class="title-type">Average Criteria Ratings</h3>
+        <canvas id="criteriaChart"></canvas>
+      </div>
 </div>
-<script src="../../javascripts/statistic.js"></script>
-    
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Lấy danh sách các hàng từ bảng sản phẩm
-        const tableRows = document.querySelectorAll('#product_row tr');
-
-        let totalOrders = 0;
-        let totalProducts = 0;
-        let totalSummary = 0;
-
-        // Duyệt qua từng hàng trong bảng sản phẩm
-        tableRows.forEach(row => {
-            const cells = row.querySelectorAll('td');
-
-            // Tăng tổng số đơn hàng lên mỗi khi duyệt qua một hàng
-            totalOrders++;
-
-            // Lấy số lượng sản phẩm từ cột thứ hai (index 1) và cộng vào tổng số sản phẩm
-            const productCell = cells[1];
-            const products = productCell.querySelectorAll('div');
-            totalProducts += products.length;
-
-            // Lấy giá trị tổng giá tiền từ cột thứ ba (index 2) và cộng vào tổng giá trị tổng cộng
-            const totalPriceCell = cells[3];
-            const totalPrice = parseFloat(totalPriceCell.textContent);
-            totalSummary += totalPrice;
-        });
-        
-        if(document.getElementById('totalOrders'))
-        {
-            document.getElementById('totalOrders').textContent = totalOrders;
+    const industryStats = <%- JSON.stringify(industryStats) %>;
+    const companies = <%- JSON.stringify(companies) %>;
+  
+    const industryLabels = Object.keys(industryStats);
+    const industryValues = Object.values(industryStats);
+  
+    // thống kê lĩnh vực
+    const ctxIndustry = document.getElementById('industryChart').getContext('2d');
+    const industryChart = new Chart(ctxIndustry, {
+      type: 'pie',
+      data: {
+        // labels: industryLabels,
+        datasets: [{
+          label: 'Number of Companies',
+          data: industryValues,
+          backgroundColor: [
+            '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40'
+          ],
+        }]
+      },
+      options: {
+        responsive: false,
+        plugins: {
+          legend: {
+            position: 'bottom',
+          }
         }
-        // Hiển thị các tổng đã tính được vào các ô tương ứng trong bảng tổng hợp
-        if(document.getElementById('totalProducts')){
-            document.getElementById('totalProducts').textContent = totalProducts;
+      }
+    });
+  
+    // Xử lý dữ liệu xếp hạng
+    const topCompanies = companies.slice(0, 10); // 10 công ty hàng đầu
+    const companyNames = topCompanies.map(company => company.name);
+    const companyRatings = topCompanies.map(company => company.averageRating);
+  
+    const maxLength = 7;
+    const shortCompanyNames = companyNames.map(name => 
+        name.length > maxLength ? name.slice(0, maxLength) + '...' : name
+      );
+    
+    const maxCompanies = 5;
+    const limitedCompanyNames = shortCompanyNames.slice(0, maxCompanies);
+    const limitedCompanyRatings = companyRatings.slice(0, maxCompanies);
 
+    // Biểu đồ xếp hạng doanh nghiệp
+    const ctxRating = document.getElementById('ratingChart').getContext('2d');
+  const ratingChart = new Chart(ctxRating, {
+    type: 'bar',
+    data: {
+      labels: limitedCompanyNames,
+      datasets: [{
+        label: 'Average Rating',
+        data: limitedCompanyRatings,
+        backgroundColor: '#36A2EB',
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {
+          display: false,
         }
-        if(document.getElementById('Summary'))
-        {
-            document.getElementById('Summary').textContent = totalSummary.toFixed(2); // Hiển thị giá trị tổng cộng với hai số sau dấu thập phân
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          max: 5, // 5 sao
+          grid: {
+            color: '#ddd'
+          }
+        },
+        x: {
+          grid: {
+            color: '#ddd'
+          }
+        }
+      }
+    }
+  });
 
+    const criteriaKeys = {
+        'Work Environment': 'workEnvironment',
+        'Training Support': 'trainingSupport',
+        'Learning Opportunities': 'learningOpportunities',
+        'Benefits': 'benefits',
+    };
+
+    const criteria = Object.keys(criteriaKeys);
+    const avgCriteriaRatings = criteria.map((crit) => {
+        const key = criteriaKeys[crit]; // Sử dụng mapping để lấy key chính xác
+        const total = companies.reduce((sum, company) => sum + (company.ratings[key] || 0), 0);
+        // console.log("Ratings for", crit, ":", companies.map((company) => company.ratings[key] || 0));
+        // console.log("crit: ", crit);
+        // console.log("total: ", total);
+        // console.log("companies.length: ", companies.length);
+        // console.log("total / companies.length: ", (total / companies.length).toFixed(2));
+        return (total / companies.length).toFixed(2); // Tính trung bình từng tiêu chí
+    });
+
+    // Biểu đồ tiêu chí đánh giá
+    const ctxCriteria = document.getElementById('criteriaChart').getContext('2d');
+    const criteriaChart = new Chart(ctxCriteria, {
+        type: 'radar',
+        data: {
+        labels: criteria,
+        datasets: [{
+            label: 'Average Ratings',
+            data: avgCriteriaRatings,
+            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+            borderColor: '#36A2EB',
+            borderWidth: 1,
+        }]
+        },
+        options: {
+        responsive: false,
+        plugins: {
+            legend: {
+            position: 'top',
+            }
+        },
+        scales: {
+            r: {
+            beginAtZero: true,
+            max: 5,
+            grid: {
+                color: '#ddd'
+            }
+            }
+        }
         }
     });
 </script>
+<style>
+.charts-container {
+  margin-top: 20px;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: stretch; /* Đảm bảo các biểu đồ có chiều cao bằng nhau */
+  gap: 10px; /* Khoảng cách giữa các biểu đồ */
+}
+
+.chart-container {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  padding: 10px;
+  flex-grow: 1; /* Đảm bảo các biểu đồ co giãn đều */
+  height: fit-content;
+}
+
+body.dark .chart-container {
+  background-color: #222;
+}
+
+.chart-container canvas {
+  width: 100% !important; /* Đảm bảo canvas chiếm toàn bộ chiều rộng của container */
+  height: 100% !important; /* Đảm bảo canvas chiếm toàn bộ chiều cao của container */
+}
+
+canvas {
+  margin: 20px auto;
+  display: block;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #fff;
+}
+
+body.dark canvas {
+  border-color: #333;
+  background-color: #222;
+}
+
+.cards {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); /* 4 card mỗi hàng */
+  gap: 20px; /* Khoảng cách giữa các card */
+}
+
+.cards .card {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 30px;
+  background-color: #f8f9fa;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.cards .card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+}
+
+.cards .icon-box {
+  width: 80px;
+  height: 80px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #e9ecef;
+  border-radius: 50%;
+  margin-right: 20px;
+}
+
+.cards .icon-box i {
+  font-size: 50px;
+}
+
+.cards .card-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.cards .card-content .number {
+  font-size: 36px;
+  font-weight: bold;
+  color: #299B63;
+}
+
+.cards .card-content .card-name {
+  font-size: 16px;
+  color: #888;
+  font-weight: 500;
+}
+
+body.dark .cards .card-content .card-name {
+  color: #fff;
+}
+
+/* each card one color */
+.cards .card:nth-child(1),
+.cards .card:nth-child(3) {
+    background-color: #1cf94c58;
+}
+
+body.dark .cards .card:nth-child(1),
+body.dark .cards .card:nth-child(3) {
+  background-color: #8672f9b3;
+}
+
+body.dark .cards .card:nth-child(2),
+body.dark .cards .card:nth-child(4) {
+  background-color: #555;
+}
+
+.cards .card:nth-child(1) .icon-box {
+  background-color: #e8f5e9;
+}
+
+.cards .card:nth-child(1) .icon-box i,
+.cards .card:nth-child(1) .number {
+  color: #28a745;
+}
+
+.cards .card:nth-child(2) .icon-box {
+  background-color: #e7f3ff;
+}
+
+.cards .card:nth-child(2) .icon-box i,
+.cards .card:nth-child(2) .number {
+  color: #007bff;
+}
+
+.cards .card:nth-child(3) .icon-box {
+  background-color: #fff9e6;
+}
+
+.cards .card:nth-child(3) .icon-box i,
+.cards .card:nth-child(3) .number {
+  color: #ffc107;
+}
+
+.cards .card:nth-child(4) .icon-box {
+  background-color: #fcebea;
+}
+
+.cards .card:nth-child(4) .icon-box i,
+.cards .card:nth-child(4) .number {
+  color: #dc3545;
+}
+</style>
+<%- include('../partials/footer') %>

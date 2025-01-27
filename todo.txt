@@ -9,7 +9,5 @@ Job
 Comment
 Blog
 
-if alota people applied -> show notifications
 
 kịp:
-admin gửi thông báo cập nhật hồ sơ cho company chưa nộp đủ docs
