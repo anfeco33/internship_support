@@ -262,28 +262,41 @@
     <div class="pagination-container">
       <nav aria-label="Page navigation">
         <ul class="pagination justify-content-center">
+          <!-- Nút Previous -->
           <% if (data.currentPage > 1) { %>
             <li class="page-item">
               <a class="page-link" href="/business?page=<%= data.currentPage - 1 %>&limit=<%= data.limit %>" aria-label="Previous">
                 <span aria-hidden="true">&laquo;</span>
               </a>
             </li>
+          <% } else { %>
+            <li class="page-item disabled">
+              <span class="page-link" aria-hidden="true">&laquo;</span>
+            </li>
           <% } %>
+    
+          <!-- Danh sách các trang -->
           <% for (var i = 1; i <= data.totalPages; i++) { %>
             <li class="page-item <%= data.currentPage === i ? 'active' : '' %>">
               <a class="page-link" href="/business?page=<%= i %>&limit=<%= data.limit %>"><%= i %></a>
             </li>
           <% } %>
+    
+          <!-- Nút Next -->
           <% if (data.currentPage < data.totalPages) { %>
             <li class="page-item">
               <a class="page-link" href="/business?page=<%= data.currentPage + 1 %>&limit=<%= data.limit %>" aria-label="Next">
                 <span aria-hidden="true">&raquo;</span>
               </a>
             </li>
+          <% } else { %>
+            <li class="page-item disabled">
+              <span class="page-link" aria-hidden="true">&raquo;</span>
+            </li>
           <% } %>
         </ul>
       </nav>
-    </div>
+    </div>    
   </div>
 
 <%- include('../partials/footer') %>

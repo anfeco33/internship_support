@@ -101,7 +101,7 @@
             <div class="post-header">
                 <h3><%= internship.title %></h3>
                 <button class="view-details-btn" onclick="location.href='/home/business/<%= internship.company._id.toString() %>'">
-                    <i class="fa-solid fa-arrow-right"></i></button>
+                    <i class="fa-solid fa-arrow-right" style="font-size: 17px;"></i></button>
             </div>
             <p><%= new Date(internship.createdAt).toLocaleString('vi-VN') %></p>
             <p>Company: <%= internship.company ? internship.company.name : 'N/A' %></p>

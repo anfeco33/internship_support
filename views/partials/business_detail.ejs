@@ -198,7 +198,7 @@
             <% if (company.internships && company.internships.length > 0) { %>
                 <% company.internships.forEach(function (internship) { %>
                     <h1><% internship._id.toString() %></h1>
-                    <div class="card mb-3">
+                    <div class="card mb-3" id="opportunitiesOpening">
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-center">
                                 <div>
@@ -214,7 +214,7 @@
                             <div class="card-text mt-3"><%- internship.description %></div>
                             <p class="text-muted mt-3"><%= new Date(internship.createdAt).toLocaleString('vi-VN') %></p>
                             <% if (account.role === 'student') { %>
-                              <button class="btn btn-primary mt-3" onclick="applyForInternship('<%= internship._id %>')">Apply Now</button>
+                              <button class="btn btn-primary mt-3" id="applyBtn" onclick="applyForInternship('<%= internship._id %>')" style="font-size: 16px;">Apply Now <i class="fa fa-user-plus" style="font-size: 16px;"></i></button>
                             <% } %>
                         </div>
                     </div>
@@ -255,53 +255,53 @@
                         <option value="5">⭐⭐⭐⭐⭐</option>
                       </select>
                     </div>
-                    <button class="btn btn-primary" onclick="addComment('<%= company._id %>')">
-                      <i class="fas fa-paper-plane"></i></button>
+                    <button class="btn btn-primary" id="cmtSend" onclick="addComment('<%= company._id %>')">
+                      <i class="fas fa-paper-plane" style="font-size: 15px;"></i></button>
                   </div>
                   <h4>OR RATE BY CATEGORY</h4>
                   <div class="rating-section mt-2">
                     <label for="workEnvironmentRating">Work Environment</label>
                     <div id="workEnvironmentRating" class="star-rating work-environment-stars">
-                      <i class="fa-regular fa-star" onmouseover="highlightStars('workEnvironmentRating', 1)" onmouseout="resetStars('workEnvironmentRating')" onclick="setRating('workEnvironmentRating', 1)"></i>
-                      <i class="fa-regular fa-star" onmouseover="highlightStars('workEnvironmentRating', 2)" onmouseout="resetStars('workEnvironmentRating')" onclick="setRating('workEnvironmentRating', 2)"></i>
-                      <i class="fa-regular fa-star" onmouseover="highlightStars('workEnvironmentRating', 3)" onmouseout="resetStars('workEnvironmentRating')" onclick="setRating('workEnvironmentRating', 3)"></i>
-                      <i class="fa-regular fa-star" onmouseover="highlightStars('workEnvironmentRating', 4)" onmouseout="resetStars('workEnvironmentRating')" onclick="setRating('workEnvironmentRating', 4)"></i>
-                      <i class="fa-regular fa-star" onmouseover="highlightStars('workEnvironmentRating', 5)" onmouseout="resetStars('workEnvironmentRating')" onclick="setRating('workEnvironmentRating', 5)"></i>
+                      <i class="fa-regular fa-star" onmouseover="highlightStars('workEnvironmentRating', 1)" onmouseout="resetStars('workEnvironmentRating')" onclick="setRating('workEnvironmentRating', 1)"style="cursor: pointer;"></i>
+                      <i class="fa-regular fa-star" onmouseover="highlightStars('workEnvironmentRating', 2)" onmouseout="resetStars('workEnvironmentRating')" onclick="setRating('workEnvironmentRating', 2)"style="cursor: pointer;"></i>
+                      <i class="fa-regular fa-star" onmouseover="highlightStars('workEnvironmentRating', 3)" onmouseout="resetStars('workEnvironmentRating')" onclick="setRating('workEnvironmentRating', 3)"style="cursor: pointer;"></i>
+                      <i class="fa-regular fa-star" onmouseover="highlightStars('workEnvironmentRating', 4)" onmouseout="resetStars('workEnvironmentRating')" onclick="setRating('workEnvironmentRating', 4)"style="cursor: pointer;"></i>
+                      <i class="fa-regular fa-star" onmouseover="highlightStars('workEnvironmentRating', 5)" onmouseout="resetStars('workEnvironmentRating')" onclick="setRating('workEnvironmentRating', 5)"style="cursor: pointer;"></i>
                     </div>
                     <input type="hidden" id="workEnvironmentRatingValue" value="0">
                   
                     <label for="trainingSupportRating">Training Support</label>
                     <div id="trainingSupportRating" class="star-rating training-support-stars">
-                      <i class="fa-regular fa-star" onmouseover="highlightStars('trainingSupportRating', 1)" onmouseout="resetStars('trainingSupportRating')" onclick="setRating('trainingSupportRating', 1)"></i>
-                      <i class="fa-regular fa-star" onmouseover="highlightStars('trainingSupportRating', 2)" onmouseout="resetStars('trainingSupportRating')" onclick="setRating('trainingSupportRating', 2)"></i>
-                      <i class="fa-regular fa-star" onmouseover="highlightStars('trainingSupportRating', 3)" onmouseout="resetStars('trainingSupportRating')" onclick="setRating('trainingSupportRating', 3)"></i>
-                      <i class="fa-regular fa-star" onmouseover="highlightStars('trainingSupportRating', 4)" onmouseout="resetStars('trainingSupportRating')" onclick="setRating('trainingSupportRating', 4)"></i>
-                      <i class="fa-regular fa-star" onmouseover="highlightStars('trainingSupportRating', 5)" onmouseout="resetStars('trainingSupportRating')" onclick="setRating('trainingSupportRating', 5)"></i>
+                      <i class="fa-regular fa-star" onmouseover="highlightStars('trainingSupportRating', 1)" onmouseout="resetStars('trainingSupportRating')" onclick="setRating('trainingSupportRating', 1)"style="cursor: pointer;"></i>
+                      <i class="fa-regular fa-star" onmouseover="highlightStars('trainingSupportRating', 2)" onmouseout="resetStars('trainingSupportRating')" onclick="setRating('trainingSupportRating', 2)"style="cursor: pointer;"></i>
+                      <i class="fa-regular fa-star" onmouseover="highlightStars('trainingSupportRating', 3)" onmouseout="resetStars('trainingSupportRating')" onclick="setRating('trainingSupportRating', 3)"style="cursor: pointer;"></i>
+                      <i class="fa-regular fa-star" onmouseover="highlightStars('trainingSupportRating', 4)" onmouseout="resetStars('trainingSupportRating')" onclick="setRating('trainingSupportRating', 4)"style="cursor: pointer;"></i>
+                      <i class="fa-regular fa-star" onmouseover="highlightStars('trainingSupportRating', 5)" onmouseout="resetStars('trainingSupportRating')" onclick="setRating('trainingSupportRating', 5)"style="cursor: pointer;"></i>
                     </div>
                     <input type="hidden" id="trainingSupportRatingValue" value="0">
                   
                     <label for="learningOpportunitiesRating">Learning Opportunities</label>
                     <div id="learningOpportunitiesRating" class="star-rating learning-opportunities-stars">
-                      <i class="fa-regular fa-star" onmouseover="highlightStars('learningOpportunitiesRating', 1)" onmouseout="resetStars('learningOpportunitiesRating')" onclick="setRating('learningOpportunitiesRating', 1)"></i>
-                      <i class="fa-regular fa-star" onmouseover="highlightStars('learningOpportunitiesRating', 2)" onmouseout="resetStars('learningOpportunitiesRating')" onclick="setRating('learningOpportunitiesRating', 2)"></i>
-                      <i class="fa-regular fa-star" onmouseover="highlightStars('learningOpportunitiesRating', 3)" onmouseout="resetStars('learningOpportunitiesRating')" onclick="setRating('learningOpportunitiesRating', 3)"></i>
-                      <i class="fa-regular fa-star" onmouseover="highlightStars('learningOpportunitiesRating', 4)" onmouseout="resetStars('learningOpportunitiesRating')" onclick="setRating('learningOpportunitiesRating', 4)"></i>
-                      <i class="fa-regular fa-star" onmouseover="highlightStars('learningOpportunitiesRating', 5)" onmouseout="resetStars('learningOpportunitiesRating')" onclick="setRating('learningOpportunitiesRating', 5)"></i>
+                      <i class="fa-regular fa-star" onmouseover="highlightStars('learningOpportunitiesRating', 1)" onmouseout="resetStars('learningOpportunitiesRating')" onclick="setRating('learningOpportunitiesRating', 1)"style="cursor: pointer;"></i>
+                      <i class="fa-regular fa-star" onmouseover="highlightStars('learningOpportunitiesRating', 2)" onmouseout="resetStars('learningOpportunitiesRating')" onclick="setRating('learningOpportunitiesRating', 2)"style="cursor: pointer;"></i>
+                      <i class="fa-regular fa-star" onmouseover="highlightStars('learningOpportunitiesRating', 3)" onmouseout="resetStars('learningOpportunitiesRating')" onclick="setRating('learningOpportunitiesRating', 3)"style="cursor: pointer;"></i>
+                      <i class="fa-regular fa-star" onmouseover="highlightStars('learningOpportunitiesRating', 4)" onmouseout="resetStars('learningOpportunitiesRating')" onclick="setRating('learningOpportunitiesRating', 4)"style="cursor: pointer;"></i>
+                      <i class="fa-regular fa-star" onmouseover="highlightStars('learningOpportunitiesRating', 5)" onmouseout="resetStars('learningOpportunitiesRating')" onclick="setRating('learningOpportunitiesRating', 5)"style="cursor: pointer;"></i>
                     </div>
                     <input type="hidden" id="learningOpportunitiesRatingValue" value="0">
                   
                     <label for="benefitsRating">Benefits</label>
                     <div id="benefitsRating" class="star-rating benefits-stars">
-                      <i class="fa-regular fa-star" onmouseover="highlightStars('benefitsRating', 1)" onmouseout="resetStars('benefitsRating')" onclick="setRating('benefitsRating', 1)"></i>
-                      <i class="fa-regular fa-star" onmouseover="highlightStars('benefitsRating', 2)" onmouseout="resetStars('benefitsRating')" onclick="setRating('benefitsRating', 2)"></i>
-                      <i class="fa-regular fa-star" onmouseover="highlightStars('benefitsRating', 3)" onmouseout="resetStars('benefitsRating')" onclick="setRating('benefitsRating', 3)"></i>
-                      <i class="fa-regular fa-star" onmouseover="highlightStars('benefitsRating', 4)" onmouseout="resetStars('benefitsRating')" onclick="setRating('benefitsRating', 4)"></i>
-                      <i class="fa-regular fa-star" onmouseover="highlightStars('benefitsRating', 5)" onmouseout="resetStars('benefitsRating')" onclick="setRating('benefitsRating', 5)"></i>
+                      <i class="fa-regular fa-star" onmouseover="highlightStars('benefitsRating', 1)" onmouseout="resetStars('benefitsRating')" onclick="setRating('benefitsRating', 1)" style="cursor: pointer;"></i>
+                      <i class="fa-regular fa-star" onmouseover="highlightStars('benefitsRating', 2)" onmouseout="resetStars('benefitsRating')" onclick="setRating('benefitsRating', 2)" style="cursor: pointer;"></i>
+                      <i class="fa-regular fa-star" onmouseover="highlightStars('benefitsRating', 3)" onmouseout="resetStars('benefitsRating')" onclick="setRating('benefitsRating', 3)" style="cursor: pointer;"></i>
+                      <i class="fa-regular fa-star" onmouseover="highlightStars('benefitsRating', 4)" onmouseout="resetStars('benefitsRating')" onclick="setRating('benefitsRating', 4)" style="cursor: pointer;"></i>
+                      <i class="fa-regular fa-star" onmouseover="highlightStars('benefitsRating', 5)" onmouseout="resetStars('benefitsRating')" onclick="setRating('benefitsRating', 5)" style="cursor: pointer;"></i>
                     </div>
                     <input type="hidden" id="benefitsRatingValue" value="0">
                   </div>
                   <div class="d-flex justify-content-end mt-2">
-                    <button class="btn btn-secondary" onclick="resetAllRatings()">Reset</button>
+                    <button class="btn btn-secondary" onclick="resetAllRatings()" style="font-size: 17px;">Reset <i class="fa fa-refresh" style="font-size: 17px;"></i> </button>
                   </div>
 
               </div>

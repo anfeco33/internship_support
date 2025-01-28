@@ -655,7 +655,7 @@ body.dark .navbar {
 }
 
 body.dark #search_icon {
-    background: white;
+    background: rgb(151, 150, 150);
     border: none; /* Xóa viền */
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Đổ bóng đậm hơn khi ở chế độ tối */
     position: relative;
@@ -2772,14 +2772,33 @@ body.light .update_business {
     padding: 20px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
+body.dark .company_detail_card {
+    background: #e0e0e0e5;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
 .company_info {
     padding: 20px;
     background: #f8f9fa;
     border-radius: 10px;
 }
+body.dark .company_info {
+    padding: 20px;
+    background: #ebebeb;
+    border-radius: 10px;
+}
 .carousel-inner img {
     object-fit: cover;
     height: 400px;
+}
+#opportunitiesOpening{
+    background: #f8f9fa;
+    border-radius: 10px;
+}
+body.dark #opportunitiesOpening{
+    background: #ebebeb;
+    border-radius: 10px;
 }
 
 /* === HEAD*/
@@ -3271,3 +3290,75 @@ body.dark .custom-alert {
     font-size: 16px;
     align-content: center;
 }
+.thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Đảm bảo hình ảnh được cắt và hiển thị đúng tỉ lệ */
+    border-radius: 5px; /* Bo góc cho ảnh (phải trùng với .thumbnail) */
+}
+
+#applyBtn{
+    background: linear-gradient(135deg,#00cc5f, rgba(0, 150, 209, 0.885));
+    border: none;
+}
+#applyBtn:hover{
+    background: linear-gradient(135deg,#01af52, rgba(0, 129, 180, 0.885));
+    border: none;
+}
+#applyBtn .fa-mouse-pointer {
+  margin-left: 10px; /* Khoảng cách giữa chữ và biểu tượng */
+}
+#cmtSend{
+    background: linear-gradient(135deg,#00cc5f, rgba(0, 150, 209, 0.885));
+    border: none;
+}
+#cmtSend:hover{
+    background: linear-gradient(135deg,#01af52, rgba(0, 129, 180, 0.885));
+    border: none;
+}
+.view-details-btn:hover{
+background-color: rgb(119, 1, 119);
+}
+.internship_list_title{
+    background: linear-gradient(45deg, #1e90ff, #32cd32); /* Gradient từ xanh dương sang xanh lá */
+    background-clip: text; /* Chỉ áp dụng gradient lên text */
+    -webkit-background-clip: text; /* Chỉ áp dụng gradient lên text */
+    -webkit-text-fill-color: transparent; /* Làm text trong suốt để hiện gradient */
+    text-align: center; /* Căn giữa nội dung */
+    font-weight: bold; /* Đậm nét chữ */
+    margin-bottom: 20px; /* Tạo khoảng cách dưới */
+}
+.pagination-container {
+    padding: 10px;
+    border-radius: 8px;
+  }
+  
+  .pagination .page-item .page-link {
+    background-color: #ffffff;
+    border: 1px solid #1e1e1e;
+    color: #1e1e1e;
+    transition: all 0.3s ease;
+  }
+  
+  .pagination .page-item .page-link:hover {
+    background-color: #d4d4d4;
+    color: #ffffff; /* Màu chữ trắng khi hover */
+  }
+  
+  .pagination .page-item.active .page-link {
+    background-color: #33d2c5; /* Màu nền của trang hiện tại */
+    border-color: #33d2c5;
+    color: #ffffff; /* Màu chữ trắng */
+    font-weight: bold; /* Tăng độ nổi bật */
+    pointer-events: none; /* Không thể nhấp vào trang hiện tại */
+  }
+  
+  .pagination .page-item.disabled .page-link {
+    color: #d3d3d3; /* Màu chữ xám cho các nút bị vô hiệu */
+    background-color: #f3e8ff;
+    border-color: #d3d3d3;
+    pointer-events: none; /* Không cho phép nhấn vào nút disabled */
+    cursor: not-allowed;
+  }
+  
+  
