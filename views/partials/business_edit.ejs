@@ -67,7 +67,11 @@
                             <option value="Medium" <%= data.company.size === 'Medium' ? 'selected' : '' %>>Medium</option>
                             <option value="Large" <%= data.company.size === 'Large' ? 'selected' : '' %>>Large</option>
                         </select>
+                        <span class="text-danger">Small: A company with fewer than 50 employees. <br>
+                            Medium: A company with 50 to 250 employees. <br>
+                            Large: A company with more than 250 employees.</span>
                     </div>
+                    
                 </div>
             </div>
 
@@ -92,7 +96,7 @@
                     <div class="col-sm-10">
                         <textarea class="form-control" id="inputProfile" name="profile" rows="3" 
                         placeholder="The company has not updated their profile yet" required>
-                        <%= data.company.profile %>
+                        <%- data.company.profile %>
                         </textarea>
                     </div>
                 </div>
@@ -157,10 +161,9 @@
                 <div class="row">
                     <label for="inputImages" class="col-sm-2 col-form-label">Your Company Images</label>
                     <div class="col-sm-10">
-                        <!-- Input để upload ảnh -->
+                        <!-- Input up ảnh -->
                         <input type="file" id="inputImages" name="images" class="form-control" accept="image/*" multiple>
                         
-                        <!-- Khu vực preview các ảnh đã lưu -->
                         <div id="imagePreview" class="mt-3 d-flex flex-wrap">
                             <% if (data.company.images && data.company.images.length > 0) { %>
                                 <% data.company.images.forEach(function(image) { %>
@@ -173,7 +176,6 @@
                     </div>
                 </div>
             </div>
-
 
             <!-- Video quảng cáo -->
             <div class="form-group">
@@ -229,11 +231,7 @@
     window.companyId = "<%= data.companyId %>";
 </script>
 
-<script 
-src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBs2CCj3DSth7s_9YHuG5EazDGskh5uKGk&libraries=places&callback=initMap" 
-async 
-defer>
-</script>
+<script src="/tinymce/tinymce.min.js"></script>
 <script src="/javascripts/update-business.js"></script>
 
 <%- include('../partials/flash-message') %>

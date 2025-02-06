@@ -419,7 +419,6 @@ class BusinessController {
 
         const profileDescription = profile || '';
 
-        // Cập nhật thông tin công ty
         const company = await Company.findOneAndUpdate(
             { representativeIds },
             {
@@ -440,6 +439,10 @@ class BusinessController {
             },
             { new: true, upsert: true }
         );
+        // update trường company trong user
+        const user = await User.findById(representativeIds);
+        user.company = company._id;
+        await user.save();
 
         res.json({ success: true, company });
     } catch (error) {

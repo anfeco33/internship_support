@@ -67,6 +67,9 @@
                             <option value="Medium" selected>Medium</option>
                             <option value="Large">Large</option>
                         </select>
+                        <span class="text-danger">Small: A company with fewer than 50 employees. <br>
+                            Medium: A company with 50 to 250 employees. <br>
+                            Large: A company with more than 250 employees.</span>
                     </div>
                 </div>
             </div>
@@ -198,13 +201,14 @@
 <%- include('../partials/flash-message') %>
 <%- include('../partials/css-library') %>
 <!-- nếu doanh nghiệp đăng nhập lần đầu thì phải cập nhật đủ thông tin doanh nghiệp -->
+<script src="/tinymce/tinymce.min.js"></script>
 <script src="/javascripts/update-business.js"></script>
 
-<script 
+<!-- <script 
 src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBs2CCj3DSth7s_9YHuG5EazDGskh5uKGk&callback=initMap" 
 async 
 defer>
-</script>
+</script> -->
 </div>
 
 <%- include('../partials/footer') %>

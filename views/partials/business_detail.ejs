@@ -105,7 +105,7 @@
                     </div>
                     <!-- Thumbnails -->
                     <div class="thumbnail-container mt-3">
-                        <button class="thumbnail-control-prev" onclick="scrollThumbnails('prev')">
+                        <button class="thumbnail-control-prev" onclick="scrollThumbnails('prev')" style="margin-right: 10px;">
                             <span class="carousel-control-prev-icon" aria-hidden="true"></span>
                             <span class="visually-hidden">Previous</span>
                         </button>
@@ -190,7 +190,9 @@
         <!-- Company Description -->
         <div class="company_detail_card" style="margin-top: 20px;">
             <h4>COMPANY DETAILS DESCRIPTION</h4>
-            <p><%= company.profile || 'No description available' %></p>
+            <div class="card mb-3" id="opportunitiesOpening" style="padding: 20px;">
+              <p><%- company.profile || 'No description available' %></p>
+            </div>
         </div>
         <!-- Internship Postings -->
         <div class="company_detail_card" style="margin-top: 20px;">
@@ -220,7 +222,9 @@
                     </div>
                 <% }); %>
             <% } else { %>
+              <div class="card mb-3" id="opportunitiesOpening" style="padding-top: 10px; padding-left: 10px;">
                 <p>No internship opportunities available at the moment.</p>
+              </div>
             <% } %>
         </div>
         <!-- Google Map -->
@@ -510,7 +514,8 @@
             <% } %>
         </div>
 
-<script src="https://cdn.tiny.cloud/1/rkluiijc3ceh2ffj46mafmr3qsdeijckhb4ja3bq6um2k256/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script>
+<script src="/tinymce/tinymce.min.js"></script>
+<!-- <script src="https://cdn.tiny.cloud/1/rkluiijc3ceh2ffj46mafmr3qsdeijckhb4ja3bq6um2k256/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script> -->
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBs2CCj3DSth7s_9YHuG5EazDGskh5uKGk&libraries=places&callback=initMap" 
 async defer></script>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet" />
@@ -546,6 +551,12 @@ async defer></script>
       imageItem.innerHTML = '<img src="' + src + '" class="d-block w-100" alt="Company Image">';
       carouselInner.appendChild(imageItem);
     }
+
+    // khởi động lại carousel controls
+    var carousel = new bootstrap.Carousel(document.getElementById('mediaCarousel'), {
+      interval: 5000,
+      ride: 'carousel'
+    });
   }
 
   document.addEventListener('DOMContentLoaded', function () {
@@ -623,9 +634,9 @@ async defer></script>
   function scrollThumbnails(direction) {
     var thumbnailWrapper = document.querySelector('.thumbnail-wrapper');
     if (direction === 'prev') {
-      thumbnailWrapper.scrollBy({ left: -150, behavior: 'smooth' });
-    } else if (direction === 'next') {
-      thumbnailWrapper.scrollBy({ left: 150, behavior: 'smooth' });
+      thumbnailWrapper.scrollLeft -= 100;
+    } else {
+      thumbnailWrapper.scrollLeft += 100;
     }
   }
 </script>

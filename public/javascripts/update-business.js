@@ -10,6 +10,16 @@ if (updateApplicationStatus) {
     });
 }
 
+document.addEventListener('DOMContentLoaded', function () {
+    tinymce.init({
+      selector: '#inputProfile',
+      plugins: 'advlist autolink lists link image charmap preview anchor pagebreak',
+      toolbar: 'undo redo | formatselect | bold italic backcolor forecolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat | emoticons | code',
+      toolbar_mode: 'floating',
+      height: 300,
+    });
+});
+
 function handleBusinessProfile(url, method) {
     const name = document.getElementById('inputBusinessName').value.trim();
     const industry = document.getElementById('inputIndustry').value.trim();
@@ -21,7 +31,7 @@ function handleBusinessProfile(url, method) {
     const locationElement = document.getElementById(locationId);
     const location = locationElement ? locationElement.value.trim() : '';
 
-    const profile = document.getElementById('inputProfile').value.trim();
+    const profile = tinymce.get('inputProfile').getContent();
     const contactEmail = document.getElementById('inputContactEmail').value.trim();
     const phoneNumber = document.getElementById('inputPhoneNumber').value.trim();
 
@@ -74,7 +84,7 @@ function handleBusinessProfile(url, method) {
         .then(data => {
             const successMessage = method === 'POST' ? 'Profile created successfully!' : 'Profile updated successfully!';
             showflashmessage('success', successMessage);
-            window.location.href = '/home';
+            window.location.href = `/home/business/${data.company._id}`;
         })
         .catch(error => {
             console.error(`Error processing profile (${method}):`, error);
