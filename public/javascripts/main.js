@@ -108,19 +108,22 @@ function sendData(term) {
         list_business = list.data
         var data = ""
         list_business.forEach((company) => {
-          data += `
-          <li class="list-group-item d-flex justify-content-start align-items-center my-2"
-          onclick="getBusinessById('${company._id.toString()}')">
-            <div class="business_res_pic  d-flex justify-content-start align-items-center">
-              <img src="${company.images[0]}" alt="business" class="img-fluid">
-            </div>
-            
-            <div class="name mx-2  d-flex justify-content-start align-items-center">
-                <span><strong>${company.name}</strong><span>
-                <span class="industry text-muted">(${company.industry})</span>
-            </div>
-          </li>
-          `
+          if (company && company._id) {
+            const imageUrl = company.images && company.images.length > 0 ? company.images[0] : '/images/default_companyImage_details.jpg';
+            data += `
+            <li class="list-group-item d-flex justify-content-start align-items-center my-2"
+            onclick="getBusinessById('${company._id.toString()}')">
+              <div class="business_res_pic d-flex justify-content-start align-items-center">
+                <img src="${imageUrl}" alt="business" class="img-fluid">
+              </div>
+              
+              <div class="name mx-2 d-flex justify-content-start align-items-center">
+                  <span><strong>${company.name}</strong><span>
+                  <span class="industry text-muted">(${company.industry})</span>
+              </div>
+            </li>
+            `;
+          }
         });
         $("#search_result_row").append(data);
       }else{
@@ -129,7 +132,7 @@ function sendData(term) {
       }
     })
     .catch(error => {
-      console.error('Error getting list of product:', error.message);
+      console.error('Error getting list while searching:', error.message);
     });
 }
 
