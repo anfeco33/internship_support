@@ -148,7 +148,7 @@
                     <p><strong>Industry</strong> <%= company.industry %></p>
                     <p><strong>Size</strong> <%= company.size || 'Not specified' %></p>
                     <p><strong>Address</strong> <%= company.address || 'Not specified' %></p>
-                    <p><strong>Website</strong> <a href="<%= company.website %>" target="_blank"><%= company.website || 'Not specified' %></a></p>
+                    <p><strong>Website</strong> <a id="companyWebsite" href="<%= company.website %>" target="_blank"><%= company.website || 'Not specified' %></a></p>
                     <p><strong>Contact Email</strong> <%= company.contactEmail || 'Not specified' %></p>
                     <p><strong>Phone Number</strong> <%= company.phoneNumber || 'Not specified' %></p>
                     <p><strong> <i class="fa fa-star" aria-hidden="true" style="color: gold;"></i></strong> <%= company.averageRating ? company.averageRating.toFixed(1) : '0' %>/5</p>
@@ -1263,6 +1263,15 @@ document.addEventListener('DOMContentLoaded', function () {
     console.error('Error saving favorite company:', error);
   }
 }
+
+document.addEventListener('DOMContentLoaded', function () {
+    var websiteLink = document.getElementById('companyWebsite');
+    var url = websiteLink.getAttribute('href');
+    
+    if (url && !url.startsWith('http://') && !url.startsWith('https://')) {
+      websiteLink.setAttribute('href', 'http://' + url);
+    }
+});
 
 function showflashmessage(type, message) {
     const validTypes = ['success', 'error', 'info', 'warning'];

@@ -121,8 +121,18 @@
                         </h5>
                         <p class="card-text" id="industry">Industry: <%= company.industry %></p>
                         <p class="card-text">
-                          <span class="stars" data-rating="<%= company.averageRating %>"></span>
-                          (<%= company.averageRating.toFixed(1) %>/5)
+                          <% if (company.averageRating) { %>
+                            <span class="stars" data-rating="<%= company.averageRating %>"></span>
+                            (<%= company.averageRating.toFixed(1) %>/5)                                
+                          <% } else { %>
+                            <span class="stars" data-rating="0"></span>
+                            (0/5)
+                          <% } %>
+                          <% if (company.comments && company.comments.length > 0) { %>
+                            <span class="text-muted"><%= company.comments.length %> reviews</span>
+                            <% } else { %>
+                            <span class="text-muted" class="text-muted">(0 review)</span>
+                          <% } %>
                         </p>
                         
                         <div class="mt-2 d-flex justify-content-between align-items-center">
@@ -238,8 +248,18 @@
                               </h5>
                               <p class="card-text" id="industry">Industry: <%= business.industry %></p>
                               <p class="card-text">
-                                <span class="stars" data-rating="<%= business.averageRating %>"></span>
-                                (<%= business.averageRating.toFixed(1) %>/5)
+                                <% if (business.averageRating) { %>
+                                  <span class="stars" data-rating="<%= business.averageRating %>"></span>
+                                  (<%= business.averageRating.toFixed(1) %>/5)                                
+                                <% } else { %>
+                                  <span class="stars" data-rating="0"></span>
+                                  (0/5)
+                                <% } %>
+                                <% if (business.comments && business.comments.length > 0) { %>
+                                  <span class="text-muted"><%= business.comments.length %> reviews</span>
+                                  <% } else { %>
+                                  <span class="text-muted" class="text-muted">(0 review)</span>
+                                <% } %>
                               </p>  
                               <p class="card-text" id="address" style="font-size: 10px;"><%= business.address %></p>
                               <% if (account.role === 'student') { %>

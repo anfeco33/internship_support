@@ -365,7 +365,7 @@ router.get('/', function (req, res) {
   .put('/business/:companyId/comments/replies/:replyId/remove', businessController.removeReply)
   .post('/business/:companyId/comments/:commentId/report', businessController.reportComment)
   .post('/business/:companyId/comments/replies/:replyId/report', businessController.reportReply)
-  .get('/dashboard', async function (req, res, next) {
+  .get('/dashboard', ensureProfileUpdated, async function (req, res, next) {
     console.log('Fetching dashboard data for company');
     const partial = 'partials/dashboardPage';
     const layout = 'layouts/main';

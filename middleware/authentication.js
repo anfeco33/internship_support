@@ -30,7 +30,7 @@ async function ensureProfileUpdated(req, res, next) {
   console.log("Checking profile update for:", req.session.account);
   console.log("Query parameters in middleware:", req.query);
   // if (req.path === '/home/business/update') {
-  if (req.path.startsWith('/home/business/update') || req.path.startsWith('/home/business-edit/edit')) {
+  if (req.path.startsWith('/home/business/update') || req.path.startsWith('/home/business-edit/edit') || req.path.startsWith('/home/dashboard')) {
     console.log("ensureProfileUpdated called for path:", req.path);
     return next();
   }
@@ -175,8 +175,9 @@ async (req, accessToken, refreshToken, profile, done) => {
           if (user.role === 'company') {
             await Company.create({
                 representativeIds: [user._id], // Gán người đại diện là user mới tạo]
-                name: '', // Để trống hoặc mặc định
+                name: '',
                 isProfileUpdated: false, 
+                averageRating: 0,
             });
           }
 

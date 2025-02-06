@@ -704,6 +704,7 @@ class UserController {
                       representativeIds: [user._id],
                       name: '', 
                       isProfileUpdated: false,
+                      averageRating: 0,
                   });
                 }
               } else {
