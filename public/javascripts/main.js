@@ -38,12 +38,10 @@ const sidebar = document.querySelector(".sidebar"),
 const handleSearchResultsDebouce = useDebounce(handleSearchResults , 250);
 
 function handleSearchResults(searchValue) {
-  // if (event.key === 'Enter') {
     const keyword = searchValue.trim();
-    // console.log(keyword)
     if (keyword !== '') {
       
-      $("#search_result_row").innerHTML = ''; // Xóa nội dung hiện tại của collapseExample
+      $("#search_result_row").innerHTML = '';
       data = `
                 <li class="list-group-item d-flex justify-content-start align-items-center my-2">
                   <div class="find_icon ">
@@ -60,11 +58,11 @@ function handleSearchResults(searchValue) {
       $("#search_result_row").html(data);
 
       sendData(keyword);
-      $collap.show(); // Hiển thị collapseExample
+      $collap.show(); 
       $clearIcon.show();
     } else {
       $("#search_result_row").html("");
-      $collap.hide(); // Ẩn collapseExample
+      $collap.hide();
       $clearIcon.hide();
     }
 }
@@ -73,7 +71,7 @@ if (searchInput) {
 
   $clearIcon.hide();
 
-  $collap.hide(); // Ẩn collapseExample
+  $collap.hide();
 
   searchInput.addEventListener('input', () => {
     handleSearchResultsDebouce(searchInput.value);
@@ -92,7 +90,7 @@ if (searchInput) {
     $("#search_result_row").html("");
     $clearIcon.hide();
 
-    $collap.hide(); // Ẩn collapseExample
+    $collap.hide();
   });
 }
 
@@ -145,20 +143,15 @@ function useDebounce(callback, delay) {
   }
 }
 
-//TODO: tách ra từng js cho partials vì render chỉ read property , 
-// các element của partials hiện tại
 profile.addEventListener('click', function () {
   console.log('profile page');
   window.location.href = "/profile"
 });
 
-
-// Lắng nghe sự kiện click của nút "Có"
 log_out.addEventListener('click', function () {
-  // Gửi yêu cầu đăng xuất đến máy chủ
   fetch('/logout', {
     method: 'POST',
-    credentials: 'same-origin' // Đảm bảo gửi cookie và thông tin xác thực cùng phiên
+    credentials: 'same-origin'
   })
     .then(function (response) {
       // Xử lý phản hồi từ máy chủ
@@ -169,7 +162,6 @@ log_out.addEventListener('click', function () {
 
     })
     .then(function (data) {
-      // Xử lý dữ liệu nhận được từ phản hồi
       if (data.flashMessage.type === 'success') {
         window.location.reload();
       }
@@ -179,7 +171,6 @@ log_out.addEventListener('click', function () {
 
     })
     .catch(function (error) {
-      // Xử lý lỗi khi gửi yêu cầu
       console.log('Error while sending logout require:', error);
       window.location.href = '/login'
     });
@@ -222,19 +213,18 @@ closeBtn.addEventListener("click", () => {
       console.log('Sidebar opened');
     } else {
       console.log('Sidebar closed');
-      // Ẩn các nút sub nếu sidebar đóng lại
+      // Ẩn nút sub nếu sidebar đóng lại
       const internshipSubNav = document.getElementById('internshipSubNav');
       if (internshipSubNav) {
         const subNavItems = internshipSubNav.querySelectorAll('.sub-nav-item');
         subNavItems.forEach(subNavItem => {
           subNavItem.classList.add('hide');
         });
-        // Loại bỏ các mục khỏi DOM sau khi hiệu ứng hoàn tất
         setTimeout(() => {
           subNavItems.forEach(subNavItem => {
             subNavItem.remove();
           });
-        }, 300); // Thời gian chờ khớp với thời gian chuyển tiếp trong CSS
+        }, 300); 
         subNavVisible = false;
       }
     }
@@ -1383,9 +1373,35 @@ function showImageModal(imageSrc) {
 }
 
 /**
- * show sending modal
+ * star showing in main page
  */
+function renderStars(rating) {
+  const fullStar = '<i class="fas fa-star" style="color: gold; margin-right: 2px;"></i>'; // Sao đầy
+  const halfStar = '<i class="fas fa-star-half-alt" style="color: gold; margin-right: 2px;"></i>'; // Sao nửa
+  const emptyStar = '<i class="far fa-star" style="color: gold; margin-right: 2px;"></i>'; // Sao rỗng (outline)
 
+  let stars = '';
+  const fullStars = Math.floor(rating);
+  const hasHalfStar = (rating % 1) >= 0.5;
+  const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+
+  console.log('Rating:', rating);
+  console.log('Full:', fullStars, 'Half:', hasHalfStar, 'Empty:', emptyStars);
+
+  for (let i = 0; i < fullStars; i++) {
+    stars += fullStar;
+  }
+
+  if (hasHalfStar) {
+    stars += halfStar;
+  }
+
+  for (let i = 0; i < emptyStars; i++) {
+    stars += emptyStar;
+  }
+
+  return stars.trim();
+}
 
 /**
  * Scroll top button
@@ -1397,17 +1413,14 @@ if(scrollTopButton){
     let scrollableDiv = document.querySelector('.home-section');
   
   
-    // Lắng nghe sự kiện scroll của khối div
     scrollableDiv.addEventListener('scroll', function () {
       toggleScrollTopButton();
     });
   
-    // Lắng nghe sự kiện click của nút "scroll top"
     scrollTopButton.addEventListener('click', function () {
       scrollToTop();
     });
   
-    // Kiểm tra và cập nhật trạng thái của nút "scroll top"
     function toggleScrollTopButton() {
       let scrollTop = scrollableDiv.scrollTop;
       let scrollHeight = scrollableDiv.scrollHeight;
@@ -1420,12 +1433,9 @@ if(scrollTopButton){
       }
   
       if (scrollTop + clientHeight >= scrollHeight) {
-        // Đã cuộn đến cuối khối div
-        // Có thể thực hiện các hành động khác tại đây (nếu cần)
       }
     }
   
-    // Cuộn khối div đến đầu trang
     function scrollToTop() {
       homeSection.scrollTo({
         top: 0,
@@ -1433,7 +1443,6 @@ if(scrollTopButton){
       });
     }
   });
-  
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -1441,10 +1450,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
   window.addEventListener("scroll", () => {
       if (window.scrollY > 50) {
-          header.classList.add("scrolled"); // Thêm lớp khi cuộn xuống
+          header.classList.add("scrolled");
       } else {
-          header.classList.remove("scrolled"); // Gỡ lớp khi trở về đầu trang
+          header.classList.remove("scrolled");
       }
+  });
+  // gọi hàm renderStars
+  document.querySelectorAll('.stars').forEach(function(starContainer) {
+    const rating = parseFloat(starContainer.getAttribute('data-rating'));
+    starContainer.innerHTML = renderStars(rating);
   });
 });
 

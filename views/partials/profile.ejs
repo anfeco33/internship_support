@@ -44,9 +44,10 @@
                             <a class="list-group-item list-group-item-action" data-bs-toggle="tab"
                             href="#password">Password</a>
                         <% } %>
-                        
-                        <a class="list-group-item list-group-item-action" data-bs-toggle="tab"
-                            href="#fav-com-list">Favorite Companies</a>
+                        <% if(account.role === 'student') { %>
+                            <a class="list-group-item list-group-item-action" data-bs-toggle="tab"
+                                href="#fav-com-list">Favorite Companies</a>
+                        <% } %>
                     </div>
                 </div>
                 <!-- //TODO: sửa lại thành form -->

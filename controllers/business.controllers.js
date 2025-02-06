@@ -132,14 +132,65 @@ class BusinessController {
   
   async get_top_supportive_companies() {
     try {
-      const topCompanies = await Company.find({
-        isProfileUpdated: true,
-        isVerified: true,
-        isLocked: false, // Chỉ lấy những công ty không bị khóa
-      })
-        .sort({ averageRating: -1 }) // Sort by average rating in descending order
-        .limit(3)
-        .select('name images averageRating address isVerified industry size');
+      // const topCompanies = await Company.find({
+      //   isProfileUpdated: true,
+      //   isVerified: true,
+      //   isLocked: false, // công ty không bị khóa
+      // })
+      //   .sort({ averageRating: -1 }) // Sort by average rating in descending order
+      //   .limit(3)
+      //   .select('name images averageRating address isVerified industry size');
+      const topCompanies = await Company.aggregate([
+      {
+        $match: {
+          isProfileUpdated: true,
+          isVerified: true,
+          isLocked: false, // công ty không bị khóa
+        }
+      },
+      {
+        $addFields: {
+          criteriaAverage: {
+            $avg: [
+              "$ratings.workEnvironment",
+              "$ratings.trainingSupport",
+              "$ratings.learningOpportunities",
+              "$ratings.benefits"
+            ]
+          },
+          overallAverage: {
+            $avg: [
+              "$ratings.workEnvironment",
+              "$ratings.trainingSupport",
+              "$ratings.learningOpportunities",
+              "$ratings.benefits",
+              "$averageRating"
+            ]
+          }
+        }
+      },
+      {
+        $sort: {
+          overallAverage: -1 // tính theo điểm trung bình tổng average và tiêu chí
+        }
+      },
+      {
+        $limit: 3
+      },
+      {
+        $project: {
+          name: 1,
+          images: 1,
+          averageRating: 1,
+          address: 1,
+          isVerified: 1,
+          industry: 1,
+          size: 1,
+          criteriaAverage: 1,
+          overallAverage: 1
+        }
+      }
+    ]);
   
       return topCompanies;
     } catch (error) {
@@ -156,11 +207,9 @@ class BusinessController {
       const businesses = await Company.find({ companyId }).populate('companyID', 'profilePicture fullName');
 
       for (const business of businesses) {
-        const company = business.companyID; // Người hướng dẫn tương ứng với khóa học
-        const profilePicture = business.profilePicture; // Ảnh đại diện của người hướng dẫn
-        const fullName = company.fullName; // Tên đầy đủ của người hướng dẫn
-
-        // console.log(profilePicture, fullName);
+        const company = business.companyID; 
+        const profilePicture = business.profilePicture;
+        const fullName = company.fullName; 
       }
 
       return businesses;
