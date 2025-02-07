@@ -187,12 +187,16 @@ class BusinessController {
           industry: 1,
           size: 1,
           criteriaAverage: 1,
-          overallAverage: 1
+          overallAverage: 1,
+          comments: 1
         }
       }
     ]);
   
-      return topCompanies;
+      // return topCompanies;
+      const populatedCompanies = await Company.populate(topCompanies, { path: 'comments' });
+
+      return populatedCompanies;
     } catch (error) {
       console.error('Error fetching top supportive companies:', error);
     }

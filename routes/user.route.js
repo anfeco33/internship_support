@@ -382,7 +382,7 @@ router.get('/', function (req, res) {
     req.layout_path = layout
     req.page_data = {
       businessId: company? company._id : null,
-      topCompaniesByIndustry: await businessController.getTopCompaniesByCriteria(),
+      topCompaniesByIndustry: await businessController.getCompaniesByCriteria(),
       internships: internships ? internships : [],
     }
 

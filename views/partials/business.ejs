@@ -123,15 +123,15 @@
                         <p class="card-text">
                           <% if (company.averageRating) { %>
                             <span class="stars" data-rating="<%= company.averageRating %>"></span>
-                            (<%= company.averageRating.toFixed(1) %>/5)                                
+                            (<%= company.averageRating.toFixed(1) %>/5)
                           <% } else { %>
                             <span class="stars" data-rating="0"></span>
                             (0/5)
                           <% } %>
-                          <% if (company.comments && company.comments.length > 0) { %>
+                          <% if (company.comments && company.comments.length > 0) { %>  
                             <span class="text-muted"><%= company.comments.length %> reviews</span>
-                            <% } else { %>
-                            <span class="text-muted" class="text-muted">(0 review)</span>
+                          <% } else { %>
+                            <span class="text-muted">(0 review)</span>
                           <% } %>
                         </p>
                         
