@@ -138,7 +138,10 @@
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h4 class="mb-0"><%= company.name %></h4>
                         <% if (company.isLocked) { %>
-                          <span class="badge bg-danger" data-bs-toggle="tooltip" data-bs-placement="top" title="Your business may have violated community guidelines. Your profile will not be visible to other users. If there is a mistake, please contact support at: internchoice@support.gmail.com.">Locked</span>
+                          <span class="badge bg-danger" data-bs-toggle="tooltip" data-bs-placement="top" style="font-size: 16px;" title="This business may have violated community guidelines. This profile will not be visible to other users. If there is a mistake, please contact support at: internchoice@support.gmail.com">
+                            <i class="fa fa-exclamation-triangle" style="margin-right: 10px;" aria-hidden="true"></i>
+                            CAUTION: Locked
+                          </span>
                         <% } else { %>
                             <% if (company.isVerified) { %>
                               <img src="/images/verified_icon.png" alt="Verified" style="width: 20px; height: 20px;">
