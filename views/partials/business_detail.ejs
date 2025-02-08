@@ -1267,15 +1267,6 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 }
 
-document.addEventListener('DOMContentLoaded', function () {
-    var websiteLink = document.getElementById('companyWebsite');
-    var url = websiteLink.getAttribute('href');
-    
-    if (url && !url.startsWith('http://') && !url.startsWith('https://')) {
-      websiteLink.setAttribute('href', 'http://' + url);
-    }
-});
-
 function showflashmessage(type, message) {
     const validTypes = ['success', 'error', 'info', 'warning'];
       if (!validTypes.includes(type)) {
@@ -1303,6 +1294,15 @@ function showflashmessage(type, message) {
       "hideMethod": "fadeOut"
     }
 }
+
+document.addEventListener('DOMContentLoaded', function () {
+    var websiteLink = document.getElementById('companyWebsite');
+    var url = websiteLink.getAttribute('href');
+    
+    if (url && !url.startsWith('http://') && !url.startsWith('https://')) {
+      websiteLink.setAttribute('href', 'http://' + url);
+    }
+});
 </script>
 
 <style>

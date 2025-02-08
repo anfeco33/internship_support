@@ -6,6 +6,16 @@ Before you begin, ensure you have met the following requirements:
 - You have installed [MongoDB](https://www.mongodb.com/)
 - You have installed [Express.js](https://expressjs.com/) (if not included in your project dependencies)
 
+## Admin Account
+email: admin@gmail.com
+password: admin
+
+## Student Account 
+You can create one and add an attribute [otp: {random 6 numbers}].
+
+## Company Account
+You can normally create one by any email address.
+
 ## First, clone repository or download Zip
 
 ## To start setting up the project
