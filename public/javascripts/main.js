@@ -1274,7 +1274,7 @@ async function toggleLockProfile(companyId, lock) {
 
     const result = await response.json();
     if (result.status === 'success') {
-      showflashmessage('success', response.message);
+      showflashmessage('success', result.message);
       location.reload();
     } else {
       showflashmessage('error', `Failed to ${lock ? 'remove' : 'unlock'} company profile: ${result.message}`);

@@ -6,7 +6,6 @@ const { ensureProfileUpdated } = require('../middleware/authentication');
 const Company = require('../models/companies');
 const Internship = require('../models/internships');
 const Application = require('../models/applications');
-const Review = require('../models/reviews');
 const Comment = require('../models/comments');
 const userController = require('../controllers/user.controllers');
 const businessController = require('../controllers/business.controllers');

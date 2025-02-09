@@ -234,10 +234,15 @@ class BusinessController {
         listBusiness = await Company.find().select('name images industry'); 
       } else {
         listBusiness = await Company.find({
-          $or: [
-            { name: regex },
-            { industry: regex },
-            { address: regex }
+          $and: [
+            { isLocked: false },
+            {
+              $or: [
+                { name: regex },
+                { industry: regex },
+                { address: regex }
+              ]
+            }
           ]
         }).select('name images industry'); 
       }
