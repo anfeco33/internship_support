@@ -1438,12 +1438,19 @@ class BusinessController {
 
       // count com mới
       const startOfDay = new Date();
-      startOfDay.setHours(0, 0, 0, 0);
+      startOfDay.setUTCHours(0, 0, 0, 0);
+      
       const endOfDay = new Date();
-      endOfDay.setHours(23, 59, 59, 999);
-
+      endOfDay.setUTCHours(23, 59, 59, 999);
+      
+      // Chuyển đổi chuỗi createdAt thành đối tượng Date trong quá trình truy vấn
       const newCommentsCount = await Comment.countDocuments({
-        createdAt: { $gte: startOfDay, $lte: endOfDay }
+        $expr: {
+          $and: [
+            { $gte: [{ $dateFromString: { dateString: "$createdAt", format: "%H:%M:%S %d/%m/%Y" } }, startOfDay] },
+            { $lte: [{ $dateFromString: { dateString: "$createdAt", format: "%H:%M:%S %d/%m/%Y" } }, endOfDay] }
+          ]
+        }
       });
 
       const businessProfileCount = await Company.countDocuments();
