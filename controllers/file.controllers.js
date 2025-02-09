@@ -74,7 +74,6 @@ function formatSize(size) {
 
 
 const { promisify } = require('util');
-//TODO: sửa lại dùng req gán action 
 class FileController {
     async changeAvatar(req , res , next) {
         try {
@@ -114,46 +113,6 @@ class FileController {
             next(error);
         }
     }
-    // async productPicture(req , res , next) {
-    //     try {
-    //         const curr_product = req.session.product
-    //         console.log("ABC##############" + curr_product)
-    //         const uploadArray = promisify(upload2.array('file', 5));
-    //         await uploadArray(req, res);
-    //         const files = req.files;
-    //         console.log(files[0].filename);
-    //         if(curr_product){
-    //             const find = await Product.findById(curr_product);
-    //             console.log(find)
-    //             if (find) { 
-    //                 const imagePath = path.join(__dirname, '../uploads','tmp@product.jpg'); // Đường dẫn của hình ảnh upload
-
-    //                 const newImagePath = path.join(__dirname, '../uploads', find.productPicture); // Đường dẫn mới với tên file tương ứng với productPicture
-    //                 console.log(imagePath, newImagePath);
-    //                 fs.rename(imagePath, newImagePath, function (err) {
-    //                   if (err) {
-    //                     console.error('Error renaming image:', err);
-    //                   } else {
-    //                     console.log('Image renamed successfully');
-    //                     req.session.flash = {
-    //                         type: 'success',
-    //                         intro: 'Change IMAGE product',
-    //                         message: 'Change IMAGE product successful',
-    //                     };
-    //                     res.json({ uploaded: true, status: 'success', message: 'Change IMAGE product successful' });
-    //                   }
-    //                 });
-    //             }
-    //             else{
-    //                 res.json({ uploaded: false, status: 'warning', message: 'Change product fail' });
-    //             }
-    //         }
-    //     } catch (error) {
-    //         next(error);
-    //     }
-    // }
-
-    
 }
 
 module.exports = new FileController();

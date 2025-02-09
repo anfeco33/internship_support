@@ -3,7 +3,6 @@ const router = express.Router();
 const User = require('../models/users');
 const userControllers = require('../controllers/user.controllers');
 const businessController = require('../controllers/business.controllers');
-const transactionController = require('../controllers/transaction.controllers');
 var { authentication, isAdmin } = require('../middleware/authentication');
 
 router.get('/', function (req, res) {
