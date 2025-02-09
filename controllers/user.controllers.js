@@ -658,6 +658,13 @@ class UserController {
               });
           }
 
+          if (user.lock) {
+            return res.status(400).json({
+                status: 'warning',
+                message: 'Account has been locked!'
+            });
+          }
+
           // Handle OTP verification
           if (otp) {
               if (!user.otp || user.otpExpires < Date.now()) {

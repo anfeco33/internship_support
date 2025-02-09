@@ -676,36 +676,14 @@ if (delete_btn) {
   delete_btn.addEventListener("click", () => { deletecoursebyId( end_point, global_id) })
 }
 
-// function resendVerifyEmail(email, accountid) {
-//   console.log(email)
-//   fetch("/resend_email", {
-//     method: "POST",
-//     headers: {
-//       "Content-Type": "application/json" // Đặt kiểu dữ liệu là JSON
-//     },
-//     body: JSON.stringify({ email: email, accountId: accountid }) // Chuyển đổi dữ liệu thành chuỗi JSON
-//   })
-//     .then(response => response.json())
-//     .then(data => {
-//       if (data.status === "success") {
-//         showflashmessage('success', data.message);
-
-//       }
-
-//     })
-//     .catch(function (error) {
-//       console.error("Error:", error);
-//     });
-// }
-
 function lock_unlock_Account(accountid) {
   console.log(accountid)
   fetch("/lock_account", {
     method: "POST",
     headers: {
-      "Content-Type": "application/json" // Đặt kiểu dữ liệu là JSON
+      "Content-Type": "application/json" 
     },
-    body: JSON.stringify({ accountID: accountid }) // Chuyển đổi dữ liệu thành chuỗi JSON
+    body: JSON.stringify({ accountID: accountid }) 
   })
     .then(response => response.json())
     .then(data => {
@@ -718,56 +696,6 @@ function lock_unlock_Account(accountid) {
       console.error("Error:", error);
     });
 }
-
-
-// function updateProgress(percent) {
-//   const progressBarFill = document.querySelector('.progress-bar');
-//   progressBarFill.style.width = `${percent}%`;
-
-//   if (percent >= 100) {
-//     progressBarFill.innerText = 'Uploaded!';
-//   } else {
-//     progressBarFill.innerText = `${percent}%`;
-//   }
-// }
-
-
-// function closeModal(id) {
-//   $(`#${id}`).modal('hide');
-// }
-
-// function resetModal(id) {
-//   const form = document.getElementById(id);
-//   if (form) {
-//     form.reset();
-//   }
-// }
-
-
-// let lecture_page = document.querySelector('.lecture_page');
-// var player;
-
-// if (lecture_page) {
-//   $('.toggle_show_lecture').click(function () {
-//     $(this).toggleClass('fa-angle-down fa-angle-up');
-//     $(this).parent().next('#all_lecture').toggleClass('open');
-//   });
-
-//   function change_lecture(lectureID, lectureTitle, lectureLink, lectureDescription) {
-//     console.log(lectureID, lectureTitle, lectureLink, lectureDescription);
-
-//     $('#lectureId').val(lectureID);
-//     // $('#lecture_link').attr('src', lectureLink);
-//     $('.lecture_title').text(lectureTitle);
-//     $('.lecture_description').text(lectureDescription);
-
-//     const videoId = getYouTubeVideoID(lectureLink);
-//     if (player && videoId) {
-//       player.loadVideoById(videoId);
-//     }
-//   }
-// }
-
 
 /** filter */
 const filter = document.getElementById('filterForm');

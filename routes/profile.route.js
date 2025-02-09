@@ -57,7 +57,7 @@ router.get('/', (req, res) => {
   //   await sendEmail.sendConfirmationEmail(email, accountId);
   //   res.json({ send: true, status: "success", message: "Email has been sent to: " +email});
   // })
-  // .post('/lock_account' , authentication , isAdmin , userController.togglelockAccount);
+  .post('/lock_account' , authentication , isAdmin , userController.togglelockAccount);
 
 
 

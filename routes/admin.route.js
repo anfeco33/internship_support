@@ -8,7 +8,6 @@ var { authentication, isAdmin } = require('../middleware/authentication');
 router.get('/', function (req, res) {
   res.redirect('/admin/student');
 })
-  //TODO: sửa lại get staff hiển thị toàn bộ user trong database
   .get('/student', async function (req, res, next) {
     const partial = 'partials/student_manager';
     const layout = 'layouts/main';
@@ -16,7 +15,6 @@ router.get('/', function (req, res) {
     req.layout_path = layout
     req.page_data = {
       liststudent: await userControllers.getliststudent(),
-      // feature: req.session.admin_feature,
     }
     // console.log(req.page_data.liststaff)
     await userControllers.getpage(req , res, next);
@@ -33,7 +31,7 @@ router.get('/', function (req, res) {
     }
     await userControllers.getpage(req , res, next);
   })
-  .get('/business-profiles', async function (req, res, next) {
+  .get('/businesss', async function (req, res, next) {
     const partial = 'partials/business_manager';
     const layout = 'layouts/main';
     req.partial_path = partial
