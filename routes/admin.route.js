@@ -31,7 +31,7 @@ router.get('/', function (req, res) {
     }
     await userControllers.getpage(req , res, next);
   })
-  .get('/businesss', async function (req, res, next) {
+  .get('/business-profiles', async function (req, res, next) {
     const partial = 'partials/business_manager';
     const layout = 'layouts/main';
     req.partial_path = partial
