@@ -719,6 +719,12 @@ class UserController {
                   await user.save();
               }
 
+              const token = jwt.sign(
+                { id: user._id, role: user.role, access: user.access },
+                process.env.JWT_SECRET,
+                { expiresIn: '1h' }
+              );
+              
               req.session.account = user._id.toString();
               req.session.loggedIn = true;
               req.session.role = user.role;
@@ -732,7 +738,13 @@ class UserController {
                     message: 'Server error. Please try again later.'
                   });
                 }
-        
+
+                res.cookie("remember", token, { 
+                  maxAge: 30 * 24 * 60 * 60 * 1000, // lưu cookie 30 ngày
+                  httpOnly: true, // ko cho truy cập cookie JS từ client
+                  secure: process.env.NODE_ENV === 'production' // chỉ dc gửi cookie qua HTTPS trong env production
+                });
+
                 return res.status(200).json({
                   status: 'success',
                   message: 'Login successful!',
@@ -751,6 +763,17 @@ class UserController {
                       message: 'Invalid password. Please try again!'
                   });
               }
+
+              const token = jwt.sign(
+                { id: user._id, role: user.role, access: user.access },
+                process.env.JWT_SECRET,
+                { expiresIn: '1h' }
+              );
+              res.cookie("remember", token, { 
+                maxAge: 30 * 24 * 60 * 60 * 1000, // lưu cookie 30 ngày
+                httpOnly: true, // ko cho truy cập cookie JS từ client
+                secure: process.env.NODE_ENV === 'production' // chỉ dc gửi cookie qua HTTPS trong env production
+              });
 
               req.session.account = user._id.toString();
               req.session.role = user.role;

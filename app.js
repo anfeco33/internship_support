@@ -10,14 +10,12 @@ const passport = require('passport');
 const expressLayouts = require('express-ejs-layouts');
 const app = express();
 
-// middleware setup
-
 const userController = require('./controllers/user.controllers');
 
 const envPath = path.join(__dirname, '.env.example');
 require('dotenv').config({ path: envPath });
 
-// Sử dụng middleware express-ejs-layouts
+// middleware express-ejs-layouts
 app.use(expressLayouts);
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
