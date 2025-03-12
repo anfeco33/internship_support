@@ -68,7 +68,6 @@ function handleSearchResults(searchValue) {
 }
 if (searchInput) {
 
-
   $clearIcon.hide();
 
   $collap.hide();
@@ -105,10 +104,11 @@ function sendData(term) {
     .then((response) => response.json())
     .then(list => {
       if (list.data.length > 0) {
-        list_business = list.data
-        var data = ""
+        list_business = list.data;
+        const displayedItems = new Set(); // set theo dõi item đã hiển thị
+        var data = "";
         list_business.forEach((company) => {
-          if (company && company._id) {
+          if (company && company._id && !displayedItems.has(company._id.toString())) {
             const imageUrl = company.images && company.images.length > 0 ? company.images[0] : '/images/default_companyImage_details.jpg';
             data += `
             <li class="list-group-item d-flex justify-content-start align-items-center my-2"
@@ -123,11 +123,12 @@ function sendData(term) {
               </div>
             </li>
             `;
+            displayedItems.add(company._id.toString()); // ADD item vào set đã show
           }
         });
-        $("#search_result_row").append(data);
-      }else{
-        $("#search_result_row").append("");
+        $("#search_result_row").html(data); // dùng html thay  append để ko bị show lại các mục cũ
+      } else {
+        $("#search_result_row").html(""); // clear phần tử nếu ko có kq
         $(".course_name").html("No results found for '"+term+"'");
       }
     })
@@ -421,14 +422,7 @@ if (body) {
     });
   }
 
-
-
-
-
-
-
 }
-
 
 const editButton = document.getElementById('editRequest');
 function toggleEdit(id) {
@@ -488,9 +482,16 @@ function toggleEdit(id) {
   editButton.textContent = (editButton.classList.contains('active')) ? 'Save' : 'Edit';
 }
 
+function updateProgress(percent) {
+  const progressBarFill = document.querySelector('.progress-bar');
+  progressBarFill.style.width = `${percent}%`;
 
-
-
+  if (percent >= 100) {
+    progressBarFill.innerText = 'Uploaded!';
+  } else {
+    progressBarFill.innerText = `${percent}%`;
+  }
+}
 
 function uploadFiles(event, endpoint) {
   event.preventDefault();

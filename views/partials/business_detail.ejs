@@ -947,8 +947,23 @@ function editComment(companyId, commentId) {
     .then((data) => {
       console.log('Edit comment response:', data);
       if (data.status === 'success') {
-        document.getElementById(`comment-content-${commentId}`).innerText = data.updatedContent;
-        document.getElementById(`comment-updatedAt-${commentId}`).innerText = data.updatedAt;
+        const commentContentElement = document.getElementById(`comment-content-${commentId}`);
+        const commentUpdatedAtElement = document.getElementById(`comment-updatedAt-${commentId}`);
+
+        if (commentContentElement) {
+          commentContentElement.innerText = data.updatedContent;
+        } else {
+          console.error(`Element with id comment-content-${commentId} not found`);
+        }
+
+        if (commentUpdatedAtElement) {
+          commentUpdatedAtElement.innerText = data.updatedAt;
+        } else {
+          console.error(`Element with id comment-updatedAt-${commentId} not found`);
+        }
+
+        // document.getElementById(`comment-content-${commentId}`).innerText = data.updatedContent;
+        // document.getElementById(`comment-updatedAt-${commentId}`).innerText = data.updatedAt;
         toggleEditForm(commentId);
         showflashmessage(data.status, data.message);
       } else {
@@ -975,8 +990,22 @@ function editReply(companyId, replyId) {
     .then((data) => {
       console.log('Edit reply response:', data);
       if (data.status === 'success') {
-        document.getElementById(`reply-content-${replyId}`).innerText = data.updatedContent;
-        document.getElementById(`reply-updatedAt-${replyId}`).innerText = data.updatedAt;
+        const commentContentElement = document.getElementById(`reply-content-${replyId}`);
+        const commentUpdatedAtElement = document.getElementById(`reply-updatedAt-${replyId}`);
+
+        if (commentContentElement) {
+          commentContentElement.innerText = data.updatedContent;
+        } else {
+          console.error(`Element with id reply-content-${replyId} not found`);
+        }
+
+        if (commentUpdatedAtElement) {
+          commentUpdatedAtElement.innerText = data.updatedAt;
+        } else {
+          console.error(`Element with id reply-updatedAt-${replyId} not found`);
+        }
+        // document.getElementById(`reply-content-${replyId}`).innerText = data.updatedContent;
+        // document.getElementById(`reply-updatedAt-${replyId}`).innerText = data.updatedAt;
         toggleEditForm(replyId);
         showflashmessage(data.status, data.message);
       } else {

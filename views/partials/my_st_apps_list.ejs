@@ -40,6 +40,10 @@
     rows.forEach(row => {
       row.addEventListener('click', function() {
         const companyId = this.getAttribute('data-company-id');
+        if (companyId && companyId == 'Unknown') {
+          toastr.warning('This internship is not available anymore');
+          return;
+        }
         window.location.href = `/home/business/${companyId}`;
       });
     });

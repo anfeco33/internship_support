@@ -98,6 +98,7 @@ if (login_form) {
     passwordField.style.display = 'none';
     sendOtpButton.textContent = 'Continue';
     backIcon.style.display = 'none';
+    fullNameField.style.display = 'none';
   });
 } else {
   console.error('Login form not found');

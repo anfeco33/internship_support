@@ -38,6 +38,7 @@ const company_feature_list = [
   { access: "Home", icon: "<i class='fa-solid fa-house'></i>" },
   { access: "Internship Applications", icon: "<i class='fa-solid fa-pen-to-square'></i>" },
   { access: "Dashboard", icon: "<i class='fa-solid fa-gauge'></i>" },
+
 ]
 
 class UserController {
@@ -379,7 +380,7 @@ class UserController {
             const newpassword = await bcrypt.hash(newpass, parseInt(process.env.BCRYPT_SALT_ROUND));
             find.password = newpassword;
             await find.save(); // Lưu thay đổi
-            var state = { status: 'success', message: 'Change password successful' }
+            var state = { status: 'success', message: 'Password successfully changed!' }
           } else {
             var state = { status: 'warning', message: 'Invalid password' }
           }
@@ -569,79 +570,122 @@ class UserController {
               message: 'Admin account detected. Please enter your password.'
           });
       }
-      if (user) {
-        // Existing user
-        let featureList;
-        if (user.role === 'student') {
-          featureList = student_feature_list;
-        } if (user.role === 'company') {
-          featureList = company_feature_list;
-        } 
-        featureList.forEach((feature) => {
-           if (!user.access.some((item) => item.access === feature.access)) {
-             user.access.push(feature); // Thêm feature nếu chưa tồn tại
-           }
-         });
+      // if (user) {
+      //   // Existing user
+      //   let featureList;
+      //   if (user.role === 'student') {
+      //     featureList = student_feature_list;
+      //   } if (user.role === 'company') {
+      //     featureList = company_feature_list;
+      //   } 
+      //   featureList.forEach((feature) => {
+      //      if (!user.access.some((item) => item.access === feature.access)) {
+      //        user.access.push(feature); // Thêm feature nếu chưa tồn tại
+      //      }
+      //    });
      
-         const otp = user.createOTP();
-         await user.save({ validateBeforeSave: false });
+      //    const otp = user.createOTP();
+      //    await user.save({ validateBeforeSave: false });
      
-         const message = `Your OTP code is: ${otp}\n\nThis code is valid for 10 minutes.`;
+      //    const message = `Your OTP code is: ${otp}\n\nThis code is valid for 10 minutes.`;
      
-         try {
-             await mailer.sendMailForOTP({
-                 email: user.email,
-                 subject: 'Your Login OTP (valid for 10 min)',
-                 message: message
-             });
+      //    try {
+      //        await mailer.sendMailForOTP({
+      //            email: user.email,
+      //            subject: 'Your Login OTP (valid for 10 min)',
+      //            message: message
+      //        });
      
-             return res.status(200).json({
-                 status: 'success',
-                 message: 'OTP has been sent to your email! Please check your email to login.'
-             });
-         } catch (err) {
-               user.otp = undefined;
-               user.otpExpires = undefined;
-               await user.save({ validateBeforeSave: false });
+      //        return res.status(200).json({
+      //            status: 'success',
+      //            message: 'OTP has been sent to your email! Please check your email to login.'
+      //        });
+      //    } catch (err) {
+      //          user.otp = undefined;
+      //          user.otpExpires = undefined;
+      //          await user.save({ validateBeforeSave: false });
        
-               console.error('Error during sending OTP:', err);
+      //          console.error('Error during sending OTP:', err);
        
-               return res.status(500).json({
-                   status: 'error',
-                   message: 'There was an error while sending the email. Try again later!'
-               });
-           }
-       }
- 
-      // Generate OTP for existing user
-      // const otp = user.createOTP();
-      // await user.save({ validateBeforeSave: false });
+      //          return res.status(500).json({
+      //              status: 'error',
+      //              message: 'There was an error while sending the email. Try again later!'
+      //          });
+      //      }
+      //  }
+    // Existing user without fullname
+    if (user && !user.fullName) {
+      const otp = user.createOTP();
+      await user.save({ validateBeforeSave: false });
 
-      // const message = `Your OTP code is: ${otp}\n\nThis code is valid for 10 minutes.`;
+      const message = `Your OTP code is: ${otp}\n\nThis code is valid for 10 minutes.`;
 
-      // try {
-      //     await mailer.sendMailForOTP({
-      //         email: user.email,
-      //         subject: 'Your Login OTP (valid for 10 min)',
-      //         message: message
-      //     });
+      try {
+        await mailer.sendMailForOTP({
+          email: user.email,
+          subject: 'Your Registration OTP (valid for 10 min)',
+          message: message
+        });
 
-      //     return res.status(200).json({
-      //         status: 'success',
-      //         message: 'OTP has been sent to your email! Please check your email to login.'
-      //     });
-      // } catch (err) {
-      //     user.otp = undefined;
-      //     user.otpExpires = undefined;
-      //     await user.save({ validateBeforeSave: false });
+        return res.status(200).json({
+          status: 'newUser',
+          message: 'OTP has been sent to your email! Please check your email to register!'
+        });
+      } catch (err) {
+        user.otp = undefined;
+        user.otpExpires = undefined;
+        await user.save({ validateBeforeSave: false });
 
-      //     console.error('Error during sending OTP:', err);
+        console.error('Error during sending OTP:', err);
 
-      //     return res.status(500).json({
-      //         status: 'error',
-      //         message: 'There was an error while sending the email. Try again later!'
-      //     });
-      // }
+        return res.status(500).json({
+          status: 'error',
+          message: 'There was an error while sending the email. Try again later!'
+        });
+      }
+    }
+
+    // Existing user
+    let featureList;
+    if (user.role === 'student') {
+        featureList = student_feature_list;
+      } if (user.role === 'company') {
+        featureList = company_feature_list;
+      } 
+      featureList.forEach((feature) => {
+        if (!user.access.some((item) => item.access === feature.access)) {
+          user.access.push(feature); // Thêm feature nếu chưa tồn tại
+        }
+      });
+
+      const otp = user.createOTP();
+      await user.save({ validateBeforeSave: false });
+
+      const message = `Your OTP code is: ${otp}\n\nThis code is valid for 10 minutes.`;
+
+      try {
+        await mailer.sendMailForOTP({
+          email: user.email,
+          subject: 'Your Login OTP (valid for 10 min)',
+          message: message
+        });
+
+        return res.status(200).json({
+          status: 'success',
+          message: 'OTP has been sent to your email! Please check your email to login.'
+        });
+      } catch (err) {
+        user.otp = undefined;
+        user.otpExpires = undefined;
+        await user.save({ validateBeforeSave: false });
+
+        console.error('Error during sending OTP:', err);
+
+        return res.status(500).json({
+          status: 'error',
+          message: 'There was an error while sending the email. Try again later!'
+        });
+    }
   }
 
   async verify_OTP(req, res, next) {

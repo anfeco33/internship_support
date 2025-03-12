@@ -115,7 +115,7 @@ class BusinessController {
       const skip = (page - 1) * limit;
       const totalCompanies = await Company.countDocuments(filter);
       const businesses = await Company.find(filter)
-        .select('name images averageRating address isVerified industry size')
+        .select('name images averageRating address isVerified industry size comments')
         .skip(skip)
         .limit(limit);
   
@@ -1171,10 +1171,11 @@ class BusinessController {
       }
   
       comment.content = content;
-      comment.createdAt = new Date();
+      comment.createdAt = new Date().toLocaleString('vi-VN');
       comment.updatedAt = `Updated at ${new Date().toLocaleString('vi-VN')}`;
       await comment.save();
-  
+      console.log('Comment updated successfully:', comment);
+      console.log("comm ", comment.updatedAt);
       res.status(200).json({ status: 'success', message: 'Comment updated successfully!', updatedContent: comment.content, updatedAt: comment.updatedAt });
     } catch (error) {
       console.error('Error editing comment:', error);
@@ -1208,10 +1209,10 @@ class BusinessController {
       }
   
       reply.content = content;
-      reply.createdAt = new Date();
+      reply.createdAt = new Date().toLocaleString('vi-VN');
       reply.updatedAt = `Updated at ${new Date().toLocaleString('vi-VN')}`;
       await reply.save();
-  
+      
       res.status(200).json({ status: 'success', message: 'Reply updated successfully!', updatedContent: reply.content, updatedAt: reply.updatedAt });
     } catch (error) {
       console.error('Error editing reply:', error);

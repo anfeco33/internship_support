@@ -22,7 +22,11 @@
                     <!-- <tr> -->
                         <td>
                             <div>
-                                <%= business.name %>
+                                <% if (business.name) { %>
+                                    <%= business.name %>
+                                <% } else { %>
+                                    Not updated
+                                <% } %>
                             </div>
                         </td>
                         <td>
